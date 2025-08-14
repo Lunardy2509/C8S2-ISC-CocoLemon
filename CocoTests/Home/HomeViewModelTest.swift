@@ -80,6 +80,50 @@ struct HomeViewModelTest {
         #expect(context.viewModel.collectionViewModel.activityData.dataModel.count == 1)
     }
     
+    @Test("category filter - should filter activities when selected")
+    func categoryFilter_whenSelected_shouldFilterActivities() async throws {
+        // --- GIVEN ---
+        let context = try TestContext.setup()
+        context.viewModel.onViewDidLoad()
+        
+        // Create a mock filter state for snorkeling
+        let filterState = HomeSearchFilterPillState(
+            id: 1,
+            title: "Snorkeling",
+            isSelected: false
+        )
+        
+        // --- WHEN ---
+        context.viewModel.onCategoryFilterSelected(filterState)
+        
+        // --- THEN ---
+        #expect(filterState.isSelected == true)
+        #expect(context.actionDelegate.invokedConstructFilterCarouselCount >= 1)
+        // The collection view should be updated with filtered activities
+    }
+    
+    @Test("category filter - should show all activities when deselected")
+    func categoryFilter_whenDeselected_shouldShowAllActivities() async throws {
+        // --- GIVEN ---
+        let context = try TestContext.setup()
+        context.viewModel.onViewDidLoad()
+        
+        // Create a mock filter state that is already selected
+        let filterState = HomeSearchFilterPillState(
+            id: 1,
+            title: "Snorkeling",
+            isSelected: true
+        )
+        
+        // --- WHEN ---
+        context.viewModel.onCategoryFilterSelected(filterState)
+        
+        // --- THEN ---
+        #expect(filterState.isSelected == false)
+        #expect(context.actionDelegate.invokedConstructFilterCarouselCount >= 1)
+        // The collection view should show all activities when filter is deselected
+    }
+    
     // MARK: - Initial Load Tests
     
     @Test("view did load - should setup initial state")
@@ -262,10 +306,22 @@ private extension HomeViewModelTest {
 }
 
 private final class MockHomeViewModelAction: HomeViewModelAction {
+    var invokedConstructFilterCarousel = false
+    var invokedConstructFilterCarouselCount = 0
+    var invokedConstructFilterCarouselParameters: (filterPillStates: [HomeSearchFilterPillState], Void)?
+    var invokedConstructFilterCarouselParametersList = [(filterPillStates: [HomeSearchFilterPillState], Void)]()
+    
+    func constructFilterCarousel(filterPillStates: [Coco.HomeSearchFilterPillState]) {
+        invokedConstructFilterCarousel = true
+        invokedConstructFilterCarouselCount += 1
+        invokedConstructFilterCarouselParameters = (filterPillStates, ())
+        invokedConstructFilterCarouselParametersList.append((filterPillStates, ()))
+    }
+    
 
     var invokedConstructCollectionView = false
     var invokedConstructCollectionViewCount = 0
-
+    
     func constructCollectionView(viewModel: some HomeCollectionViewModelProtocol) {
         invokedConstructCollectionView = true
         invokedConstructCollectionViewCount += 1

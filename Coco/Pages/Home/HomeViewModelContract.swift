@@ -15,6 +15,7 @@ protocol HomeViewModelAction: AnyObject {
     func constructCollectionView(viewModel: some HomeCollectionViewModelProtocol)
     func constructLoadingState(state: HomeLoadingState)
     func constructNavBar(viewModel: HomeSearchBarViewModel)
+    func constructFilterCarousel(filterPillStates: [HomeSearchFilterPillState])
     
     func toggleLoadingView(isShown: Bool, after: CGFloat)
     func activityDidSelect(data: ActivityDetailDataModel)
@@ -33,4 +34,6 @@ protocol HomeViewModelProtocol: AnyObject {
     
     func onViewDidLoad()
     func onSearchDidApply(_ queryText: String)
+    func openFilterTray()
+    func onCategoryFilterSelected(_ filterState: HomeSearchFilterPillState)
 }

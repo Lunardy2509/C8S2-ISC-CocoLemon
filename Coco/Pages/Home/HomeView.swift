@@ -46,9 +46,19 @@ final class HomeView: UIView {
         searchBarView.addSubviewAndLayout(view, insets: .init(vertical: 0, horizontal: 24.0))
     }
     
+    func addFilterView(from view: UIView) {
+        filterView.subviews.forEach { $0.removeFromSuperview() }
+        filterView.addSubviewAndLayout(view)
+    }
+    
+    func toggleFilterView(isShown: Bool) {
+        filterView.isHidden = !isShown
+    }
+    
     private lazy var errorView: UIView = UIView()
     private lazy var contentStackView: UIStackView = createContentStackView()
     private lazy var searchBarView: UIView = UIView()
+    private lazy var filterView: UIView = UIView()
     private lazy var searchResultView: UIView = UIView()
     private lazy var loadingView: UIView = UIView()
 }
@@ -61,11 +71,13 @@ private extension HomeView {
         
         errorView.isHidden = true
         loadingView.isHidden = true
+        filterView.isHidden = true
     }
     
     func createContentStackView() -> UIStackView {
         let stackView: UIStackView = UIStackView(arrangedSubviews: [
             searchBarView,
+            filterView,
             searchResultView,
         ])
         stackView.axis = .vertical

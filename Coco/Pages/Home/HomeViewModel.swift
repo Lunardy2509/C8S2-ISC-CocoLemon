@@ -61,6 +61,44 @@ extension HomeViewModel: HomeViewModelProtocol {
         actionDelegate?.toggleLoadingView(isShown: true, after: 0)
         fetch()
     }
+    
+    func openFilterTray() {
+        guard let filterDataModel: HomeSearchFilterTrayDataModel else { return }
+        
+        let viewModel: HomeSearchFilterTrayViewModel = HomeSearchFilterTrayViewModel(
+            dataModel: filterDataModel,
+            activities: Array(responseMap.values)
+        )
+        viewModel.filterDidApplyPublisher
+            .receive(on: RunLoop.main)
+            .sink { [weak self] newFilterData in
+                guard let self else { return }
+                self.filterDataModel = newFilterData
+                actionDelegate?.dismissTray()
+                filterDidApply()
+            }
+            .store(in: &cancellables)
+        
+        actionDelegate?.openFilterTray(viewModel)
+    }
+    
+    func onCategoryFilterSelected(_ filterState: HomeSearchFilterPillState) {
+        // Disable filtering logic for now - just handle the selection state
+        // The visual state is already handled in the view
+        
+        // TODO: Re-enable when ready for filtering functionality
+        /*
+        // Toggle the selected state
+        filterState.isSelected.toggle()
+        
+        // Update filter carousel to reflect selection
+        guard let filterDataModel = filterDataModel else { return }
+        actionDelegate?.constructFilterCarousel(filterPillStates: filterDataModel.filterPillDataState)
+        
+        // Filter activities based on selected category
+        filterActivitiesByCategory(filterState)
+        */
+    }
 }
 
 extension HomeViewModel: HomeCollectionViewModelDelegate {
@@ -159,26 +197,9 @@ private extension HomeViewModel {
         )
         
         self.filterDataModel = filterDataModel
-    }
-    
-    func openFilterTray() {
-        guard let filterDataModel: HomeSearchFilterTrayDataModel else { return }
         
-        let viewModel: HomeSearchFilterTrayViewModel = HomeSearchFilterTrayViewModel(
-            dataModel: filterDataModel,
-            activities: Array(responseMap.values)
-        )
-        viewModel.filterDidApplyPublisher
-            .receive(on: RunLoop.main)
-            .sink { [weak self] newFilterData in
-                guard let self else { return }
-                self.filterDataModel = newFilterData
-                actionDelegate?.dismissTray()
-                filterDidApply()
-            }
-            .store(in: &cancellables)
-        
-        actionDelegate?.openFilterTray(viewModel)
+        // Construct filter carousel
+        actionDelegate?.constructFilterCarousel(filterPillStates: activityValues)
     }
     
     func filterDidApply() {
@@ -196,5 +217,41 @@ private extension HomeViewModel {
                 }
             )
         )
+        
+        // Update filter carousel with current filter states
+        actionDelegate?.constructFilterCarousel(filterPillStates: filterDataModel.filterPillDataState)
+    }
+    
+    func filterActivitiesByCategory(_ filterState: HomeSearchFilterPillState) {
+        // TODO: Re-enable when ready for filtering functionality
+        /*
+        var filteredActivities: [Activity] = []
+        
+        if filterState.isSelected {
+            // If filter is selected, show activities that match this category
+            if filterState.title == "Free Cancellation" {
+                // Special case for free cancellation
+                filteredActivities = responseData.filter { !$0.cancelable.isEmpty }
+            } else {
+                // Filter by accessory name
+                filteredActivities = responseData.filter { activity in
+                    activity.accessories.contains { accessory in
+                        accessory.name.lowercased().contains(filterState.title.lowercased())
+                    }
+                }
+            }
+        } else {
+            // If filter is deselected, show all activities
+            filteredActivities = responseData
+        }
+        
+        // Update collection view
+        collectionViewModel.updateActivity(
+            activity: (
+                title: filterState.isSelected ? "Activities for \(filterState.title)" : "",
+                dataModel: filteredActivities.map { HomeActivityCellDataModel(activity: $0) }
+            )
+        )
+        */
     }
 }
