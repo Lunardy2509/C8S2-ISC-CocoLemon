@@ -38,12 +38,15 @@ final class HomeCollectionViewController: UIViewController {
 extension HomeCollectionViewController: HomeCollectionViewModelAction {
     func configureDataSource() {
         let activityCellRegistration: ActivityCellRegistration = createActivityCellRegistration()
+        let noResultCellRegistration: NoResultCellRegistration = createNoResultCellRegistration()
         let headerRegistration: HeaderRegistration = createHeaderRegistration()
         
         dataSource = HomeCollectionViewDataSource(collectionView: collectionView, cellProvider: { (collectionView, indexPath, item: AnyHashable) -> UICollectionViewCell? in
             switch item {
             case let item as HomeActivityCellDataModel:
                 return collectionView.dequeueConfiguredReusableCell(using: activityCellRegistration, for: indexPath, item: item)
+            case let item as NoResultCellDataModel:
+                return collectionView.dequeueConfiguredReusableCell(using: noResultCellRegistration, for: indexPath, item: item)
             default:
                 return nil
             }
@@ -108,6 +111,15 @@ private extension HomeCollectionViewController {
                 section.interGroupSpacing = CGFloat(20)
                 section.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 24.0, bottom: 8.0, trailing: 24.0)
                 return section
+                
+            case .noResult:
+                let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .estimated(100))
+                let item = NSCollectionLayoutItem(layoutSize: itemSize)
+                let groupSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .estimated(100))
+                let group = NSCollectionLayoutGroup.horizontal(layoutSize: groupSize, subitems: [item])
+                let section = NSCollectionLayoutSection(group: group)
+                section.contentInsets = NSDirectionalEdgeInsets(top: 40, leading: 24, bottom: 40, trailing: 24)
+                return section
             }
         }
     }
@@ -120,6 +132,13 @@ private extension HomeCollectionViewController {
         .init { [weak self] cell, _, itemIdentifier in
             guard let self else { return }
             cell.configureCell(itemIdentifier)
+        }
+    }
+    
+    typealias NoResultCellRegistration = UICollectionView.CellRegistration<NoResultCell, NoResultCellDataModel>
+    func createNoResultCellRegistration() -> NoResultCellRegistration {
+        .init { cell, _, itemIdentifier in
+            // No configuration needed for the simple no result cell
         }
     }
     

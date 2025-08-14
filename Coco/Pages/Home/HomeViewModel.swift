@@ -43,7 +43,7 @@ final class HomeViewModel {
     private var responseData: [Activity] = []
     private var cancellables: Set<AnyCancellable> = Set()
     
-    private(set) var filterDataModel: HomeSearchFilterTrayDataModel?
+    private(set) var filterDataModel: HomeFilterTrayDataModel?
 }
 
 extension HomeViewModel: HomeViewModelProtocol {
@@ -67,21 +67,35 @@ extension HomeViewModel: HomeViewModelProtocol {
         
         // Create a copy with price range for the full filter tray
         let sortedData = responseData.sorted { $0.pricing < $1.pricing }
-        let minPrice: Double = sortedData.first?.pricing ?? 0
-        let maxPrice: Double = sortedData.last?.pricing ?? 0
+        let dataMinPrice: Double = sortedData.first?.pricing ?? 0
+        let dataMaxPrice: Double = sortedData.last?.pricing ?? 0
         
-        let priceRangeModel = HomeSearchFilterPriceRangeModel(
-            minPrice: minPrice,
-            maxPrice: maxPrice,
-            range: minPrice...maxPrice
-        )
+        // Use existing price range if available, otherwise create new one with full data range
+        let priceRangeModel: HomeFilterPriceRangeModel
+        if let existingPriceRange = filterDataModel.priceRangeModel {
+            // Keep the user's previously selected price range
+            priceRangeModel = HomeFilterPriceRangeModel(
+                minPrice: existingPriceRange.minPrice,
+                maxPrice: existingPriceRange.maxPrice,
+                range: dataMinPrice...dataMaxPrice,
+                step: 50000 // Step of 50,000 for better UX
+            )
+        } else {
+            // Create new price range model with full data range
+            priceRangeModel = HomeFilterPriceRangeModel(
+                minPrice: dataMinPrice,
+                maxPrice: dataMaxPrice,
+                range: dataMinPrice...dataMaxPrice,
+                step: 50000
+            )
+        }
         
-        let trayDataModel = HomeSearchFilterTrayDataModel(
+        let trayDataModel = HomeFilterTrayDataModel(
             filterPillDataState: filterDataModel.filterPillDataState,
             priceRangeModel: priceRangeModel
         )
         
-        let viewModel: HomeSearchFilterTrayViewModel = HomeSearchFilterTrayViewModel(
+        let viewModel: HomeFilterTrayViewModel = HomeFilterTrayViewModel(
             dataModel: trayDataModel,
             activities: Array(responseMap.values)
         )
@@ -89,50 +103,20 @@ extension HomeViewModel: HomeViewModelProtocol {
             .receive(on: RunLoop.main)
             .sink { [weak self] newFilterData in
                 guard let self else { return }
-                // Keep only the filter pills, not the price range for carousel
-                let carouselDataModel = HomeSearchFilterTrayDataModel(
-                    filterPillDataState: newFilterData.filterPillDataState,
-                    priceRangeModel: nil
-                )
-                self.filterDataModel = carouselDataModel
+                // Store the complete filter data model including price range
+                self.filterDataModel = newFilterData
                 actionDelegate?.dismissTray()
                 filterDidApply()
                 
-                // Update the home view carousel with applied filters
-                actionDelegate?.constructFilterCarousel(filterPillStates: carouselDataModel.filterPillDataState)
+                // Update the home view carousel with applied filters (pills only for display)
+                actionDelegate?.constructFilterCarousel(filterPillStates: newFilterData.filterPillDataState)
             }
             .store(in: &cancellables)
 
         actionDelegate?.openFilterTray(viewModel)
     }
     
-    func onCategoryFilterSelected(_ filterState: HomeSearchFilterPillState) {
-        // This method is now only used for filter tray interactions
-        // Toggle the selected state
-        filterState.isSelected.toggle()
-        
-        // Update the filter data model with the new state
-        guard var filterDataModel = filterDataModel else { return }
-        
-        // Find and update the corresponding filter pill state in the data model
-        if let index = filterDataModel.filterPillDataState.firstIndex(where: { $0.id == filterState.id }) {
-            filterDataModel.filterPillDataState[index] = filterState
-        }
-        
-        self.filterDataModel = filterDataModel
-    }
-    
-    func onCategoryFilterSelectedById(_ filterId: Int) {
-        // This method is now only used for filter tray interactions
-        guard var filterDataModel = filterDataModel else { return }
-        
-        // Find and toggle the filter state by ID
-        if let index = filterDataModel.filterPillDataState.firstIndex(where: { $0.id == filterId }) {
-            filterDataModel.filterPillDataState[index].isSelected.toggle()
-        }
-        
-        self.filterDataModel = filterDataModel
-    }
+
     
     func onFilterDismiss(_ filterId: Int) {
         // Dismiss a specific filter from the home view carousel
@@ -141,7 +125,6 @@ extension HomeViewModel: HomeViewModelProtocol {
         // Find and deselect the filter
         if let index = filterDataModel.filterPillDataState.firstIndex(where: { $0.id == filterId }) {
             filterDataModel.filterPillDataState[index].isSelected = false
-            print("Filter dismissed: \(filterDataModel.filterPillDataState[index].title)")
         }
         
         self.filterDataModel = filterDataModel
@@ -176,19 +159,11 @@ extension HomeViewModel: HomeViewModelProtocol {
     private func applyCurrentFilters() {
         guard let filterDataModel = filterDataModel else { return }
         
-        // Get selected categories
-        let selectedCategoryIds = filterDataModel.filterPillDataState
-            .filter { $0.isSelected }
-            .map { $0.id }
-        
-        var filteredActivities: [Activity] = responseData
-        
-        // Filter by selected categories if any are selected
-        if !selectedCategoryIds.isEmpty {
-            filteredActivities = filteredActivities.filter { activity in
-                selectedCategoryIds.contains(activity.category.id)
-            }
-        }
+        // Use the centralized filtering logic that handles both categories and price range
+        let filteredActivities: [Activity] = HomeFilterUtil.doFilter(
+            responseData,
+            filterDataModel: filterDataModel
+        )
         
         // Update collection view without title
         collectionViewModel.updateActivity(
@@ -201,7 +176,12 @@ extension HomeViewModel: HomeViewModelProtocol {
         let selectedTitles = filterDataModel.filterPillDataState
             .filter { $0.isSelected }
             .map { $0.title }
-        print("Applied filters: \(selectedTitles.joined(separator: ", "))")
+        
+        var filterInfo = "Applied filters: \(selectedTitles.joined(separator: ", "))"
+        if let priceRange = filterDataModel.priceRangeModel {
+            filterInfo += " | Price: Rp\(Int(priceRange.minPrice).formatted()) - Rp\(Int(priceRange.maxPrice).formatted())"
+        }
+        print(filterInfo)
     }
 }
 
@@ -264,25 +244,25 @@ private extension HomeViewModel {
         let responseMapActivity: [Activity] = Array(responseMap.values)
         
         // Use only the 3 predefined categories
-        let activityValues: [HomeSearchFilterPillState] = [
-            HomeSearchFilterPillState(
+        let activityValues: [HomeFilterPillState] = [
+            HomeFilterPillState(
                 id: 1,
                 title: "Snorkeling",
                 isSelected: false
             ),
-            HomeSearchFilterPillState(
+            HomeFilterPillState(
                 id: 2,
                 title: "Diving",
                 isSelected: false
             ),
-            HomeSearchFilterPillState(
+            HomeFilterPillState(
                 id: 3,
                 title: "Land Exploration",
                 isSelected: false
             )
         ]
         
-        let filterDataModel: HomeSearchFilterTrayDataModel = HomeSearchFilterTrayDataModel(
+        let filterDataModel: HomeFilterTrayDataModel = HomeFilterTrayDataModel(
             filterPillDataState: activityValues
         )
         

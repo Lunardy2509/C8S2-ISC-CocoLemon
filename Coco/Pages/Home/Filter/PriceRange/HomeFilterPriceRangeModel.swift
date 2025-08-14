@@ -1,5 +1,5 @@
 //
-//  HomeSearchFilterPriceRangeModel.swift
+//  HomeFilterPriceRangeModel.swift
 //  Coco
 //
 //  Created by Jackie Leonardy on 09/07/25.
@@ -8,7 +8,7 @@
 import Foundation
 import SwiftUI
 
-final class HomeSearchFilterPriceRangeModel: ObservableObject {
+final class HomeFilterPriceRangeModel: ObservableObject {
     @Published var minPrice: Double
     @Published var maxPrice: Double
 

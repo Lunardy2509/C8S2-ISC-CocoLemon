@@ -1,5 +1,5 @@
 //
-//  HomeSearchFilterPillView.swift
+//  HomeFilterPillView.swift
 //  Coco
 //
 //  Created by Jackie Leonardy on 09/07/25.
@@ -8,8 +8,8 @@
 import Foundation
 import SwiftUI
 
-struct HomeSearchFilterPillView: View {
-    @ObservedObject var state: HomeSearchFilterPillState
+struct HomeFilterPillView: View {
+    @ObservedObject var state: HomeFilterPillState
     let didTap: () -> Void
     
     var body: some View {

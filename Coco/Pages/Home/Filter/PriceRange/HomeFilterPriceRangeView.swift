@@ -1,5 +1,5 @@
 //
-//  HomeSearchFilterPriceRangeView.swift
+//  HomeFilterPriceRangeView.swift
 //  Coco
 //
 //  Created by Jackie Leonardy on 09/07/25.
@@ -10,8 +10,8 @@ import SwiftUI
 
 private let kKnobSize: CGFloat = 40.0
 
-struct HomeSearchFilterPriceRangeView: View {
-    @ObservedObject var model: HomeSearchFilterPriceRangeModel
+struct HomeFilterPriceRangeView: View {
+    @ObservedObject var model: HomeFilterPriceRangeModel
     let rangeDidChange: () -> Void
 
     var body: some View {
@@ -74,7 +74,7 @@ struct HomeSearchFilterPriceRangeView: View {
     }
 }
 
-private extension HomeSearchFilterPriceRangeView {
+private extension HomeFilterPriceRangeView {
     func knobView() -> some View {
         HStack(spacing: 0) {
             Image(uiImage: CocoIcon.icChevronLeft.image)

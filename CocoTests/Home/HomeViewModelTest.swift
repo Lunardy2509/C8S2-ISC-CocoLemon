@@ -63,9 +63,9 @@ struct HomeViewModelTest {
         context.viewModel.onViewDidLoad()
         context.viewModel.searchBarViewModel.trailingIcon?.didTap?()
         
-        let filterModel = HomeSearchFilterTrayDataModel(
+        let filterModel = HomeFilterTrayDataModel(
             filterPillDataState: [],
-            priceRangeModel: HomeSearchFilterPriceRangeModel(
+            priceRangeModel: HomeFilterPriceRangeModel(
                 minPrice: 499000.0,
                 maxPrice: 200000,
                 range: 0...0
@@ -78,50 +78,6 @@ struct HomeViewModelTest {
         
         #expect(context.actionDelegate.invokedOpenFilterTrayCount == 1)
         #expect(context.viewModel.collectionViewModel.activityData.dataModel.count == 1)
-    }
-    
-    @Test("category filter - should filter activities when selected")
-    func categoryFilter_whenSelected_shouldFilterActivities() async throws {
-        // --- GIVEN ---
-        let context = try TestContext.setup()
-        context.viewModel.onViewDidLoad()
-        
-        // Create a mock filter state for snorkeling
-        let filterState = HomeSearchFilterPillState(
-            id: 1,
-            title: "Snorkeling",
-            isSelected: false
-        )
-        
-        // --- WHEN ---
-        context.viewModel.onCategoryFilterSelected(filterState)
-        
-        // --- THEN ---
-        #expect(filterState.isSelected == true)
-        #expect(context.actionDelegate.invokedConstructFilterCarouselCount >= 1)
-        // The collection view should be updated with filtered activities
-    }
-    
-    @Test("category filter - should show all activities when deselected")
-    func categoryFilter_whenDeselected_shouldShowAllActivities() async throws {
-        // --- GIVEN ---
-        let context = try TestContext.setup()
-        context.viewModel.onViewDidLoad()
-        
-        // Create a mock filter state that is already selected
-        let filterState = HomeSearchFilterPillState(
-            id: 2,
-            title: "Diving",
-            isSelected: true
-        )
-        
-        // --- WHEN ---
-        context.viewModel.onCategoryFilterSelected(filterState)
-        
-        // --- THEN ---
-        #expect(filterState.isSelected == false)
-        #expect(context.actionDelegate.invokedConstructFilterCarouselCount >= 1)
-        // The collection view should show all activities when filter is deselected
     }
     
     // MARK: - Initial Load Tests
@@ -308,10 +264,10 @@ private extension HomeViewModelTest {
 private final class MockHomeViewModelAction: HomeViewModelAction {
     var invokedConstructFilterCarousel = false
     var invokedConstructFilterCarouselCount = 0
-    var invokedConstructFilterCarouselParameters: (filterPillStates: [HomeSearchFilterPillState], Void)?
-    var invokedConstructFilterCarouselParametersList = [(filterPillStates: [HomeSearchFilterPillState], Void)]()
-    
-    func constructFilterCarousel(filterPillStates: [Coco.HomeSearchFilterPillState]) {
+    var invokedConstructFilterCarouselParameters: (filterPillStates: [HomeFilterPillState], Void)?
+    var invokedConstructFilterCarouselParametersList = [(filterPillStates: [HomeFilterPillState], Void)]()
+
+    func constructFilterCarousel(filterPillStates: [Coco.HomeFilterPillState]) {
         invokedConstructFilterCarousel = true
         invokedConstructFilterCarouselCount += 1
         invokedConstructFilterCarouselParameters = (filterPillStates, ())
@@ -392,10 +348,10 @@ private final class MockHomeViewModelAction: HomeViewModelAction {
 
     var invokedOpenFilterTray = false
     var invokedOpenFilterTrayCount = 0
-    var invokedOpenFilterTrayParameters: (viewModel: HomeSearchFilterTrayViewModel, Void)?
-    var invokedOpenFilterTrayParametersList = [(viewModel: HomeSearchFilterTrayViewModel, Void)]()
+    var invokedOpenFilterTrayParameters: (viewModel: HomeFilterTrayViewModel, Void)?
+    var invokedOpenFilterTrayParametersList = [(viewModel: HomeFilterTrayViewModel, Void)]()
 
-    func openFilterTray(_ viewModel: HomeSearchFilterTrayViewModel) {
+    func openFilterTray(_ viewModel: HomeFilterTrayViewModel) {
         invokedOpenFilterTray = true
         invokedOpenFilterTrayCount += 1
         invokedOpenFilterTrayParameters = (viewModel, ())

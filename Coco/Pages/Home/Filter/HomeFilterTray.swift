@@ -1,5 +1,5 @@
 //
-//  HomeSearchFilterTray.swift
+//  HomeFilterTray.swift
 //  Coco
 //
 //  Created by Jackie Leonardy on 07/07/25.
@@ -8,8 +8,8 @@
 import Foundation
 import SwiftUI
 
-struct HomeSearchFilterTray: View {
-    @ObservedObject var viewModel: HomeSearchFilterTrayViewModel
+struct HomeFilterTray: View {
+    @ObservedObject var viewModel: HomeFilterTrayViewModel
     
     var body: some View {
         VStack(alignment: .center) {
@@ -29,7 +29,7 @@ struct HomeSearchFilterTray: View {
                             ScrollView(.horizontal) {
                                 HStack(spacing: 12.0) {
                                     ForEach(viewModel.dataModel.filterPillDataState, id: \.id) { state in
-                                        HomeSearchFilterPillView(state: state, didTap: {
+                                        HomeFilterPillView(state: state, didTap: {
                                             viewModel.updateApplyButtonTitle()
                                         })
                                     }
@@ -38,23 +38,40 @@ struct HomeSearchFilterTray: View {
                         }
                     }
                     
-                    // Only show price range view if priceRangeModel exists
                     if let priceRangeModel = viewModel.dataModel.priceRangeModel {
-                        HomeSearchFilterPriceRangeView(model: priceRangeModel, rangeDidChange: {
+                        HomeFilterPriceRangeView(model: priceRangeModel, rangeDidChange: {
                             viewModel.updateApplyButtonTitle()
                         })
                     }
                     
                     Spacer()
-                    CocoButton(
-                        action: {
-                            viewModel.filterDidApply()
-                        },
-                        text: viewModel.applyButtonTitle,
-                        style: .large,
-                        type: .primary
-                    )
-                    .stretch()
+                    HStack(spacing: 12.0) {
+                        // Reset Button
+                        CocoButton(
+                            action: {
+                                viewModel.resetFilters()
+                            },
+                            text: "Reset",
+                            style: .large,
+                            type: .secondary
+                        )
+                        .stretch()
+                        
+                        // Apply Button
+                        CocoButton(
+                            action: {
+                                if viewModel.applyButtonTitle != "No Result" {
+                                    viewModel.filterDidApply()
+                                }
+                            },
+                            text: viewModel.applyButtonTitle,
+                            style: .large,
+                            type: viewModel.applyButtonTitle == "No Result" ? .secondary : .primary
+                        )
+                        .stretch()
+                        .disabled(viewModel.applyButtonTitle == "No Result")
+                        .opacity(viewModel.applyButtonTitle == "No Result" ? 0.6 : 1.0)
+                    }
                 }
             }
         }
@@ -65,7 +82,7 @@ struct HomeSearchFilterTray: View {
     }
 }
 
-private extension HomeSearchFilterTray {
+private extension HomeFilterTray {
     func createSectionView(
         title: String,
         view: (() -> some View)

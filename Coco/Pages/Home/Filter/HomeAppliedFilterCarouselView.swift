@@ -9,7 +9,7 @@ import Foundation
 import SwiftUI
 
 struct HomeAppliedFilterCarouselView: View {
-    let appliedFilters: [HomeSearchFilterPillState]
+    let appliedFilters: [HomeFilterPillState]
     let onFilterDismiss: (Int) -> Void
     
     var body: some View {
@@ -35,8 +35,8 @@ struct HomeAppliedFilterCarouselView: View {
 #Preview {
     HomeAppliedFilterCarouselView(
         appliedFilters: [
-            HomeSearchFilterPillState(id: 1, title: "Snorkeling", isSelected: true),
-            HomeSearchFilterPillState(id: 2, title: "Diving", isSelected: true)
+            HomeFilterPillState(id: 1, title: "Snorkeling", isSelected: true),
+            HomeFilterPillState(id: 2, title: "Diving", isSelected: true)
         ],
         onFilterDismiss: { _ in }
     )

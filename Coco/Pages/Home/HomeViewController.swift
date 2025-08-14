@@ -57,7 +57,7 @@ extension HomeViewController: HomeViewModelAction {
         viewController.didMove(toParent: self)
     }
     
-    func constructFilterCarousel(filterPillStates: [HomeSearchFilterPillState]) {
+    func constructFilterCarousel(filterPillStates: [HomeFilterPillState]) {
         // Only show applied filters (isSelected = true) in the home view carousel
         let appliedFilters = filterPillStates.filter { $0.isSelected }
         
@@ -107,8 +107,8 @@ extension HomeViewController: HomeViewModelAction {
         })
     }
     
-    func openFilterTray(_ viewModel: HomeSearchFilterTrayViewModel) {
-        presentTray(view: HomeSearchFilterTray(viewModel: viewModel))
+    func openFilterTray(_ viewModel: HomeFilterTrayViewModel) {
+        presentTray(view: HomeFilterTray(viewModel: viewModel))
     }
     
     func dismissTray() {
