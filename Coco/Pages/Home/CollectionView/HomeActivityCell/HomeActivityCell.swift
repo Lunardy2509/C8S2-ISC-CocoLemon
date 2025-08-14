@@ -52,12 +52,12 @@ final class HomeActivityCell: UICollectionViewCell {
     private lazy var imageView: UIImageView = createImageView()
     private lazy var areaView: UIView = createAreaView()
     private lazy var areaLabel: UILabel = UILabel(
-        font: .jakartaSans(forTextStyle: .callout, weight: .medium),
+        font: .jakartaSans(forTextStyle: .title3, weight: .bold),
         textColor: Token.additionalColorsBlack,
         numberOfLines: 2
     )
     private lazy var nameLabel: UILabel = UILabel(
-        font: .jakartaSans(forTextStyle: .title3, weight: .bold),
+        font: .jakartaSans(forTextStyle: .callout, weight: .medium),
         textColor: Token.additionalColorsBlack,
         numberOfLines: 2
     )
@@ -73,9 +73,9 @@ private extension HomeActivityCell {
         let stackView: UIStackView = UIStackView(
             arrangedSubviews: [
                 imageView,
+//                nameLabel,
                 areaView,
-                nameLabel,
-                priceLabel,
+                priceLabel
             ]
         )
         stackView.spacing = 4.0
@@ -98,29 +98,16 @@ private extension HomeActivityCell {
     }
     
     func createAreaView() -> UIView {
-        let imageView: UIImageView = UIImageView(image: CocoIcon.icActivityAreaIcon.image)
-        imageView.contentMode = .scaleAspectFill
-        imageView.layout {
-            $0.size(20)
-        }
-        let contentView: UIView = UIView()
-        contentView.addSubviews([
-            imageView,
-            areaLabel
-        ])
-        
-        imageView.layout {
-            $0.leading(to: contentView.leadingAnchor)
-                .top(to: contentView.topAnchor)
-                .bottom(to: contentView.bottomAnchor)
-        }
+        let ContentView = UIView()
+        ContentView.addSubview(areaLabel)
         
         areaLabel.layout {
-            $0.leading(to: imageView.trailingAnchor, constant: 4.0)
-                .centerY(to: contentView.centerYAnchor)
-                .trailing(to: contentView.trailingAnchor, relation: .lessThanOrEqual)
+            $0.leading(to: ContentView.leadingAnchor)
+                .trailing(to: ContentView.trailingAnchor)
+                .top(to: ContentView.topAnchor)
+                .bottom(to: ContentView.bottomAnchor)
         }
         
-        return contentView
+        return ContentView
     }
 }
