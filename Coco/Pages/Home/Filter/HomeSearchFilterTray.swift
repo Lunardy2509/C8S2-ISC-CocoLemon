@@ -13,7 +13,7 @@ struct HomeSearchFilterTray: View {
     
     var body: some View {
         VStack(alignment: .center) {
-            Text("Search")
+            Text("Filters")
                 .multilineTextAlignment(.center)
                 .font(.jakartaSans(forTextStyle: .body, weight: .semibold))
                 .foregroundStyle(Token.additionalColorsBlack.toColor())
@@ -22,7 +22,7 @@ struct HomeSearchFilterTray: View {
                 VStack(alignment: .leading, spacing: 24.0) {
                     if !viewModel.dataModel.filterPillDataState.isEmpty {
                         VStack(alignment: .leading, spacing: 12.0) {
-                            Text("Popular Filters")
+                            Text("Activities")
                                 .foregroundStyle(Token.additionalColorsBlack.toColor())
                                 .font(.jakartaSans(forTextStyle: .body, weight: .semibold))
                              
@@ -38,9 +38,13 @@ struct HomeSearchFilterTray: View {
                         }
                     }
                     
-                    HomeSearchFilterPriceRangeView(model: viewModel.dataModel.priceRangeModel, rangeDidChange: {
-                        viewModel.updateApplyButtonTitle()
-                    })
+                    // Only show price range view if priceRangeModel exists
+                    if let priceRangeModel = viewModel.dataModel.priceRangeModel {
+                        HomeSearchFilterPriceRangeView(model: priceRangeModel, rangeDidChange: {
+                            viewModel.updateApplyButtonTitle()
+                        })
+                    }
+                    
                     Spacer()
                     CocoButton(
                         action: {

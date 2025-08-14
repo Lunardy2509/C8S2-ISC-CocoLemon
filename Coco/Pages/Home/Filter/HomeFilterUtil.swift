@@ -16,22 +16,22 @@ final class HomeFilterUtil {
             .filter { $0.isSelected }
             .map { $0.id }
         
-        if !selectedIds.isEmpty {
+        // filter by category (ids 1, 2, 3 are categories)
+        let selectedCategoryIds: [Int] = filterDataModel.filterPillDataState
+            .filter { $0.isSelected && $0.id > 0 && $0.id <= 3 }
+            .map { $0.id }
+        
+        if !selectedCategoryIds.isEmpty {
             tempActivities = tempActivities.filter { activity in
-                let shouldMatchCancelable = selectedIds.contains(-99999999)
-                let shouldMatchAccessory = selectedIds.contains(where: { $0 != -99999999 })
-
-                let matchesCancelable = shouldMatchCancelable && !activity.cancelable.isEmpty
-                let matchesAccessory = shouldMatchAccessory &&
-                    activity.accessories.contains { selectedIds.contains($0.id) }
-
-                return matchesCancelable || matchesAccessory
+                selectedCategoryIds.contains(activity.category.id)
             }
         }
         
-        // filter by price range
-        tempActivities = tempActivities.filter {
-            $0.pricing >= filterDataModel.priceRangeModel.minPrice && $0.pricing <= filterDataModel.priceRangeModel.maxPrice
+        // filter by price range (only if priceRangeModel exists)
+        if let priceRangeModel = filterDataModel.priceRangeModel {
+            tempActivities = tempActivities.filter {
+                $0.pricing >= priceRangeModel.minPrice && $0.pricing <= priceRangeModel.maxPrice
+            }
         }
         
         return tempActivities

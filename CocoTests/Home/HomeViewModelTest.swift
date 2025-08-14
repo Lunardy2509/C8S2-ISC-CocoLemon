@@ -110,8 +110,8 @@ struct HomeViewModelTest {
         
         // Create a mock filter state that is already selected
         let filterState = HomeSearchFilterPillState(
-            id: 1,
-            title: "Snorkeling",
+            id: 2,
+            title: "Diving",
             isSelected: true
         )
         

@@ -33,9 +33,8 @@ struct HomeFilterCarouselView: View {
     HomeFilterCarouselView(
         filterPillStates: [
             HomeSearchFilterPillState(id: 1, title: "Snorkeling", isSelected: true),
-            HomeSearchFilterPillState(id: 2, title: "Certified Guide", isSelected: false),
-            HomeSearchFilterPillState(id: 3, title: "Bottled Water", isSelected: false),
-            HomeSearchFilterPillState(id: 4, title: "Free Cancellation", isSelected: false)
+            HomeSearchFilterPillState(id: 2, title: "Diving", isSelected: false),
+            HomeSearchFilterPillState(id: 3, title: "Land Exploration", isSelected: false)
         ],
         onFilterTap: { _ in }
     )

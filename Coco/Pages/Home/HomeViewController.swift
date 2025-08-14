@@ -58,19 +58,21 @@ extension HomeViewController: HomeViewModelAction {
     }
     
     func constructFilterCarousel(filterPillStates: [HomeSearchFilterPillState]) {
-        let filterCarouselView = HomeFilterCarouselView(
-            filterPillStates: filterPillStates,
-            onFilterTap: { filterState in
-                // For now, just provide visual feedback - no filtering logic
-                print("Filter tapped: \(filterState.title), isSelected: \(filterState.isSelected)")
+        // Only show applied filters (isSelected = true) in the home view carousel
+        let appliedFilters = filterPillStates.filter { $0.isSelected }
+        
+        let appliedFilterCarouselView = HomeAppliedFilterCarouselView(
+            appliedFilters: appliedFilters,
+            onFilterDismiss: { [weak self] filterId in
+                self?.viewModel.onFilterDismiss(filterId)
             }
         )
-        let viewController: UIHostingController = UIHostingController(rootView: filterCarouselView)
+        let viewController: UIHostingController = UIHostingController(rootView: appliedFilterCarouselView)
         addChild(viewController)
         thisView.addFilterView(from: viewController.view)
         viewController.didMove(toParent: self)
         
-        thisView.toggleFilterView(isShown: !filterPillStates.isEmpty)
+        thisView.toggleFilterView(isShown: !appliedFilters.isEmpty)
     }
     
     func toggleLoadingView(isShown: Bool, after: CGFloat) {

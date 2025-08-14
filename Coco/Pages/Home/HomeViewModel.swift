@@ -63,41 +63,145 @@ extension HomeViewModel: HomeViewModelProtocol {
     }
     
     func openFilterTray() {
-        guard let filterDataModel: HomeSearchFilterTrayDataModel else { return }
+        guard let filterDataModel = filterDataModel else { return }
+        
+        // Create a copy with price range for the full filter tray
+        let sortedData = responseData.sorted { $0.pricing < $1.pricing }
+        let minPrice: Double = sortedData.first?.pricing ?? 0
+        let maxPrice: Double = sortedData.last?.pricing ?? 0
+        
+        let priceRangeModel = HomeSearchFilterPriceRangeModel(
+            minPrice: minPrice,
+            maxPrice: maxPrice,
+            range: minPrice...maxPrice
+        )
+        
+        let trayDataModel = HomeSearchFilterTrayDataModel(
+            filterPillDataState: filterDataModel.filterPillDataState,
+            priceRangeModel: priceRangeModel
+        )
         
         let viewModel: HomeSearchFilterTrayViewModel = HomeSearchFilterTrayViewModel(
-            dataModel: filterDataModel,
+            dataModel: trayDataModel,
             activities: Array(responseMap.values)
         )
         viewModel.filterDidApplyPublisher
             .receive(on: RunLoop.main)
             .sink { [weak self] newFilterData in
                 guard let self else { return }
-                self.filterDataModel = newFilterData
+                // Keep only the filter pills, not the price range for carousel
+                let carouselDataModel = HomeSearchFilterTrayDataModel(
+                    filterPillDataState: newFilterData.filterPillDataState,
+                    priceRangeModel: nil
+                )
+                self.filterDataModel = carouselDataModel
                 actionDelegate?.dismissTray()
                 filterDidApply()
+                
+                // Update the home view carousel with applied filters
+                actionDelegate?.constructFilterCarousel(filterPillStates: carouselDataModel.filterPillDataState)
             }
             .store(in: &cancellables)
-        
+
         actionDelegate?.openFilterTray(viewModel)
     }
     
     func onCategoryFilterSelected(_ filterState: HomeSearchFilterPillState) {
-        // Disable filtering logic for now - just handle the selection state
-        // The visual state is already handled in the view
-        
-        // TODO: Re-enable when ready for filtering functionality
-        /*
+        // This method is now only used for filter tray interactions
         // Toggle the selected state
         filterState.isSelected.toggle()
         
-        // Update filter carousel to reflect selection
-        guard let filterDataModel = filterDataModel else { return }
+        // Update the filter data model with the new state
+        guard var filterDataModel = filterDataModel else { return }
+        
+        // Find and update the corresponding filter pill state in the data model
+        if let index = filterDataModel.filterPillDataState.firstIndex(where: { $0.id == filterState.id }) {
+            filterDataModel.filterPillDataState[index] = filterState
+        }
+        
+        self.filterDataModel = filterDataModel
+    }
+    
+    func onCategoryFilterSelectedById(_ filterId: Int) {
+        // This method is now only used for filter tray interactions
+        guard var filterDataModel = filterDataModel else { return }
+        
+        // Find and toggle the filter state by ID
+        if let index = filterDataModel.filterPillDataState.firstIndex(where: { $0.id == filterId }) {
+            filterDataModel.filterPillDataState[index].isSelected.toggle()
+        }
+        
+        self.filterDataModel = filterDataModel
+    }
+    
+    func onFilterDismiss(_ filterId: Int) {
+        // Dismiss a specific filter from the home view carousel
+        guard var filterDataModel = filterDataModel else { return }
+        
+        // Find and deselect the filter
+        if let index = filterDataModel.filterPillDataState.firstIndex(where: { $0.id == filterId }) {
+            filterDataModel.filterPillDataState[index].isSelected = false
+            print("Filter dismissed: \(filterDataModel.filterPillDataState[index].title)")
+        }
+        
+        self.filterDataModel = filterDataModel
+        
+        // Update filter carousel to reflect the change
         actionDelegate?.constructFilterCarousel(filterPillStates: filterDataModel.filterPillDataState)
         
-        // Filter activities based on selected category
-        filterActivitiesByCategory(filterState)
-        */
+        // Apply current filters immediately
+        applyCurrentFilters()
+    }
+    
+    private func filterDidApply() {
+        guard let filterDataModel = filterDataModel else { return }
+        let tempResponseData: [Activity] = HomeFilterUtil.doFilter(
+            responseData,
+            filterDataModel: filterDataModel
+        )
+        
+        collectionViewModel.updateActivity(
+            activity: (
+                title: "",
+                dataModel: tempResponseData.map {
+                    HomeActivityCellDataModel(activity: $0)
+                }
+            )
+        )
+        
+        // Update filter carousel with current filter states
+        actionDelegate?.constructFilterCarousel(filterPillStates: filterDataModel.filterPillDataState)
+    }
+    
+    private func applyCurrentFilters() {
+        guard let filterDataModel = filterDataModel else { return }
+        
+        // Get selected categories
+        let selectedCategoryIds = filterDataModel.filterPillDataState
+            .filter { $0.isSelected }
+            .map { $0.id }
+        
+        var filteredActivities: [Activity] = responseData
+        
+        // Filter by selected categories if any are selected
+        if !selectedCategoryIds.isEmpty {
+            filteredActivities = filteredActivities.filter { activity in
+                selectedCategoryIds.contains(activity.category.id)
+            }
+        }
+        
+        // Update collection view without title
+        collectionViewModel.updateActivity(
+            activity: (
+                title: "",
+                dataModel: filteredActivities.map { HomeActivityCellDataModel(activity: $0) }
+            )
+        )
+        
+        let selectedTitles = filterDataModel.filterPillDataState
+            .filter { $0.isSelected }
+            .map { $0.title }
+        print("Applied filters: \(selectedTitles.joined(separator: ", "))")
     }
 }
 
@@ -144,114 +248,44 @@ private extension HomeViewModel {
                 responseData = response.values
                 collectionViewModel.updateActivity(activity: (title: "", dataModel: sectionData))
                 
-                contructFilterData()
+                constructFilterData()
+                
+                // Only show applied filters in the carousel (initially none)
+                if let filterDataModel = filterDataModel {
+                    actionDelegate?.constructFilterCarousel(filterPillStates: filterDataModel.filterPillDataState)
+                }
             case .failure(let failure):
                 break
             }
         }
     }
     
-    func contructFilterData() {
+    func constructFilterData() {
         let responseMapActivity: [Activity] = Array(responseMap.values)
-        var seenIDs: Set<Int> = Set()
-        var activityValues: [HomeSearchFilterPillState] = responseMap.values
-            .flatMap { $0.accessories }
-            .filter { accessory in
-                if seenIDs.contains(accessory.id) {
-                    return false
-                } else {
-                    seenIDs.insert(accessory.id)
-                    return true
-                }
-            }
-            .map {
-                HomeSearchFilterPillState(
-                    id: $0.id,
-                    title: $0.name,
-                    isSelected: false
-                )
-            }
         
-        if responseMapActivity.first(where: { !$0.cancelable.isEmpty }) != nil {
-            activityValues.append(
-                HomeSearchFilterPillState(
-                    id: -99999999,
-                    title: "Free Cancellation",
-                    isSelected: false
-                )
+        // Use only the 3 predefined categories
+        let activityValues: [HomeSearchFilterPillState] = [
+            HomeSearchFilterPillState(
+                id: 1,
+                title: "Snorkeling",
+                isSelected: false
+            ),
+            HomeSearchFilterPillState(
+                id: 2,
+                title: "Diving",
+                isSelected: false
+            ),
+            HomeSearchFilterPillState(
+                id: 3,
+                title: "Land Exploration",
+                isSelected: false
             )
-        }
+        ]
         
-        let sortedData = responseMapActivity.sorted { $0.pricing < $1.pricing }
-        
-        let minPrice: Double = sortedData.first?.pricing ?? 0
-        let maxPrice: Double = sortedData.last?.pricing ?? 0
         let filterDataModel: HomeSearchFilterTrayDataModel = HomeSearchFilterTrayDataModel(
-            filterPillDataState: activityValues,
-            priceRangeModel: HomeSearchFilterPriceRangeModel(
-                minPrice: minPrice,
-                maxPrice: maxPrice,
-                range: minPrice...maxPrice,
-                step: 1
-            )
+            filterPillDataState: activityValues
         )
         
         self.filterDataModel = filterDataModel
-        
-        // Construct filter carousel
-        actionDelegate?.constructFilterCarousel(filterPillStates: activityValues)
-    }
-    
-    func filterDidApply() {
-        guard let filterDataModel: HomeSearchFilterTrayDataModel else { return }
-        let tempResponseData: [Activity] = HomeFilterUtil.doFilter(
-            responseData,
-            filterDataModel: filterDataModel
-        )
-        
-        collectionViewModel.updateActivity(
-            activity: (
-                title: "",
-                dataModel: tempResponseData.map {
-                    HomeActivityCellDataModel(activity: $0)
-                }
-            )
-        )
-        
-        // Update filter carousel with current filter states
-        actionDelegate?.constructFilterCarousel(filterPillStates: filterDataModel.filterPillDataState)
-    }
-    
-    func filterActivitiesByCategory(_ filterState: HomeSearchFilterPillState) {
-        // TODO: Re-enable when ready for filtering functionality
-        /*
-        var filteredActivities: [Activity] = []
-        
-        if filterState.isSelected {
-            // If filter is selected, show activities that match this category
-            if filterState.title == "Free Cancellation" {
-                // Special case for free cancellation
-                filteredActivities = responseData.filter { !$0.cancelable.isEmpty }
-            } else {
-                // Filter by accessory name
-                filteredActivities = responseData.filter { activity in
-                    activity.accessories.contains { accessory in
-                        accessory.name.lowercased().contains(filterState.title.lowercased())
-                    }
-                }
-            }
-        } else {
-            // If filter is deselected, show all activities
-            filteredActivities = responseData
-        }
-        
-        // Update collection view
-        collectionViewModel.updateActivity(
-            activity: (
-                title: filterState.isSelected ? "Activities for \(filterState.title)" : "",
-                dataModel: filteredActivities.map { HomeActivityCellDataModel(activity: $0) }
-            )
-        )
-        */
     }
 }

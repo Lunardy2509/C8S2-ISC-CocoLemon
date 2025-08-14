@@ -36,4 +36,6 @@ protocol HomeViewModelProtocol: AnyObject {
     func onSearchDidApply(_ queryText: String)
     func openFilterTray()
     func onCategoryFilterSelected(_ filterState: HomeSearchFilterPillState)
+    func onCategoryFilterSelectedById(_ filterId: Int)
+    func onFilterDismiss(_ filterId: Int)
 }

@@ -24,10 +24,12 @@ final class HomeSearchFilterTrayViewModel: ObservableObject {
         
         let tempActivity: [Activity] = HomeFilterUtil.doFilter(activities, filterDataModel: dataModel)
         applyButtonTitle = Self.getTitle(tempActivity)
+        print("Initial \(applyButtonTitle)")
     }
     
     func filterDidApply() {
         filterDidApplyPublisher.send(dataModel)
+        print("Data Model: \(dataModel)")
     }
     
     func updateApplyButtonTitle() {
@@ -38,6 +40,6 @@ final class HomeSearchFilterTrayViewModel: ObservableObject {
 
 private extension HomeSearchFilterTrayViewModel {
     static func getTitle(_ activities: [Activity]) -> String {
-        "Apply Filter (\(activities.count))"
+        "Apply Filter"
     }
 }
