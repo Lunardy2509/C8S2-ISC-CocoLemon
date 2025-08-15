@@ -1,5 +1,5 @@
 //
-//  HomeSearchFilterPillState.swift
+//  HomeFilterPillState.swift
 //  Coco
 //
 //  Created by Jackie Leonardy on 09/07/25.
@@ -8,7 +8,7 @@
 import Foundation
 import SwiftUI
 
-final class HomeSearchFilterPillState: ObservableObject, Identifiable {
+final class HomeFilterPillState: ObservableObject, Identifiable {
     let id: Int
     let title: String
     @Published var isSelected: Bool

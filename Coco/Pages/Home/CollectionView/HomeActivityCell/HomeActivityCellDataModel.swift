@@ -27,7 +27,7 @@ struct HomeActivityCellDataModel: Hashable {
         self.id = activity.id
         self.area = activity.title
         self.name = activity.description
-        self.priceText = "\(activity.pricing)"
+        self.priceText = activity.pricing.toRupiah()
         self.imageUrl = if let thumbnail = activity.images.first { $0.imageType == .thumbnail }?.imageUrl {
             URL(string: thumbnail)
         }

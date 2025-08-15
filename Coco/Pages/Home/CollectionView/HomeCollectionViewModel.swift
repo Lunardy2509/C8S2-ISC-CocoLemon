@@ -57,6 +57,15 @@ private extension HomeCollectionViewModel {
         
         if let activitySectionDataModel: HomeCollectionContent {
             contents.append(activitySectionDataModel)
+        } else {
+            // Add "No Result" section when there are no activities
+            contents.append(.init(
+                section: .init(
+                    type: .noResult,
+                    title: nil
+                ),
+                items: [NoResultCellDataModel()]
+            ))
         }
         
         var snapshot: HomeCollectionViewSnapShot = HomeCollectionViewSnapShot()

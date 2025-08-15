@@ -57,6 +57,29 @@ extension HomeViewController: HomeViewModelAction {
         viewController.didMove(toParent: self)
     }
     
+    func constructFilterCarousel(filterPillStates: [HomeFilterPillState]) {
+        // Only show applied filters (isSelected = true) in the home view carousel
+        let appliedFilters = filterPillStates.filter { $0.isSelected }
+        let isPriceRangeApplied = viewModel.isPriceRangeFilterApplied()
+        
+        let appliedFilterCarouselView = HomeAppliedFilterCarouselView(
+            appliedFilters: appliedFilters,
+            isPriceRangeApplied: isPriceRangeApplied,
+            onFilterDismiss: { [weak self] filterId in
+                self?.viewModel.onFilterDismiss(filterId)
+            },
+            onResetAll: { [weak self] in
+                self?.viewModel.onResetAllFilters()
+            }
+        )
+        let viewController: UIHostingController = UIHostingController(rootView: appliedFilterCarouselView)
+        addChild(viewController)
+        thisView.addFilterView(from: viewController.view)
+        viewController.didMove(toParent: self)
+        
+        thisView.toggleFilterView(isShown: !appliedFilters.isEmpty || isPriceRangeApplied)
+    }
+    
     func toggleLoadingView(isShown: Bool, after: CGFloat) {
         DispatchQueue.main.asyncAfter(deadline: .now() + after, execute: { [weak self] in
             guard let self else { return }
@@ -89,8 +112,8 @@ extension HomeViewController: HomeViewModelAction {
         })
     }
     
-    func openFilterTray(_ viewModel: HomeSearchFilterTrayViewModel) {
-        presentTray(view: HomeSearchFilterTray(viewModel: viewModel))
+    func openFilterTray(_ viewModel: HomeFilterTrayViewModel) {
+        presentTray(view: HomeFilterTray(viewModel: viewModel))
     }
     
     func dismissTray() {

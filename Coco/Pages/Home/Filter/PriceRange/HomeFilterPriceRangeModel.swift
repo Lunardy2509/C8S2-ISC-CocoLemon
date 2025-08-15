@@ -1,5 +1,5 @@
 //
-//  HomeSearchFilterPriceRangeModel.swift
+//  HomeFilterPriceRangeModel.swift
 //  Coco
 //
 //  Created by Jackie Leonardy on 09/07/25.
@@ -8,7 +8,7 @@
 import Foundation
 import SwiftUI
 
-final class HomeSearchFilterPriceRangeModel: ObservableObject {
+final class HomeFilterPriceRangeModel: ObservableObject {
     @Published var minPrice: Double
     @Published var maxPrice: Double
 
@@ -20,5 +20,10 @@ final class HomeSearchFilterPriceRangeModel: ObservableObject {
         self.maxPrice = maxPrice
         self.range = range
         self.step = step
+    }
+    
+    /// Returns true if the current price range covers the full range (no filtering applied)
+    var isAtFullRange: Bool {
+        return minPrice == range.lowerBound && maxPrice == range.upperBound
     }
 }
