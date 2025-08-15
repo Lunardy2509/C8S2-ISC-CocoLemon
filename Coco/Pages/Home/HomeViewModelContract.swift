@@ -36,4 +36,6 @@ protocol HomeViewModelProtocol: AnyObject {
     func onSearchDidApply(_ queryText: String)
     func openFilterTray()
     func onFilterDismiss(_ filterId: Int)
+    func onResetAllFilters()
+    func isPriceRangeFilterApplied() -> Bool
 }

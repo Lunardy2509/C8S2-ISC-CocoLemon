@@ -21,7 +21,7 @@ final class NoResultCell: UICollectionViewCell {
     }
     
     private func configureView() {
-        messageLabel.text = "No Result"
+        messageLabel.text = "No Results"
         messageLabel.textColor = UIColor.gray
         messageLabel.font = UIFont.jakartaSans(forTextStyle: .title3, weight: .medium)
         messageLabel.textAlignment = .center

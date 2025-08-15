@@ -136,12 +136,53 @@ extension HomeViewModel: HomeViewModelProtocol {
         applyCurrentFilters()
     }
     
+    func onResetAllFilters() {
+        // Reset all filters including category pills and price range
+        guard var filterDataModel = filterDataModel else { return }
+        
+        // Reset all filter pills to unselected state
+        for i in 0..<filterDataModel.filterPillDataState.count {
+            filterDataModel.filterPillDataState[i].isSelected = false
+        }
+        
+        // Reset price range to default values
+        if let priceRangeModel = filterDataModel.priceRangeModel {
+            priceRangeModel.minPrice = priceRangeModel.range.lowerBound
+            priceRangeModel.maxPrice = priceRangeModel.range.upperBound
+        }
+        
+        self.filterDataModel = filterDataModel
+        
+        // Update filter carousel to reflect the change (should be empty now)
+        actionDelegate?.constructFilterCarousel(filterPillStates: filterDataModel.filterPillDataState)
+        
+        // Apply current filters immediately (should show all activities)
+        applyCurrentFilters()
+    }
+    
+    func isPriceRangeFilterApplied() -> Bool {
+        guard let priceRangeModel = filterDataModel?.priceRangeModel else { return false }
+        return !priceRangeModel.isAtFullRange
+    }
+    
     private func filterDidApply() {
         guard let filterDataModel = filterDataModel else { return }
-        let tempResponseData: [Activity] = HomeFilterUtil.doFilter(
-            responseData,
-            filterDataModel: filterDataModel
-        )
+        
+        // Check if all filters are reset (no pills selected and price range at full range)
+        let isAllFiltersReset = filterDataModel.filterPillDataState.allSatisfy { !$0.isSelected } &&
+                               (filterDataModel.priceRangeModel?.isAtFullRange ?? true)
+        
+        let tempResponseData: [Activity]
+        if isAllFiltersReset {
+            // Show all activities when filters are reset
+            tempResponseData = responseData
+        } else {
+            // Apply filters normally
+            tempResponseData = HomeFilterUtil.doFilter(
+                responseData,
+                filterDataModel: filterDataModel
+            )
+        }
         
         collectionViewModel.updateActivity(
             activity: (
@@ -159,11 +200,21 @@ extension HomeViewModel: HomeViewModelProtocol {
     private func applyCurrentFilters() {
         guard let filterDataModel = filterDataModel else { return }
         
-        // Use the centralized filtering logic that handles both categories and price range
-        let filteredActivities: [Activity] = HomeFilterUtil.doFilter(
-            responseData,
-            filterDataModel: filterDataModel
-        )
+        // Check if all filters are reset (no pills selected and price range at full range)
+        let isAllFiltersReset = filterDataModel.filterPillDataState.allSatisfy { !$0.isSelected } &&
+                               (filterDataModel.priceRangeModel?.isAtFullRange ?? true)
+        
+        let filteredActivities: [Activity]
+        if isAllFiltersReset {
+            // Show all activities when filters are reset
+            filteredActivities = responseData
+        } else {
+            // Use the centralized filtering logic that handles both categories and price range
+            filteredActivities = HomeFilterUtil.doFilter(
+                responseData,
+                filterDataModel: filterDataModel
+            )
+        }
         
         // Update collection view without title
         collectionViewModel.updateActivity(

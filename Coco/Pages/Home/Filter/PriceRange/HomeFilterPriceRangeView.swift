@@ -15,16 +15,14 @@ struct HomeFilterPriceRangeView: View {
     let rangeDidChange: () -> Void
 
     var body: some View {
-        VStack {
+        VStack(spacing: 16) {
+            // Title only - no price display here
             HStack {
                 Text("Price Range")
                     .foregroundStyle(Token.additionalColorsBlack.toColor())
-                Spacer()
-                Text("Rp\(Int(model.minPrice)) - Rp\(Int(model.maxPrice))")
                     .font(.jakartaSans(forTextStyle: .body, weight: .semibold))
-                    .foregroundStyle(Token.mainColorPrimary.toColor())
+                Spacer()
             }
-            .font(.jakartaSans(forTextStyle: .body, weight: .semibold))
 
             GeometryReader { geo in
                 let width = geo.size.width
@@ -70,6 +68,15 @@ struct HomeFilterPriceRangeView: View {
             }
             .frame(height: 44)
             .padding(.horizontal, 20.0)
+            
+            // Price display under the slider
+            HStack {
+                Spacer()
+                Text("Rp\(Int(model.minPrice).formatted()) - Rp\(Int(model.maxPrice).formatted())")
+                    .font(.jakartaSans(forTextStyle: .body, weight: .semibold))
+                    .foregroundStyle(Token.mainColorPrimary.toColor())
+                Spacer()
+            }
         }
     }
 }

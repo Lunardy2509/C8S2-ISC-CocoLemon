@@ -21,4 +21,9 @@ final class HomeFilterPriceRangeModel: ObservableObject {
         self.range = range
         self.step = step
     }
+    
+    /// Returns true if the current price range covers the full range (no filtering applied)
+    var isAtFullRange: Bool {
+        return minPrice == range.lowerBound && maxPrice == range.upperBound
+    }
 }

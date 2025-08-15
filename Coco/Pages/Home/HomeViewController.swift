@@ -60,11 +60,16 @@ extension HomeViewController: HomeViewModelAction {
     func constructFilterCarousel(filterPillStates: [HomeFilterPillState]) {
         // Only show applied filters (isSelected = true) in the home view carousel
         let appliedFilters = filterPillStates.filter { $0.isSelected }
+        let isPriceRangeApplied = viewModel.isPriceRangeFilterApplied()
         
         let appliedFilterCarouselView = HomeAppliedFilterCarouselView(
             appliedFilters: appliedFilters,
+            isPriceRangeApplied: isPriceRangeApplied,
             onFilterDismiss: { [weak self] filterId in
                 self?.viewModel.onFilterDismiss(filterId)
+            },
+            onResetAll: { [weak self] in
+                self?.viewModel.onResetAllFilters()
             }
         )
         let viewController: UIHostingController = UIHostingController(rootView: appliedFilterCarouselView)
@@ -72,7 +77,7 @@ extension HomeViewController: HomeViewModelAction {
         thisView.addFilterView(from: viewController.view)
         viewController.didMove(toParent: self)
         
-        thisView.toggleFilterView(isShown: !appliedFilters.isEmpty)
+        thisView.toggleFilterView(isShown: !appliedFilters.isEmpty || isPriceRangeApplied)
     }
     
     func toggleLoadingView(isShown: Bool, after: CGFloat) {

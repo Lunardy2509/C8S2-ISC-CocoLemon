@@ -22,8 +22,8 @@ final class HomeFilterTrayViewModel: ObservableObject {
         self.dataModel = dataModel
         self.activities = activities
         
-        let tempActivity: [Activity] = HomeFilterUtil.doFilter(activities, filterDataModel: dataModel)
-        applyButtonTitle = Self.getTitle(tempActivity)
+        // Always show "Apply" - don't show "No Result" in filter tray
+        applyButtonTitle = "Apply"
     }
     
     func filterDidApply() {
@@ -31,8 +31,8 @@ final class HomeFilterTrayViewModel: ObservableObject {
     }
     
     func updateApplyButtonTitle() {
-        let tempActivity: [Activity] = HomeFilterUtil.doFilter(activities, filterDataModel: dataModel)
-        applyButtonTitle = Self.getTitle(tempActivity)
+        // Always show "Apply" - user should be able to apply any filter combination
+        applyButtonTitle = "Apply"
     }
     
     func resetFilters() {
@@ -52,7 +52,5 @@ final class HomeFilterTrayViewModel: ObservableObject {
 }
 
 private extension HomeFilterTrayViewModel {
-    static func getTitle(_ activities: [Activity]) -> String {
-        activities.isEmpty ? "No Result" : "Apply"
-    }
+    // No longer needed since we always show "Apply"
 }

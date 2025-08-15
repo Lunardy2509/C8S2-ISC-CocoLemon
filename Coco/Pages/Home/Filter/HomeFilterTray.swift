@@ -57,20 +57,16 @@ struct HomeFilterTray: View {
                         )
                         .stretch()
                         
-                        // Apply Button
+                        // Apply Button - always enabled and primary
                         CocoButton(
                             action: {
-                                if viewModel.applyButtonTitle != "No Result" {
-                                    viewModel.filterDidApply()
-                                }
+                                viewModel.filterDidApply()
                             },
                             text: viewModel.applyButtonTitle,
                             style: .large,
-                            type: viewModel.applyButtonTitle == "No Result" ? .secondary : .primary
+                            type: .primary
                         )
                         .stretch()
-                        .disabled(viewModel.applyButtonTitle == "No Result")
-                        .opacity(viewModel.applyButtonTitle == "No Result" ? 0.6 : 1.0)
                     }
                 }
             }

@@ -27,5 +27,5 @@ struct HomeCollectionContent {
 }
 
 struct NoResultCellDataModel: Hashable {
-    let message: String = "No Result"
+    let message: String = "No Results"
 }
