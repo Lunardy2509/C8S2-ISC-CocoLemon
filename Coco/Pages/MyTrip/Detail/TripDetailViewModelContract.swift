@@ -9,10 +9,12 @@ import Foundation
 
 protocol TripDetailViewModelAction: AnyObject {
     func configureView(dataModel: BookingDetailDataModel)
+    func shareTripDetail()
 }
 
 protocol TripDetailViewModelProtocol: AnyObject {
     var actionDelegate: TripDetailViewModelAction? { get set }
     
     func onViewDidLoad()
+    func onShareButtonTapped()
 }

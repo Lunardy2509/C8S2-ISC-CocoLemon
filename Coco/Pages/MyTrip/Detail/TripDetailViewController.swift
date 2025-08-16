@@ -5,6 +5,7 @@
 //  Created by Jackie Leonardy on 16/07/25.
 //
 
+
 import Foundation
 import UIKit
 
@@ -28,6 +29,13 @@ final class TripDetailViewController: UIViewController {
         super.viewDidLoad()
         viewModel.onViewDidLoad()
         title = "Detail My Trip"
+        
+        let shareButton = UIBarButtonItem(barButtonSystemItem: .action, target: self, action: #selector(shareButtonTapped))
+        navigationItem.rightBarButtonItem = shareButton
+    }
+    
+    @objc private func shareButtonTapped() {
+        viewModel.onShareButtonTapped()
     }
     
     private let viewModel: TripDetailViewModelProtocol
@@ -45,4 +53,19 @@ extension TripDetailViewController: TripDetailViewModelAction {
         thisView.configureStatusLabelView(with: labelVC.view)
         labelVC.didMove(toParent: self)
     }
+    
+    func shareTripDetail() {
+        let image = thisView.asImage()
+        
+        let activityViewController = UIActivityViewController(activityItems: [image], applicationActivities: nil)
+        
+        if let popoverController = activityViewController.popoverPresentationController {
+            popoverController.sourceView = self.view
+            popoverController.sourceRect = CGRect(x: self.view.bounds.midX, y: self.view.bounds.midY, width: 0, height: 0)
+            popoverController.permittedArrowDirections = []
+        }
+        
+        present(activityViewController, animated: true)
+    }
 }
+

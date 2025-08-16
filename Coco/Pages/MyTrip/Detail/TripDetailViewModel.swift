@@ -21,4 +21,8 @@ extension TripDetailViewModel: TripDetailViewModelProtocol {
     func onViewDidLoad() {
         actionDelegate?.configureView(dataModel: BookingDetailDataModel(bookingDetail: data))
     }
+    
+    func onShareButtonTapped() {
+        actionDelegate?.shareTripDetail()
+    }
 }
