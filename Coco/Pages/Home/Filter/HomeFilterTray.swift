@@ -13,7 +13,7 @@ struct HomeFilterTray: View {
     
     var body: some View {
         VStack(alignment: .center) {
-            Text("Filters")
+            Text("Filter Services")
                 .multilineTextAlignment(.center)
                 .font(.jakartaSans(forTextStyle: .body, weight: .semibold))
                 .foregroundStyle(Token.additionalColorsBlack.toColor())

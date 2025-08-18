@@ -25,11 +25,7 @@ struct HomeAppliedFilterCarouselView: View {
                         }
                     }) {
                         HStack(spacing: 8.0) {
-                            Image(systemName: "xmark")
-                                .font(.system(size: 12, weight: .semibold))
-                                .foregroundStyle(Token.grayscale70.toColor())
-                            
-                            Text("Reset Filters")
+                            Text("Reset")
                                 .font(.system(size: 14, weight: .medium))
                                 .foregroundStyle(Token.grayscale70.toColor())
                         }
