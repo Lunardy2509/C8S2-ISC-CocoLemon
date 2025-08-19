@@ -30,4 +30,8 @@ extension ActivityDetailViewModel: ActivityDetailViewModelProtocol {
     func onPackagesDetailDidTap(with packageId: Int) {
         navigationDelegate?.notifyActivityDetailPackageDidSelect(package: data, selectedPackageId: packageId)
     }
+    
+    func onCreateTripTapped() {
+        navigationDelegate?.notifyCreateTripTapped()
+    }
 }

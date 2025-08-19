@@ -132,6 +132,10 @@ final class ActivityDetailView: UIView {
         }
     }
     
+    func addCreateTripButton(button: UIView) {
+        contentStackView.addArrangedSubview(button)
+    }
+    
     private lazy var imageSliderView: UIView = UIView()
     private lazy var titleView: UIView = createTitleView()
     private lazy var titleLabel: UILabel = UILabel(

@@ -83,4 +83,11 @@ extension HomeCoordinator: ActivityDetailNavigationDelegate {
         let viewController: HomeFormScheduleViewController = HomeFormScheduleViewController(viewModel: viewModel)
         start(viewController: viewController)
     }
+
+    func notifyCreateTripTapped() {
+        let blankViewController = UIViewController()
+        blankViewController.view.backgroundColor = .white
+        blankViewController.title = "New Page"
+        start(viewController: blankViewController)
+    }
 }
