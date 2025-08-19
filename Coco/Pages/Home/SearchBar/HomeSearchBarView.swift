@@ -10,22 +10,42 @@ import SwiftUI
 
 struct HomeSearchBarView: View {
     @ObservedObject var viewModel: HomeSearchBarViewModel
+    let onReturnKeyAction: (() -> Void)?
+    let onClearAction: (() -> Void)?
+    
+    init(
+        viewModel: HomeSearchBarViewModel, 
+        onReturnKeyAction: (() -> Void)? = nil,
+        onClearAction: (() -> Void)? = nil
+    ) {
+        self.viewModel = viewModel
+        self.onReturnKeyAction = onReturnKeyAction
+        self.onClearAction = onClearAction
+    }
     
     var body: some View {
+        let showClearButton = !viewModel.currentTypedText.isEmpty && viewModel.isTypeAble
+        let trailingIcon: ImageHandler? = showClearButton ? 
+            (image: CocoIcon.icCross.image, didTap: {
+                viewModel.currentTypedText = ""
+                onClearAction?()
+            }) : viewModel.trailingIcon
+        
         CocoInputTextField(
             leadingIcon: viewModel.leadingIcon,
             currentTypedText: $viewModel.currentTypedText,
-            trailingIcon: viewModel.trailingIcon,
+            trailingIcon: trailingIcon,
             placeholder: viewModel.placeholderText,
             shouldInterceptFocus: !viewModel.isTypeAble,
-            onFocusedAction: viewModel.onTextFieldFocusDidChange(to:)
+            onFocusedAction: viewModel.onTextFieldFocusDidChange(to:),
+            onReturnKeyAction: onReturnKeyAction
         )
     }
 }
 
 final class HomeSearchBarHostingController: UIHostingController<HomeSearchBarView> {
-    init(viewModel: HomeSearchBarViewModel) {
-        let view = HomeSearchBarView(viewModel: viewModel)
+    init(viewModel: HomeSearchBarViewModel, onClearAction: (() -> Void)? = nil) {
+        let view = HomeSearchBarView(viewModel: viewModel, onClearAction: onClearAction)
         super.init(rootView: view)
     }
 

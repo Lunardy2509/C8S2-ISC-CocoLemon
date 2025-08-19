@@ -9,7 +9,6 @@ import Foundation
 
 struct HomeActivityCellDataModel: Hashable {
     let id: Int
-    
     let area: String
     let name: String
     let location: String
@@ -30,7 +29,18 @@ struct HomeActivityCellDataModel: Hashable {
         self.area = activity.title
         self.name = activity.description
         self.location = activity.destination.name
-        self.priceText = activity.pricing.toRupiah()
+        
+        let prices: [Double] = activity.packages.map { $0.pricePerPerson }
+        if let minPrice = prices.min(), let maxPrice = prices.max() {
+            if minPrice == maxPrice {
+                self.priceText = minPrice.toRupiah()
+            } else {
+                self.priceText = "\(minPrice.toRupiah()) - \(maxPrice.toRupiah())"
+            }
+        } else {
+            self.priceText = "-"
+        }
+        
         self.imageUrl = if let thumbnailURLString = activity.images.first(where: { $0.imageType == .thumbnail })?.imageUrl {
             URL(string: thumbnailURLString)
         } else {

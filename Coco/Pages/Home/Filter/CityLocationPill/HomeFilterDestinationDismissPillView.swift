@@ -1,14 +1,14 @@
 //
-//  HomeFilterDismissPillView.swift
+//  HomeFilterDestinationDismissPillView.swift
 //  Coco
 //
-//  Created by AI Assistant on 14/08/25.
+//  Created by Ferdinand Lunardy on 19/08/25.
 //
 
 import Foundation
 import SwiftUI
 
-struct HomeFilterDismissPillView: View {
+struct HomeFilterDestinationDismissPillView: View {
     let title: String
     let onDismiss: () -> Void
     

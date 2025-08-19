@@ -27,8 +27,8 @@ final class HomeActivityCell: UICollectionViewCell {
         let attributedString = NSMutableAttributedString(
             string: dataModel.priceText,
             attributes: [
-                .font : UIFont.jakartaSans(forTextStyle: .body, weight: .bold),
-                .foregroundColor : Token.additionalColorsBlack
+                .font: UIFont.jakartaSans(forTextStyle: .callout, weight: .bold),
+                .foregroundColor: Token.additionalColorsBlack
             ]
         )
         
@@ -36,8 +36,8 @@ final class HomeActivityCell: UICollectionViewCell {
             NSAttributedString(
                 string: "/Person",
                 attributes: [
-                    .font : UIFont.jakartaSans(forTextStyle: .callout, weight: .medium),
-                    .foregroundColor : Token.additionalColorsBlack
+                    .font: UIFont.jakartaSans(forTextStyle: .callout, weight: .medium),
+                    .foregroundColor: Token.additionalColorsBlack
                 ]
             )
         )
@@ -86,7 +86,7 @@ private extension HomeActivityCell {
                 priceLabel
             ]
         )
-        stackView.spacing = 4.0
+        stackView.spacing = 8.0
         stackView.axis = .vertical
         stackView.alignment = .fill
         stackView.distribution = .fill

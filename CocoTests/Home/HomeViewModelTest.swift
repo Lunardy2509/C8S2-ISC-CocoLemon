@@ -264,14 +264,14 @@ private extension HomeViewModelTest {
 private final class MockHomeViewModelAction: HomeViewModelAction {
     var invokedConstructFilterCarousel = false
     var invokedConstructFilterCarouselCount = 0
-    var invokedConstructFilterCarouselParameters: (filterPillStates: [HomeFilterPillState], Void)?
-    var invokedConstructFilterCarouselParametersList = [(filterPillStates: [HomeFilterPillState], Void)]()
+    var invokedConstructFilterCarouselParameters: (filterPillStates: [HomeFilterPillState], filterDestinationPillStates: [HomeFilterDestinationPillState])?
+    var invokedConstructFilterCarouselParametersList = [(filterPillStates: [HomeFilterPillState], filterDestinationPillStates: [HomeFilterDestinationPillState])]()
 
-    func constructFilterCarousel(filterPillStates: [Coco.HomeFilterPillState]) {
+    func constructFilterCarousel(filterPillStates: [Coco.HomeFilterPillState], filterDestinationPillStates: [Coco.HomeFilterDestinationPillState]) {
         invokedConstructFilterCarousel = true
         invokedConstructFilterCarouselCount += 1
-        invokedConstructFilterCarouselParameters = (filterPillStates, ())
-        invokedConstructFilterCarouselParametersList.append((filterPillStates, ()))
+        invokedConstructFilterCarouselParameters = (filterPillStates, filterDestinationPillStates)
+        invokedConstructFilterCarouselParametersList.append((filterPillStates, filterDestinationPillStates))
     }
     
 

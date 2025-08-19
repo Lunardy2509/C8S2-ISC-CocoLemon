@@ -29,6 +29,10 @@ extension HomeCollectionViewModel: HomeCollectionViewModelProtocol {
     func onActivityDidTap(_ dataModel: HomeActivityCellDataModel) {
         delegate?.notifyCollectionViewActivityDidTap(dataModel)
     }
+    
+    func onClearAllFilters() {
+        delegate?.notifyCollectionViewClearAllFilters()
+    }
 }
 
 private extension HomeCollectionViewModel {

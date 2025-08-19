@@ -26,4 +26,10 @@ final class HomeFilterPriceRangeModel: ObservableObject {
     var isAtFullRange: Bool {
         return minPrice == range.lowerBound && maxPrice == range.upperBound
     }
+    
+    /// Resets the price range to the full range
+    func resetToFullRange() {
+        minPrice = range.lowerBound
+        maxPrice = range.upperBound
+    }
 }

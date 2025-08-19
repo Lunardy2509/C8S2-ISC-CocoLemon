@@ -13,7 +13,7 @@ final class HomeFilterTrayViewModel: ObservableObject {
     let filterDidApplyPublisher: PassthroughSubject<HomeFilterTrayDataModel, Never> = PassthroughSubject()
     
     @Published var dataModel: HomeFilterTrayDataModel
-    @Published var applyButtonTitle: String
+    @Published var applyButtonTitle: String = "Apply Filter (0)"
     
     private let activities: [Activity]
     private var cancellables: Set<AnyCancellable> = Set()
@@ -22,8 +22,15 @@ final class HomeFilterTrayViewModel: ObservableObject {
         self.dataModel = dataModel
         self.activities = activities
         
-        // Always show "Apply" - don't show "No Result" in filter tray
-        applyButtonTitle = "Apply"
+        setupBindings()
+        applyButtonTitle = "Apply Filter (\(countFilter))"
+    }
+    
+    private var countFilter: Int {
+        let pillCount = dataModel.filterPillDataState.filter { $0.isSelected }.count
+        let destinationPillCount = dataModel.filterDestinationPillState.filter { $0.isSelected }.count
+        let priceCount = (dataModel.priceRangeModel?.isAtFullRange == false) ? 1 : 0
+        return pillCount + destinationPillCount + priceCount
     }
     
     func filterDidApply() {
@@ -31,26 +38,33 @@ final class HomeFilterTrayViewModel: ObservableObject {
     }
     
     func updateApplyButtonTitle() {
-        // Always show "Apply" - user should be able to apply any filter combination
-        applyButtonTitle = "Apply"
+        applyButtonTitle = "Apply Filter (\(countFilter))"
     }
     
-    func resetFilters() {
-        // Reset filter pills to unselected state
-        for i in 0..<dataModel.filterPillDataState.count {
-            dataModel.filterPillDataState[i].isSelected = false
+    private func setupBindings() {
+        // Observe pill selection
+        dataModel.filterPillDataState.forEach { pill in
+            pill.$isSelected
+                .sink { [weak self] _ in
+                    self?.updateApplyButtonTitle()
+                }
+                .store(in: &cancellables)
         }
         
-        // Reset price range to default values
-        if let priceRangeModel = dataModel.priceRangeModel {
-            priceRangeModel.minPrice = priceRangeModel.range.lowerBound
-            priceRangeModel.maxPrice = priceRangeModel.range.upperBound
+        // Observe destination pill selection
+        dataModel.filterDestinationPillState.forEach { pill in
+            pill.$isSelected
+                .sink { [weak self] _ in
+                    self?.updateApplyButtonTitle()
+                }
+                .store(in: &cancellables)
         }
         
-        updateApplyButtonTitle()
+        // Observe price range changes
+        dataModel.priceRangeModel?.objectWillChange
+            .sink { [weak self] in
+                self?.updateApplyButtonTitle()
+            }
+            .store(in: &cancellables)
     }
-}
-
-private extension HomeFilterTrayViewModel {
-    // No longer needed since we always show "Apply"
 }
