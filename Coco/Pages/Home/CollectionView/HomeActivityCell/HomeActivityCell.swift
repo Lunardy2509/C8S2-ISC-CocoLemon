@@ -22,6 +22,7 @@ final class HomeActivityCell: UICollectionViewCell {
         imageView.loadImage(from: dataModel.imageUrl)
         areaLabel.text = dataModel.area
         nameLabel.text = dataModel.name
+        locationLabel.text = dataModel.location
         
         let attributedString = NSMutableAttributedString(
             string: dataModel.priceText,
@@ -61,6 +62,11 @@ final class HomeActivityCell: UICollectionViewCell {
         textColor: Token.additionalColorsBlack,
         numberOfLines: 2
     )
+    private lazy var locationLabel: UILabel = UILabel(
+        font: .jakartaSans(forTextStyle: .footnote, weight: .regular),
+        textColor: Token.grayscale90,
+        numberOfLines: 1
+    )
     private lazy var priceLabel: UILabel = UILabel(
         font: .jakartaSans(forTextStyle: .body, weight: .bold),
         textColor: Token.additionalColorsBlack,
@@ -70,10 +76,12 @@ final class HomeActivityCell: UICollectionViewCell {
 
 private extension HomeActivityCell {
     func setupView() {
+        let locationView = createLocationView()
+        
         let stackView: UIStackView = UIStackView(
             arrangedSubviews: [
                 imageView,
-//                nameLabel,
+                locationView,
                 areaView,
                 priceLabel
             ]
@@ -82,6 +90,8 @@ private extension HomeActivityCell {
         stackView.axis = .vertical
         stackView.alignment = .fill
         stackView.distribution = .fill
+        
+        stackView.setCustomSpacing(12.0, after: imageView)
         
         contentView.addSubviewAndLayout(stackView)
     }
@@ -109,5 +119,27 @@ private extension HomeActivityCell {
         }
         
         return ContentView
+    }
+    
+    func createLocationView() -> UIView {
+        let containerView = UIView()
+        let pinIcon = UIImageView(image: CocoIcon.icPinPointBlue.image)
+        pinIcon.contentMode = .scaleAspectFit
+        
+        containerView.addSubviews([pinIcon, locationLabel])
+        
+        pinIcon.layout {
+            $0.leading(to: containerView.leadingAnchor)
+            $0.centerY(to: containerView.centerYAnchor)
+            $0.size(12)
+        }
+        
+        locationLabel.layout {
+            $0.leading(to: pinIcon.trailingAnchor, constant: 4.0)
+            $0.trailing(to: containerView.trailingAnchor)
+            $0.centerY(to: containerView.centerYAnchor)
+        }
+        
+        return containerView
     }
 }
