@@ -9,7 +9,7 @@ import Foundation
 
 protocol TripDetailViewModelAction: AnyObject {
     func configureView(dataModel: BookingDetailDataModel)
-    func shareTripDetail()
+    func shareTripDetail(data: ShareTripDataModel?)
 }
 
 protocol TripDetailViewModelProtocol: AnyObject {

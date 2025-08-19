@@ -28,7 +28,7 @@ final class MyTripCoordinator: BaseCoordinator {
         
         switch input.flow {
         case .bookingDetail(let data):
-            let bookingDetailViewModel: TripDetailViewModel = TripDetailViewModel(data: data)
+            let bookingDetailViewModel: TripDetailViewModel = TripDetailViewModel(data: data, fetcher: ActivityFetcher())
             let bookingDetailViewController: TripDetailViewController = TripDetailViewController(viewModel: bookingDetailViewModel)
             
             start(viewController: bookingDetailViewController)
