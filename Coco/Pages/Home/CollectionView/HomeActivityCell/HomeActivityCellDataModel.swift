@@ -12,13 +12,15 @@ struct HomeActivityCellDataModel: Hashable {
     
     let area: String
     let name: String
+    let location: String
     let priceText: String
     let imageUrl: URL?
     
-    init(id: Int, area: String, name: String, priceText: String, imageUrl: URL?) {
+    init(id: Int, area: String, name: String, location: String, priceText: String, imageUrl: URL?) {
         self.id = id
         self.area = area
         self.name = name
+        self.location = location
         self.priceText = priceText
         self.imageUrl = imageUrl
     }
@@ -27,11 +29,11 @@ struct HomeActivityCellDataModel: Hashable {
         self.id = activity.id
         self.area = activity.title
         self.name = activity.description
+        self.location = activity.destination.name
         self.priceText = activity.pricing.toRupiah()
-        self.imageUrl = if let thumbnail = activity.images.first { $0.imageType == .thumbnail }?.imageUrl {
-            URL(string: thumbnail)
-        }
-        else {
+        self.imageUrl = if let thumbnailURLString = activity.images.first(where: { $0.imageType == .thumbnail })?.imageUrl {
+            URL(string: thumbnailURLString)
+        } else {
             nil
         }
     }
