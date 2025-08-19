@@ -9,6 +9,7 @@ import Foundation
 
 protocol ActivityDetailNavigationDelegate: AnyObject {
     func notifyActivityDetailPackageDidSelect(package: ActivityDetailDataModel, selectedPackageId: Int)
+    func notifyCreateTripTapped()
 }
 
 protocol ActivityDetailViewModelAction: AnyObject {
@@ -23,4 +24,5 @@ protocol ActivityDetailViewModelProtocol: AnyObject {
     func onViewDidLoad()
     func onPackageDetailStateDidChange(shouldShowAll: Bool)
     func onPackagesDetailDidTap(with packageId: Int)
+    func onCreateTripTapped()
 }

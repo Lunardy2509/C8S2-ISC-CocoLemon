@@ -27,6 +27,19 @@ final class ActivityDetailViewController: UIViewController {
         super.viewDidLoad()
         thisView.delegate = self
         viewModel.onViewDidLoad()
+        
+        let createTripButtonVC = CocoButtonHostingController(
+            action: { [weak self] in
+                self?.viewModel.onCreateTripTapped()
+            },
+            text: "Create Trip",
+            style: .large,
+            type: .primary,
+            isStretch: true
+        )
+        addChild(createTripButtonVC)
+        thisView.addCreateTripButton(button: createTripButtonVC.view)
+        createTripButtonVC.didMove(toParent: self)
     }
     
     private let viewModel: ActivityDetailViewModelProtocol
