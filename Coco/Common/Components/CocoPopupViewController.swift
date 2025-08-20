@@ -23,12 +23,19 @@ final class CocoPopupViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         setup()
+        
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(dismissViewController))
+        tapGesture.delegate = self
+        view.addGestureRecognizer(tapGesture)
+    }
+    
+    @objc private func dismissViewController() {
+        dismiss(animated: true)
     }
 
     private func setup() {
         view.backgroundColor = .clear
 
-        let container = UIView()
         container.backgroundColor = .systemBackground
         container.layer.cornerRadius = 16
         container.layer.cornerCurve = .continuous
@@ -59,6 +66,13 @@ final class CocoPopupViewController: UIViewController {
     
     private let child: UIViewController
     private let transitionDelegate: PopupTransitioningDelegate = PopupTransitioningDelegate()
+    private let container = UIView()
+}
+
+extension CocoPopupViewController: UIGestureRecognizerDelegate {
+    func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldReceive touch: UITouch) -> Bool {
+        return !container.frame.contains(touch.location(in: view))
+    }
 }
 
 private class PopupPresentationController: UIPresentationController {
@@ -75,13 +89,6 @@ private class PopupPresentationController: UIPresentationController {
         presentedViewController.transitionCoordinator?.animate(alongsideTransition: { _ in
             self.dimmingView.alpha = 1
         })
-
-        let tap = UITapGestureRecognizer(target: self, action: #selector(dismiss))
-        dimmingView.addGestureRecognizer(tap)
-    }
-
-    @objc private func dismiss() {
-        presentedViewController.dismiss(animated: true)
     }
 
     override func dismissalTransitionWillBegin() {
