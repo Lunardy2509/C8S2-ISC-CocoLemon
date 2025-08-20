@@ -7,6 +7,7 @@
 
 import Foundation
 import UIKit
+import SwiftUI
 
 final class HomeCoordinator: BaseCoordinator {
     struct Input {
@@ -85,9 +86,46 @@ extension HomeCoordinator: ActivityDetailNavigationDelegate {
     }
 
     func notifyCreateTripTapped() {
-        let blankViewController = UIViewController()
-        blankViewController.view.backgroundColor = .white
-        blankViewController.title = "New Page"
-        start(viewController: blankViewController)
+        if UserDefaults.standard.string(forKey: "user-id") != nil {
+            showTripStylePopup()
+        } else {
+            showSignInPopup()
+        }
+    }
+    
+    private func showTripStylePopup() {
+        let tripStylePopUpView = TripStylePopUpView { [weak self] style in
+            self?.navigationController?.dismiss(animated: true, completion: {
+                let createTripViewController = CreateTripViewController()
+                // Here you can pass the selected `style` to the view controller if needed
+                self?.start(viewController: createTripViewController)
+            })
+        }
+        
+        let hostingController = UIHostingController(rootView: tripStylePopUpView)
+        let popupViewController = CocoPopupViewController(child: hostingController)
+        
+        navigationController?.present(popupViewController, animated: true)
+    }
+    
+    private func showSignInPopup() {
+        let signInPopUpView = SignInPopUpView(
+            signInDidTap: { [weak self] in
+                self?.navigationController?.dismiss(animated: true, completion: {
+                    guard let tabBarController = self?.parentCoordinator?.navigationController?.tabBarController as? BaseTabBarViewController else {
+                        return
+                    }
+                    tabBarController.selectedIndex = 2 // Profile Tab
+                })
+            },
+            cancelDidTap: { [weak self] in
+                self?.navigationController?.dismiss(animated: true)
+            }
+        )
+        
+        let hostingController = UIHostingController(rootView: signInPopUpView)
+        let popupViewController = CocoPopupViewController(child: hostingController)
+        
+        navigationController?.present(popupViewController, animated: true)
     }
 }
