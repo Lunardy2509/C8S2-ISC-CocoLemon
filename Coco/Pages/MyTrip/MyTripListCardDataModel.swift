@@ -49,15 +49,6 @@ struct MyTripListCardDataModel: Hashable {
         title = bookingDetail.activityTitle
         location = bookingDetail.destination.name
         totalPax = bookingDetail.participants
-        price = "\(bookingDetail.totalPrice.toRupiah())"
-    }
-    
-    // Hashable conformance
-    func hash(into hasher: inout Hasher) {
-        hasher.combine(id)
-    }
-    
-    static func == (lhs: MyTripListCardDataModel, rhs: MyTripListCardDataModel) -> Bool {
-        return lhs.id == rhs.id
+        price = bookingDetail.totalPrice.toRupiah()
     }
 }
