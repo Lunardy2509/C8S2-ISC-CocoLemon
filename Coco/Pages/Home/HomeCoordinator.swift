@@ -109,8 +109,10 @@ extension HomeCoordinator: ActivityDetailNavigationDelegate {
                     let soloVC = SoloTripActivityDetailViewController(viewModel: soloViewModel)
                     self.start(viewController: soloVC)
                 case .group:
-                    let createTripViewController = CreateTripViewController()
-                    self.start(viewController: createTripViewController)
+                    let groupViewModel = GroupTripActivityDetailViewModel(data: data)
+                    groupViewModel.navigationDelegate = self
+                    let groupVC = GroupTripActivityDetailViewController(viewModel: groupViewModel)
+                    self.start(viewController: groupVC)
                 }
             })
         }
@@ -198,5 +200,23 @@ extension HomeCoordinator: SoloTripActivityDetailNavigationDelegate {
     
     func notifySoloTripCreateTripTapped() {
         // This will not be called as the button is removed from SoloTripActivityDetailViewController
+    }
+}
+
+extension HomeCoordinator: GroupTripActivityDetailNavigationDelegate {
+    func notifyGroupTripActivityDetailPackageDidSelect(package: ActivityDetailDataModel, selectedPackageId: Int) {
+        let viewModel: HomeFormScheduleViewModel = HomeFormScheduleViewModel(
+            input: HomeFormScheduleViewModelInput(
+                package: package,
+                selectedPackageId: selectedPackageId
+            )
+        )
+        viewModel.delegate = self
+        let viewController: HomeFormScheduleViewController = HomeFormScheduleViewController(viewModel: viewModel)
+        start(viewController: viewController)
+    }
+    
+    func notifyGroupTripCreateTripTapped() {
+        // This will not be called as the button is removed from GroupTripActivityDetailViewController
     }
 }
