@@ -31,6 +31,14 @@ final class CocoPopupViewController: UIViewController {
     
     @objc private func dismissViewController() {
         dismiss(animated: true)
+        
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(dismissViewController))
+        tapGesture.delegate = self
+        view.addGestureRecognizer(tapGesture)
+    }
+    
+    @objc private func dismissViewController() {
+        dismiss(animated: true)
     }
 
     private func setup() {
@@ -66,7 +74,7 @@ final class CocoPopupViewController: UIViewController {
     
     private let child: UIViewController
     private let transitionDelegate: PopupTransitioningDelegate = PopupTransitioningDelegate()
-    fileprivate let container = UIView()
+    private let container = UIView()
 }
 
 extension CocoPopupViewController: UIGestureRecognizerDelegate {

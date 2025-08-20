@@ -322,7 +322,7 @@ private extension SoloTripActivityDetailView {
     }
     
     func createTitleView() -> UIView {
-        let pinPointImage: UIImageView = UIImageView(image: CocoIcon.icPinPointBlack.image)
+        let pinPointImage: UIImageView = UIImageView(image: CocoIcon.icPinPointBlue.image)
         pinPointImage.layout {
             $0.size(20.0)
         }

@@ -90,26 +90,18 @@ extension HomeCoordinator: ActivityDetailNavigationDelegate {
         if UserDefaults.standard.string(forKey: "user-id") != nil {
             navigateToTripStylePage()
         } else {
-            guard let tabBarController = parentCoordinator?.navigationController?.tabBarController as? BaseTabBarViewController else {
-                return
-            }
-            tabBarController.selectedIndex = 2
+            showSignInPopup()
         }
     }
-
-    private func navigateToTripStylePage() {
+    
+    private func showTripStylePopup() {
         guard case let .activityDetail(data) = input.flow else {
             return
         }
 
-        let tripStyleVC = TripStyleViewController(
-            didSelectStyle: { [weak self] style in
+        let tripStylePopUpView = TripStylePopUpView { [weak self] style in
+            self?.navigationController?.dismiss(animated: true, completion: {
                 guard let self = self else { return }
-                
-                // The style selection triggers navigation, so we can pop the current
-                // controller before pushing the new one.
-                self.navigationController?.popViewController(animated: false)
-
                 switch style {
                 case .solo:
                     let soloViewModel = SoloTripActivityDetailViewModel(data: data)
@@ -117,41 +109,16 @@ extension HomeCoordinator: ActivityDetailNavigationDelegate {
                     let soloVC = SoloTripActivityDetailViewController(viewModel: soloViewModel)
                     self.start(viewController: soloVC)
                 case .group:
-                    // Navigate directly to GroupFormView for group trips
-                    self.navigateToGroupForm(with: data)
+                    let createTripViewController = CreateTripViewController()
+                    self.start(viewController: createTripViewController)
                 }
-            },
-            activityData: data
-        )
-        start(viewController: tripStyleVC)
-    }
-    
-    private func navigateToGroupForm(with data: ActivityDetailDataModel) {
-        Task { @MainActor in
-            let groupFormViewModel = GroupFormViewModel(selectedActivity: data)
-            groupFormViewModel.navigationDelegate = self
-            
-            let groupFormVC = UIHostingController(rootView: GroupFormView(viewModel: groupFormViewModel))
-            
-            // Set navigation title
-            groupFormVC.navigationItem.title = "Group Form"
-            
-            self.start(viewController: groupFormVC)
+            })
         }
-    }
-}
-
-extension HomeCoordinator: SoloTripActivityDetailNavigationDelegate {
-    func notifySoloTripActivityDetailPackageDidSelect(package: ActivityDetailDataModel, selectedPackageId: Int) {
-        let viewModel: HomeFormScheduleViewModel = HomeFormScheduleViewModel(
-            input: HomeFormScheduleViewModelInput(
-                package: package,
-                selectedPackageId: selectedPackageId
-            )
-        )
-        viewModel.delegate = self
-        let viewController: HomeFormScheduleViewController = HomeFormScheduleViewController(viewModel: viewModel)
-        start(viewController: viewController)
+        
+        let hostingController = UIHostingController(rootView: tripStylePopUpView)
+        let popupViewController = CocoPopupViewController(child: hostingController)
+        
+        navigationController?.present(popupViewController, animated: true)
     }
     
     func notifySoloTripCreateTripTapped() {
@@ -213,5 +180,23 @@ extension HomeCoordinator: GroupTripPlanNavigationDelegate {
         // Handle booking flow - this could navigate to a booking confirmation
         // or checkout page depending on your app's flow
         print("Book Now tapped - implement booking flow")
+    }
+}
+
+extension HomeCoordinator: SoloTripActivityDetailNavigationDelegate {
+    func notifySoloTripActivityDetailPackageDidSelect(package: ActivityDetailDataModel, selectedPackageId: Int) {
+        let viewModel: HomeFormScheduleViewModel = HomeFormScheduleViewModel(
+            input: HomeFormScheduleViewModelInput(
+                package: package,
+                selectedPackageId: selectedPackageId
+            )
+        )
+        viewModel.delegate = self
+        let viewController: HomeFormScheduleViewController = HomeFormScheduleViewController(viewModel: viewModel)
+        start(viewController: viewController)
+    }
+    
+    func notifySoloTripCreateTripTapped() {
+        // This will not be called as the button is removed from SoloTripActivityDetailViewController
     }
 }
