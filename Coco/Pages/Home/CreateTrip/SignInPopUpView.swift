@@ -1,5 +1,5 @@
 //
-//  TripStylePopUpView.swift
+//  SignInPopUpView.swift
 //  Coco
 //
 //  Created by Teuku Fazariz Basya on 20/08/25.
@@ -7,23 +7,19 @@
 
 import SwiftUI
 
-enum TripStyle {
-    case group
-    case solo
-}
-
-struct TripStylePopUpView: View {
-    let didSelectStyle: (TripStyle) -> Void
+struct SignInPopUpView: View {
+    let signInDidTap: () -> Void
+    let cancelDidTap: () -> Void
     
     var body: some View {
         VStack(alignment: .center, spacing: 24.0) {
             VStack(spacing: 4.0) {
-                Text("Trip Style")
+                Text("Create Your Own Trip")
                     .font(.jakartaSans(forTextStyle: .title3, weight: .semibold))
                     .foregroundStyle(Token.additionalColorsBlack.toColor())
                     .multilineTextAlignment(.center)
                 
-                Text("Choose the trip style that fits you best, how do you want to travel?")
+                Text("Please sign in first to create your own trip and enjoy the holiday.")
                     .font(.jakartaSans(forTextStyle: .subheadline, weight: .regular))
                     .foregroundStyle(Token.grayscale70.toColor())
                     .multilineTextAlignment(.center)
@@ -31,18 +27,18 @@ struct TripStylePopUpView: View {
             
             VStack(spacing: 16.0) {
                 CocoButton(
-                    action: { didSelectStyle(.group) },
-                    text: "Group",
+                    action: signInDidTap,
+                    text: "Sign In",
                     style: .normal,
                     type: .primary
                 )
                 .stretch()
                 
                 CocoButton(
-                    action: { didSelectStyle(.solo) },
-                    text: "Solo",
+                    action: cancelDidTap,
+                    text: "Cancel",
                     style: .normal,
-                    type: .primary
+                    type: .secondary
                 )
                 .stretch()
             }
@@ -50,3 +46,4 @@ struct TripStylePopUpView: View {
         .padding(32.0)
     }
 }
+    
