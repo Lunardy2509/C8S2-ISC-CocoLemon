@@ -94,11 +94,23 @@ extension HomeCoordinator: ActivityDetailNavigationDelegate {
     }
     
     private func showTripStylePopup() {
+        guard case let .activityDetail(data) = input.flow else {
+            return
+        }
+
         let tripStylePopUpView = TripStylePopUpView { [weak self] style in
             self?.navigationController?.dismiss(animated: true, completion: {
-                let createTripViewController = CreateTripViewController()
-                // Here you can pass the selected `style` to the view controller if needed
-                self?.start(viewController: createTripViewController)
+                guard let self = self else { return }
+                switch style {
+                case .solo:
+                    let soloViewModel = SoloTripActivityDetailViewModel(data: data)
+                    soloViewModel.navigationDelegate = self
+                    let soloVC = SoloTripActivityDetailViewController(viewModel: soloViewModel)
+                    self.start(viewController: soloVC)
+                case .group:
+                    let createTripViewController = CreateTripViewController()
+                    self.start(viewController: createTripViewController)
+                }
             })
         }
         
@@ -127,5 +139,23 @@ extension HomeCoordinator: ActivityDetailNavigationDelegate {
         let popupViewController = CocoPopupViewController(child: hostingController)
         
         navigationController?.present(popupViewController, animated: true)
+    }
+}
+
+extension HomeCoordinator: SoloTripActivityDetailNavigationDelegate {
+    func notifySoloTripActivityDetailPackageDidSelect(package: ActivityDetailDataModel, selectedPackageId: Int) {
+        let viewModel: HomeFormScheduleViewModel = HomeFormScheduleViewModel(
+            input: HomeFormScheduleViewModelInput(
+                package: package,
+                selectedPackageId: selectedPackageId
+            )
+        )
+        viewModel.delegate = self
+        let viewController: HomeFormScheduleViewController = HomeFormScheduleViewController(viewModel: viewModel)
+        start(viewController: viewController)
+    }
+    
+    func notifySoloTripCreateTripTapped() {
+        // This will not be called as the button is removed from SoloTripActivityDetailViewController
     }
 }
