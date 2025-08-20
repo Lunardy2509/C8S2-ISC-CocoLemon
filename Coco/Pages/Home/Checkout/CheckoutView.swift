@@ -82,7 +82,7 @@ final class CheckoutView: UIView {
             textColor: Token.additionalColorsBlack,
             numberOfLines: 2
         )
-        priceDetailPrice.text = "\(data.totalPrice.toRupiah())"
+        priceDetailPrice.text = data.totalPrice.toRupiah()
         
         cardSectionStackView.addArrangedSubview(
             createSectionView(
