@@ -141,6 +141,14 @@ final class ActivityDetailView: UIView {
             .trailing(to: createTripButtonContainer.trailingAnchor, constant: -24)
             .bottom(to: createTripButtonContainer.safeAreaLayoutGuide.bottomAnchor, constant: -8)
         }
+        createTripButtonContainer.addSubview(button)
+        button.translatesAutoresizingMaskIntoConstraints = false
+        button.layout {
+            $0.top(to: createTripButtonContainer.topAnchor, constant: 16)
+            .leading(to: createTripButtonContainer.leadingAnchor, constant: 24)
+            .trailing(to: createTripButtonContainer.trailingAnchor, constant: -24)
+            .bottom(to: createTripButtonContainer.safeAreaLayoutGuide.bottomAnchor, constant: -8)
+        }
     }
     
     private lazy var imageSliderView: UIView = UIView()
@@ -173,7 +181,7 @@ final class ActivityDetailView: UIView {
     
     private lazy var createTripButtonContainer: UIView = {
         let view = UIView()
-        view.backgroundColor = .clear
+        view.backgroundColor = .white
         view.layer.shadowColor = UIColor.black.cgColor
         view.layer.shadowOpacity = 0
         view.layer.shadowOffset = .init(width: 0, height: -2)
@@ -197,7 +205,7 @@ extension ActivityDetailView {
             scrollView.topAnchor.constraint(equalTo: self.topAnchor),
             scrollView.leadingAnchor.constraint(equalTo: self.leadingAnchor),
             scrollView.trailingAnchor.constraint(equalTo: self.trailingAnchor),
-            scrollView.bottomAnchor.constraint(equalTo: self.bottomAnchor)
+            scrollView.bottomAnchor.constraint(equalTo: buttonContainer.topAnchor)
         ])
 
         buttonContainer.translatesAutoresizingMaskIntoConstraints = false
