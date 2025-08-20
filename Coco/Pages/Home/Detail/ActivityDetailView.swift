@@ -133,7 +133,14 @@ final class ActivityDetailView: UIView {
     }
     
     func addCreateTripButton(button: UIView) {
-        contentStackView.addArrangedSubview(button)
+        createTripButtonContainer.addSubview(button)
+        button.translatesAutoresizingMaskIntoConstraints = false
+        button.layout {
+            $0.top(to: createTripButtonContainer.topAnchor, constant: 16)
+            .leading(to: createTripButtonContainer.leadingAnchor, constant: 24)
+            .trailing(to: createTripButtonContainer.trailingAnchor, constant: -24)
+            .bottom(to: createTripButtonContainer.safeAreaLayoutGuide.bottomAnchor, constant: -8)
+        }
     }
     
     private lazy var imageSliderView: UIView = UIView()
@@ -163,6 +170,16 @@ final class ActivityDetailView: UIView {
     private lazy var headerStackView: UIStackView = createStackView(spacing: 0)
     
     private lazy var isPackageButtonStateHidden: Bool = true
+    
+    private lazy var createTripButtonContainer: UIView = {
+        let view = UIView()
+        view.backgroundColor = .white
+        view.layer.shadowColor = UIColor.black.cgColor
+        view.layer.shadowOpacity = 0
+        view.layer.shadowOffset = .init(width: 0, height: -2)
+        view.layer.shadowRadius = 4
+        return view
+    }()
 }
 
 extension ActivityDetailView {
@@ -170,12 +187,30 @@ extension ActivityDetailView {
         let scrollView: UIScrollView = UIScrollView()
         let contentView: UIView = UIView()
         
+        let buttonContainer = createTripButtonContainer
+
+        addSubview(scrollView)
+        addSubview(buttonContainer)
+        
+        scrollView.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            scrollView.topAnchor.constraint(equalTo: self.topAnchor),
+            scrollView.leadingAnchor.constraint(equalTo: self.leadingAnchor),
+            scrollView.trailingAnchor.constraint(equalTo: self.trailingAnchor),
+            scrollView.bottomAnchor.constraint(equalTo: buttonContainer.topAnchor)
+        ])
+
+        buttonContainer.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            buttonContainer.leadingAnchor.constraint(equalTo: self.leadingAnchor),
+            buttonContainer.trailingAnchor.constraint(equalTo: self.trailingAnchor),
+            buttonContainer.bottomAnchor.constraint(equalTo: self.bottomAnchor)
+        ])
+        
         scrollView.addSubviewAndLayout(contentView)
         contentView.layout {
             $0.widthAnchor(to: scrollView.widthAnchor)
         }
-        
-        addSubviewAndLayout(scrollView)
         
         contentView.addSubviews([
             headerStackView,
@@ -205,6 +240,7 @@ extension ActivityDetailView {
         contentStackView.backgroundColor = Token.additionalColorsWhite
         
         scrollView.backgroundColor = UIColor.from("#F5F5F5")
+        backgroundColor = .white
         
         imageSliderView.isHidden = true
     }
