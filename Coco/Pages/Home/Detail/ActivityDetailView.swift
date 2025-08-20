@@ -548,41 +548,14 @@ private extension ActivityDetailView {
         headerStackView.addArrangedSubview(nameLabel)
         headerStackView.addArrangedSubview(ratingAreaStackView)
         
-        let action: UIAction = UIAction { [weak self] _ in
-            self?.delegate?.notifyPackagesDetailDidTap(with: data.id)
-        }
-         
-        var config = UIButton.Configuration.filled()
-        config.image = CocoIcon.icArrowTopRight.image
-        config.baseBackgroundColor = Token.mainColorPrimary
-        config.baseForegroundColor = .white
-        config.cornerStyle = .capsule
-
-        let button: UIButton = UIButton(configuration: config, primaryAction: action)
-        button.layout {
-            $0.size(40.0)
-        }
-        
-        button.setContentHuggingPriority(.required + 1, for: .horizontal)
-        button.setContentHuggingPriority(.required + 1, for: .vertical)
-
-        button.setContentCompressionResistancePriority(.required, for: .horizontal)
-        button.setContentCompressionResistancePriority(.required, for: .vertical)
-        
         footerContentView.addSubviews([
-            priceLabel,
-            button
+            priceLabel
         ])
         
         priceLabel.layout {
             $0.leading(to: footerContentView.leadingAnchor)
                 .top(to: footerContentView.topAnchor)
                 .bottom(to: footerContentView.bottomAnchor)
-        }
-        
-        button.layout {
-            $0.leading(to: priceLabel.trailingAnchor, relation: .lessThanOrEqual)
-                .centerY(to: footerContentView.centerYAnchor)
                 .trailing(to: footerContentView.trailingAnchor)
         }
         
