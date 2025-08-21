@@ -9,10 +9,12 @@ import Foundation
 
 struct HomeFilterTrayDataModel {
     var filterPillDataState: [HomeFilterPillState] = []
+    var filterDestinationPillState: [HomeFilterDestinationPillState] = []
     var priceRangeModel: HomeFilterPriceRangeModel?
     
-    init(filterPillDataState: [HomeFilterPillState], priceRangeModel: HomeFilterPriceRangeModel? = nil) {
+    init(filterPillDataState: [HomeFilterPillState], priceRangeModel: HomeFilterPriceRangeModel? = nil, filterDestinationPillState: [HomeFilterDestinationPillState] = []) {
         self.filterPillDataState = filterPillDataState
+        self.filterDestinationPillState = filterDestinationPillState
         self.priceRangeModel = priceRangeModel
     }
 }

@@ -9,37 +9,20 @@ import Foundation
 import SwiftUI
 
 struct HomeAppliedFilterCarouselView: View {
-    let appliedFilters: [HomeFilterPillState]
+    let appliedActivityFilters: [HomeFilterPillState]
+    let appliedDestinationFilters: [HomeFilterDestinationPillState]
     let isPriceRangeApplied: Bool
+    let priceRangeText: String?
     let onFilterDismiss: (Int) -> Void
-    let onResetAll: () -> Void
+    
+    // Special ID for price range filter
+    private let priceRangeFilterId = -1
     
     var body: some View {
-        if !appliedFilters.isEmpty || isPriceRangeApplied {
+        if !appliedActivityFilters.isEmpty || !appliedDestinationFilters.isEmpty || isPriceRangeApplied {
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 12.0) {
-                    // Reset All Button - X mark with text label
-                    Button(action: {
-                        withAnimation {
-                            onResetAll()
-                        }
-                    }) {
-                        HStack(spacing: 8.0) {
-                            Image(systemName: "xmark")
-                                .font(.system(size: 12, weight: .semibold))
-                                .foregroundStyle(Token.grayscale70.toColor())
-                            
-                            Text("Reset Filters")
-                                .font(.system(size: 14, weight: .medium))
-                                .foregroundStyle(Token.grayscale70.toColor())
-                        }
-                        .padding(.horizontal, 12.0)
-                        .padding(.vertical, 8.0)
-                        .background(Token.grayscale20.toColor())
-                        .clipShape(Capsule())
-                    }
-                    
-                    ForEach(appliedFilters, id: \.id) { filter in
+                    ForEach(appliedActivityFilters, id: \.id) { filter in
                         HomeFilterDismissPillView(
                             title: filter.title,
                             onDismiss: {
@@ -47,22 +30,30 @@ struct HomeAppliedFilterCarouselView: View {
                             }
                         )
                     }
+                    
+                    ForEach(appliedDestinationFilters, id: \.id) { filter in
+                        HomeFilterDestinationDismissPillView(
+                            title: filter.title,
+                            onDismiss: {
+                                onFilterDismiss(filter.id)
+                            }
+                        )
+                    }
+                    
+                    // Price range pill
+                    if isPriceRangeApplied, let priceText = priceRangeText {
+                        HomeFilterDismissPillView(
+                            title: priceText,
+                            onDismiss: {
+                                onFilterDismiss(priceRangeFilterId)
+                            }
+                        )
+                    }
+
                 }
                 .padding(.horizontal, 24.0)
             }
             .frame(height: 40.0)
         }
     }
-}
-
-#Preview {
-    HomeAppliedFilterCarouselView(
-        appliedFilters: [
-            HomeFilterPillState(id: 1, title: "Snorkeling", isSelected: true),
-            HomeFilterPillState(id: 2, title: "Diving", isSelected: true)
-        ],
-        isPriceRangeApplied: false,
-        onFilterDismiss: { _ in },
-        onResetAll: { }
-    )
 }

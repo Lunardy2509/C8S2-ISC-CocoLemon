@@ -71,11 +71,13 @@ struct HomeFilterPriceRangeView: View {
             
             // Price display under the slider
             HStack {
-                Spacer()
-                Text("Rp\(Int(model.minPrice).formatted()) - Rp\(Int(model.maxPrice).formatted())")
+                Text("Rp\(Int(model.minPrice).formatted())")
                     .font(.jakartaSans(forTextStyle: .body, weight: .semibold))
                     .foregroundStyle(Token.mainColorPrimary.toColor())
                 Spacer()
+                Text("Rp\(Int(model.maxPrice).formatted())")
+                    .font(.jakartaSans(forTextStyle: .body, weight: .semibold))
+                    .foregroundStyle(Token.mainColorPrimary.toColor())
             }
         }
     }

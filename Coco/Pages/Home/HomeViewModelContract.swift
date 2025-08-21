@@ -15,7 +15,7 @@ protocol HomeViewModelAction: AnyObject {
     func constructCollectionView(viewModel: some HomeCollectionViewModelProtocol)
     func constructLoadingState(state: HomeLoadingState)
     func constructNavBar(viewModel: HomeSearchBarViewModel)
-    func constructFilterCarousel(filterPillStates: [HomeFilterPillState])
+    func constructFilterCarousel(filterPillStates: [HomeFilterPillState], filterDestinationPillStates: [HomeFilterDestinationPillState])
     
     func toggleLoadingView(isShown: Bool, after: CGFloat)
     func activityDidSelect(data: ActivityDetailDataModel)
@@ -34,8 +34,11 @@ protocol HomeViewModelProtocol: AnyObject {
     
     func onViewDidLoad()
     func onSearchDidApply(_ queryText: String)
+    func onSearchReset()
+    func removeSearchFromHistory(_ searchData: HomeSearchSearchLocationData)
     func openFilterTray()
     func onFilterDismiss(_ filterId: Int)
     func onResetAllFilters()
     func isPriceRangeFilterApplied() -> Bool
+    func getPriceRangeText() -> String?
 }

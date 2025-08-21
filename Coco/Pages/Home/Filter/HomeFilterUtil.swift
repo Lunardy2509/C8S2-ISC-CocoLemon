@@ -22,6 +22,18 @@ final class HomeFilterUtil {
             }
         }
         
+        // Filter by destination pills
+        let selectedDestinationTitles: [String] = filterDataModel.filterDestinationPillState
+            .filter { $0.isSelected }
+            .map { $0.title }
+        
+        if !selectedDestinationTitles.isEmpty {
+            filteredActivities = filteredActivities.filter { activity in
+                let extractedLocation = extractLocationFromDestination(activity.destination.name)
+                return selectedDestinationTitles.contains(extractedLocation)
+            }
+        }
+        
         // Filter by price range if it exists and has been modified
         if let priceRangeModel = filterDataModel.priceRangeModel {
             // Only apply price filter if the user has modified the range from default
@@ -39,5 +51,15 @@ final class HomeFilterUtil {
         }
         
         return filteredActivities
+    }
+    
+    /// Extracts location from destination name by taking the part after the comma
+    /// E.g., "Raja Ampat, West Papua" -> "West Papua"
+    private static func extractLocationFromDestination(_ destinationName: String) -> String {
+        let components = destinationName.components(separatedBy: ",")
+        if components.count > 1 {
+            return components[1].trimmingCharacters(in: .whitespaces)
+        }
+        return destinationName.trimmingCharacters(in: .whitespaces)
     }
 }

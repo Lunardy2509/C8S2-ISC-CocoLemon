@@ -27,6 +27,7 @@ final class ActivityDetailViewController: UIViewController {
         super.viewDidLoad()
         thisView.delegate = self
         viewModel.onViewDidLoad()
+        setupNavigation()
     }
     
     private let viewModel: ActivityDetailViewModelProtocol
@@ -39,8 +40,7 @@ extension ActivityDetailViewController: ActivityDetailViewModelAction {
         
         if data.imageUrlsString.isEmpty {
             thisView.toggleImageSliderView(isShown: false)
-        }
-        else {
+        } else {
             thisView.toggleImageSliderView(isShown: true)
             let sliderVCs: ImageSliderHostingController = ImageSliderHostingController(images: data.imageUrlsString)
             addChild(sliderVCs)
@@ -51,6 +51,21 @@ extension ActivityDetailViewController: ActivityDetailViewModelAction {
     
     func updatePackageData(data: [ActivityDetailDataModel.Package]) {
         thisView.updatePackageData(data)
+    }
+    
+    func setupNavigation() {
+        // Custom Back Button
+        let button = UIButton(type: .system)
+        button.setImage(UIImage(systemName: "chevron.left"), for: .normal)
+        button.setTitle(" Home", for: .normal)
+        button.titleLabel?.font = UIFont.systemFont(ofSize: 17, weight: .regular)
+        button.addTarget(self, action: #selector(backButtonTapped), for: .touchUpInside)
+        
+        navigationItem.leftBarButtonItem = UIBarButtonItem(customView: button)
+    }
+    
+    @objc func backButtonTapped() {
+        navigationController?.popViewController(animated: true)
     }
 }
 
