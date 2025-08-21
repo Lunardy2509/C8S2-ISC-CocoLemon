@@ -53,6 +53,12 @@ extension HomeViewController: HomeViewModelAction {
     func constructNavBar(viewModel: HomeSearchBarViewModel) {
         let viewController: HomeSearchBarHostingController = HomeSearchBarHostingController(
             viewModel: viewModel,
+            onReturnKeyAction: { [weak self] in
+                // Handle return key press if needed - could trigger search or open search tray
+                if !viewModel.currentTypedText.isEmpty {
+                    self?.viewModel.onSearchDidApply(viewModel.currentTypedText)
+                }
+            },
             onClearAction: { [weak self] in
                 self?.viewModel.onSearchReset()
             }

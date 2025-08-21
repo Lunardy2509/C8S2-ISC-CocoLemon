@@ -13,7 +13,7 @@ final class HomeFilterTrayViewModel: ObservableObject {
     let filterDidApplyPublisher: PassthroughSubject<HomeFilterTrayDataModel, Never> = PassthroughSubject()
     
     @Published var dataModel: HomeFilterTrayDataModel
-    @Published var applyButtonTitle: String = "Apply Filter (0)"
+    @Published var applyButtonTitle: String = "See 0 Results"
     
     private let activities: [Activity]
     private var cancellables: Set<AnyCancellable> = Set()
@@ -23,14 +23,17 @@ final class HomeFilterTrayViewModel: ObservableObject {
         self.activities = activities
         
         setupBindings()
-        applyButtonTitle = "Apply Filter (\(countFilter))"
+        let resultsCount = HomeFilterUtil.doFilter(activities, filterDataModel: dataModel).count
+        if resultsCount == 1 {
+            applyButtonTitle = "See \(resultsCount) Result"
+        } else {
+            applyButtonTitle = "See \(resultsCount) Results"
+        }
     }
     
-    private var countFilter: Int {
-        let pillCount = dataModel.filterPillDataState.filter { $0.isSelected }.count
-        let destinationPillCount = dataModel.filterDestinationPillState.filter { $0.isSelected }.count
-        let priceCount = (dataModel.priceRangeModel?.isAtFullRange == false) ? 1 : 0
-        return pillCount + destinationPillCount + priceCount
+    private var countFilterResults: Int {
+        let filteredActivities = HomeFilterUtil.doFilter(activities, filterDataModel: dataModel)
+        return filteredActivities.count
     }
     
     func filterDidApply() {
@@ -38,7 +41,12 @@ final class HomeFilterTrayViewModel: ObservableObject {
     }
     
     func updateApplyButtonTitle() {
-        applyButtonTitle = "Apply Filter (\(countFilter))"
+        let resultsCount = countFilterResults
+        if resultsCount == 1 {
+            applyButtonTitle = "See \(resultsCount) Result"
+        } else {
+            applyButtonTitle = "See \(resultsCount) Results"
+        }
     }
     
     private func setupBindings() {

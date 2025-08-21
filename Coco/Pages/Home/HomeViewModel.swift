@@ -26,7 +26,6 @@ final class HomeViewModel {
         viewModel.delegate = self
         return viewModel
     }()
-    private(set) lazy var loadingState: HomeLoadingState = HomeLoadingState()
     private(set) lazy var searchBarViewModel: HomeSearchBarViewModel = HomeSearchBarViewModel(
         leadingIcon: CocoIcon.icSearchLoop.image,
         placeholderText: "Search...",
@@ -50,7 +49,6 @@ final class HomeViewModel {
 extension HomeViewModel: HomeViewModelProtocol {
     func onViewDidLoad() {
         actionDelegate?.constructCollectionView(viewModel: collectionViewModel)
-        actionDelegate?.constructLoadingState(state: loadingState)
         actionDelegate?.constructNavBar(viewModel: searchBarViewModel)
         
         fetch()
@@ -64,18 +62,12 @@ extension HomeViewModel: HomeViewModelProtocol {
         if !queryText.isEmpty {
             SearchHistoryManager.shared.addSearchHistory(queryText)
         }
-        
-        loadingState.percentage = 0
-        actionDelegate?.toggleLoadingView(isShown: true, after: 0)
         fetch()
     }
     
     func onSearchReset() {
         searchBarViewModel.currentTypedText = ""
         currentSearchQuery = ""
-        
-        loadingState.percentage = 0
-        actionDelegate?.toggleLoadingView(isShown: true, after: 0)
         fetch()
     }
     
@@ -130,19 +122,10 @@ extension HomeViewModel: HomeViewModelProtocol {
                 self.filterDataModel = newFilterData
                 actionDelegate?.dismissTray()
                 
-                // Show loading state
-                loadingState.percentage = 0
-                actionDelegate?.toggleLoadingView(isShown: true, after: 0)
-                
-                // Simulate filter processing with loading animation
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                    self.loadingState.percentage = 100
-                    self.actionDelegate?.toggleLoadingView(isShown: false, after: 0.5)
-                    self.filterDidApply()
+                self.actionDelegate?.toggleLoadingView(isShown: false, after: 0.5)
+                self.filterDidApply()
                     
-                    // Update the home view carousel with applied filters (pills only for display)
-                    self.actionDelegate?.constructFilterCarousel(filterPillStates: newFilterData.filterPillDataState, filterDestinationPillStates: newFilterData.filterDestinationPillState)
-                }
+                self.actionDelegate?.constructFilterCarousel(filterPillStates: newFilterData.filterPillDataState, filterDestinationPillStates: newFilterData.filterDestinationPillState)
             }
             .store(in: &cancellables)
 
@@ -197,11 +180,14 @@ extension HomeViewModel: HomeViewModelProtocol {
         
         self.filterDataModel = filterDataModel
         
+        // Also clear search query and search bar text to completely reset the view
+        searchBarViewModel.currentTypedText = ""
+        currentSearchQuery = ""
+        
         // Update filter carousel to reflect the change (should be empty now)
         actionDelegate?.constructFilterCarousel(filterPillStates: filterDataModel.filterPillDataState, filterDestinationPillStates: filterDataModel.filterDestinationPillState)
         
-        // Apply current filters immediately (should show all activities)
-        applyCurrentFilters()
+        fetch()
     }
     
     func isPriceRangeFilterApplied() -> Bool {
@@ -262,10 +248,14 @@ extension HomeViewModel: HomeViewModelProtocol {
                                filterDataModel.filterDestinationPillState.allSatisfy { !$0.isSelected } &&
                                (filterDataModel.priceRangeModel?.isAtFullRange ?? true)
         
+        // Check if there's an active search query
+        let hasActiveSearch = !currentSearchQuery.isEmpty
+        
         let filteredActivities: [Activity]
         let sectionTitle: String
-        if isAllFiltersReset {
-            // Show all activities when filters are reset
+        
+        if isAllFiltersReset && !hasActiveSearch {
+            // Show all activities when both filters and search are reset
             filteredActivities = responseData
             sectionTitle = "Most Popular"
         } else {
@@ -293,7 +283,6 @@ extension HomeViewModel: HomeViewModelProtocol {
         if let priceRange = filterDataModel.priceRangeModel {
             filterInfo += " | Price: Rp\(Int(priceRange.minPrice).formatted()) - Rp\(Int(priceRange.maxPrice).formatted())"
         }
-        print(filterInfo)
     }
 }
 
@@ -324,22 +313,25 @@ extension HomeViewModel: HomeSearchBarViewModelDelegate {
 
 private extension HomeViewModel {
     func fetch() {
-        // Use currentSearchQuery for API calls to maintain search state
-        let searchText = currentSearchQuery.isEmpty ? searchBarViewModel.currentTypedText : currentSearchQuery
-        
+        // Always fetch the full dataset to enable local filtering for location parts
+        // This ensures we can search for extracted location parts like "Aceh", "Bali" etc.
         activityFetcher.fetchActivity(
-            request: ActivitySearchRequest(pSearchText: searchText)
+            request: ActivitySearchRequest(pSearchText: "")
         ) { [weak self] result in
             guard let self else { return }
             switch result {
             case .success(let response):
-                self.loadingState.percentage = 100
-                self.actionDelegate?.toggleLoadingView(isShown: false, after: 1.0)
+                
+                // Store the full response data first
+                var allActivities = response.values
+                
+                // Get the current search text for local filtering
+                let searchText = currentSearchQuery.isEmpty ? searchBarViewModel.currentTypedText : currentSearchQuery
                 
                 var sectionData: [HomeActivityCellDataModel] = []
                 
                 // Filter activities based on search text including destination names
-                let filteredActivities = response.values.filter { activity in
+                let filteredActivities = allActivities.filter { activity in
                     if searchText.isEmpty {
                         return true
                     }
@@ -348,14 +340,24 @@ private extension HomeViewModel {
                     let activityTitleMatch = activity.title.lowercased().contains(searchTextLowercased)
                     let destinationNameMatch = activity.destination.name.lowercased().contains(searchTextLowercased)
                     
-                    return activityTitleMatch || destinationNameMatch
+                    // Also check if search matches the extracted location part (after comma)
+                    let extractedLocation = self.extractLocationFromDestination(activity.destination.name)
+                    let locationPartMatch = extractedLocation.lowercased().contains(searchTextLowercased)
+                    
+                    return activityTitleMatch || destinationNameMatch || locationPartMatch
                 }
                 
                 filteredActivities.forEach {
                     sectionData.append(HomeActivityCellDataModel(activity: $0))
+                }
+                
+                // Store all activities in responseMap for detail navigation
+                allActivities.forEach {
                     self.responseMap[$0.id] = $0
                 }
-                responseData = filteredActivities
+                
+                // Store all activities for filter construction (not just filtered ones)
+                responseData = allActivities
                 
                 // Set section title based on whether there's an active search
                 let sectionTitle = searchText.isEmpty ? "Most Popular" : "Your Result"

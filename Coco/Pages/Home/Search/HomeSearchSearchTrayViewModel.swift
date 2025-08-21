@@ -17,6 +17,8 @@ final class HomeSearchSearchTrayViewModel: ObservableObject {
     @Published var searchBarViewModel: HomeSearchBarViewModel
     @Published var popularLocations: [HomeSearchSearchLocationData] = []
     
+    private let activityFetcher: ActivityFetcherProtocol
+    
     init(searchBarViewModel: HomeSearchBarViewModel, activityFetcher: ActivityFetcherProtocol = ActivityFetcher()) {
         self.searchBarViewModel = searchBarViewModel
         self.activityFetcher = activityFetcher
@@ -24,16 +26,27 @@ final class HomeSearchSearchTrayViewModel: ObservableObject {
     
     @MainActor
     func onAppear() {
-        activityFetcher.fetchTopDestination { [weak self] result in
+        // Fetch popular destinations from activity data instead of top destination API
+        activityFetcher.fetchActivity(
+            request: ActivitySearchRequest(pSearchText: "")
+        ) { [weak self] result in
             guard let self else { return }
             switch result {
             case .success(let response):
-                self.popularLocations = response.values.map { HomeSearchSearchLocationData(id: $0.id, name: $0.name) }
+                // Extract unique location parts (after comma) from activity responses
+                let uniqueDestinations = Set(response.values.map { $0.destination.name })
+                
+                // Convert to HomeSearchSearchLocationData and sort alphabetically
+                self.popularLocations = Array(uniqueDestinations.enumerated().map { index, name in
+                    HomeSearchSearchLocationData(id: index, name: name)
+                }
+                    .sorted { $0.name < $1.name }
+                    .prefix(5)
+                )
+                    
             case .failure:
                 break
             }
         }
     }
-    
-    private let activityFetcher: ActivityFetcherProtocol
 }

@@ -73,17 +73,16 @@ final class HomeSearchPageViewController: UIViewController {
     }
     
     private func setupNavigation() {
-        title = "Search Service"
-        navigationController?.navigationBar.prefersLargeTitles = false
+        title = ""
         
-        // Add back button
-        let backButton = UIBarButtonItem(
-            image: UIImage(systemName: "chevron.left"),
-            style: .plain,
-            target: self,
-            action: #selector(backButtonTapped)
-        )
-        navigationItem.leftBarButtonItem = backButton
+        // Custom Back Button
+        let button = UIButton(type: .system)
+        button.setImage(UIImage(systemName: "chevron.left"), for: .normal)
+        button.setTitle(" Home", for: .normal)
+        button.titleLabel?.font = UIFont.systemFont(ofSize: 17, weight: .regular)
+        button.addTarget(self, action: #selector(backButtonTapped), for: .touchUpInside)
+        
+        navigationItem.leftBarButtonItem = UIBarButtonItem(customView: button)
     }
     
     @objc private func backButtonTapped() {

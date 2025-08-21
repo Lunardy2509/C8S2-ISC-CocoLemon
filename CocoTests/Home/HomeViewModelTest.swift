@@ -11,12 +11,13 @@ import Testing
 
 struct HomeViewModelTest {
     private struct TestContext {
+        // --- GIVEN ---
         let fetcher: MockActivityFetcher
         let actionDelegate: MockHomeViewModelAction
         let navigationDelegate: MockHomeViewModelNavigationDelegate
         let viewModel: HomeViewModel
         let activities: ActivityModelArray
-        
+        // --- WHEN ---
         static func setup() throws -> TestContext {
             let fetcher = MockActivityFetcher()
             let actionDelegate = MockHomeViewModelAction()
@@ -38,9 +39,9 @@ struct HomeViewModelTest {
             )
         }
     }
+    // --- THEN ---
     
-    // MARK: - Filter Tests
-    
+    // MARK: - Filter Testsf
     @Test("filter tray - should open on icon tap")
     func filterTray_whenIconTapped_shouldOpen() async throws {
         // --- GIVEN ---
@@ -134,7 +135,7 @@ struct HomeViewModelTest {
         let activityData = HomeActivityCellDataModel(
             id: 1,
             area: "area",
-            name: "name",
+            name: "name", location: "location",
             priceText: "priceText",
             imageUrl: nil
         )
@@ -183,7 +184,7 @@ struct HomeViewModelTest {
         let invalidActivityData = HomeActivityCellDataModel(
             id: 999,
             area: "area",
-            name: "name",
+            name: "name", location: "location",
             priceText: "priceText",
             imageUrl: nil
         )

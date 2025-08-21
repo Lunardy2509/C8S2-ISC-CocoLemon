@@ -40,7 +40,7 @@ struct HomeFilterTray: View {
                     
                     if !viewModel.dataModel.filterDestinationPillState.isEmpty {
                         VStack(alignment: .leading, spacing: 12.0) {
-                            Text("City Locations")
+                            Text("Popular Locations")
                                 .foregroundStyle(Token.additionalColorsBlack.toColor())
                                 .font(.jakartaSans(forTextStyle: .body, weight: .semibold))
                             
