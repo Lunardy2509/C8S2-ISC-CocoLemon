@@ -12,6 +12,8 @@ struct HomeFormScheduleInputView: View {
     @ObservedObject var paxInputViewModel: HomeSearchBarViewModel
     
     var actionButtonAction: () -> Void
+    var actionButtonText: String = "Checkout"
+    var showActionButton: Bool = true
     
     var body: some View {
         VStack(alignment: .leading, spacing: 16.0) {
@@ -32,13 +34,15 @@ struct HomeFormScheduleInputView: View {
             
             Spacer()
             
-            CocoButton(
-                action: actionButtonAction,
-                text: "Checkout",
-                style: .large,
-                type: .primary
-            )
-            .stretch()
+            if showActionButton {
+                CocoButton(
+                    action: actionButtonAction,
+                    text: actionButtonText,
+                    style: .large,
+                    type: .primary
+                )
+                .stretch()
+            }
         }
     }
 }
