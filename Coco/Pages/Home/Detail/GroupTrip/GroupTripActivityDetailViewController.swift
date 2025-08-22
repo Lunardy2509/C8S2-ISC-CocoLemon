@@ -39,7 +39,8 @@ final class GroupTripActivityDetailViewController: UIViewController {
             calendarViewModel: viewModel.calendarInputViewModel,
             paxInputViewModel: viewModel.paxInputViewModel,
             actionButtonAction: { },
-            showActionButton: false
+            showActionButton: false,
+            showPaxInput: false
         )
         let hostingVC = UIHostingController(rootView: inputView)
         addChild(hostingVC)
