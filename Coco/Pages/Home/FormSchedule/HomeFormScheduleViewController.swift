@@ -45,7 +45,9 @@ extension HomeFormScheduleViewController: HomeFormScheduleViewModelAction {
                 paxInputViewModel: paxInputViewModel,
                 actionButtonAction: { [weak self] in
                     self?.viewModel.onCheckout()
-                }
+                },
+                actionButtonText: "Checkout",
+                showActionButton: true
             )
         )
         addChild(inputVC)

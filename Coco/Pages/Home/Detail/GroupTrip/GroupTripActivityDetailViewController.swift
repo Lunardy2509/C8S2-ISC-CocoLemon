@@ -7,6 +7,7 @@
 
 import Foundation
 import UIKit
+import SwiftUI
 
 final class GroupTripActivityDetailViewController: UIViewController {
     init(viewModel: GroupTripActivityDetailViewModelProtocol) {
@@ -27,10 +28,24 @@ final class GroupTripActivityDetailViewController: UIViewController {
         super.viewDidLoad()
         thisView.delegate = self
         viewModel.onViewDidLoad()
+        setupScheduleInputView()
     }
     
     private let viewModel: GroupTripActivityDetailViewModelProtocol
     private let thisView: GroupTripActivityDetailView = GroupTripActivityDetailView()
+    
+    private func setupScheduleInputView() {
+        let inputView = HomeFormScheduleInputView(
+            calendarViewModel: viewModel.calendarInputViewModel,
+            paxInputViewModel: viewModel.paxInputViewModel,
+            actionButtonAction: { },
+            showActionButton: false
+        )
+        let hostingVC = UIHostingController(rootView: inputView)
+        addChild(hostingVC)
+        thisView.addScheduleInputView(with: hostingVC.view)
+        hostingVC.didMove(toParent: self)
+    }
 }
 
 extension GroupTripActivityDetailViewController: GroupTripActivityDetailViewModelAction {
@@ -52,6 +67,13 @@ extension GroupTripActivityDetailViewController: GroupTripActivityDetailViewMode
     func updatePackageData(data: [ActivityDetailDataModel.Package]) {
         thisView.updatePackageData(data)
     }
+    
+    func showCalendarOption() {
+        let calendarVC: CocoCalendarViewController = CocoCalendarViewController()
+        calendarVC.delegate = self
+        let popup: CocoPopupViewController = CocoPopupViewController(child: calendarVC)
+        present(popup, animated: true)
+    }
 }
 
 extension GroupTripActivityDetailViewController: GroupTripActivityDetailViewDelegate {
@@ -61,5 +83,12 @@ extension GroupTripActivityDetailViewController: GroupTripActivityDetailViewDele
     
     func notifyPackagesDetailDidTap(with packageId: Int) {
         viewModel.onPackagesDetailDidTap(with: packageId)
+    }
+}
+
+extension GroupTripActivityDetailViewController: CocoCalendarViewControllerDelegate {
+    func notifyCalendarDidChooseDate(date: Date?, calendar: CocoCalendarViewController) {
+        guard let date: Date else { return }
+        viewModel.onCalendarDidChoose(date: date)
     }
 }
