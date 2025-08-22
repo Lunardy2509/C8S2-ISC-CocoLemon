@@ -25,11 +25,29 @@ struct HomeFilterTray: View {
                             Text("Activities")
                                 .foregroundStyle(Token.additionalColorsBlack.toColor())
                                 .font(.jakartaSans(forTextStyle: .body, weight: .semibold))
-                             
+                            
                             ScrollView(.horizontal) {
                                 HStack(spacing: 12.0) {
                                     ForEach(viewModel.dataModel.filterPillDataState, id: \.id) { state in
                                         HomeFilterPillView(state: state, didTap: {
+                                            viewModel.updateApplyButtonTitle()
+                                        })
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    
+                    if !viewModel.dataModel.filterDestinationPillState.isEmpty {
+                        VStack(alignment: .leading, spacing: 12.0) {
+                            Text("Popular Locations")
+                                .foregroundStyle(Token.additionalColorsBlack.toColor())
+                                .font(.jakartaSans(forTextStyle: .body, weight: .semibold))
+                            
+                            ScrollView(.horizontal) {
+                                HStack(spacing: 12.0) {
+                                    ForEach(viewModel.dataModel.filterDestinationPillState, id: \.id) { state in
+                                        HomeFilterDestinationPillView(state: state, didTap: {
                                             viewModel.updateApplyButtonTitle()
                                         })
                                     }
@@ -44,20 +62,8 @@ struct HomeFilterTray: View {
                         })
                     }
                     
-                    Spacer()
                     HStack(spacing: 12.0) {
-                        // Reset Button
-                        CocoButton(
-                            action: {
-                                viewModel.resetFilters()
-                            },
-                            text: "Reset",
-                            style: .large,
-                            type: .secondary
-                        )
-                        .stretch()
-                        
-                        // Apply Button - always enabled and primary
+                        // Apply Button
                         CocoButton(
                             action: {
                                 viewModel.filterDidApply()

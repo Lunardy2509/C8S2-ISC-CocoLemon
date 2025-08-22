@@ -27,8 +27,8 @@ final class HomeActivityCell: UICollectionViewCell {
         let attributedString = NSMutableAttributedString(
             string: dataModel.priceText,
             attributes: [
-                .font : UIFont.jakartaSans(forTextStyle: .body, weight: .bold),
-                .foregroundColor : Token.additionalColorsBlack
+                .font: UIFont.jakartaSans(forTextStyle: .callout, weight: .bold),
+                .foregroundColor: Token.additionalColorsBlack
             ]
         )
         
@@ -36,8 +36,8 @@ final class HomeActivityCell: UICollectionViewCell {
             NSAttributedString(
                 string: "/Person",
                 attributes: [
-                    .font : UIFont.jakartaSans(forTextStyle: .callout, weight: .medium),
-                    .foregroundColor : Token.additionalColorsBlack
+                    .font: UIFont.jakartaSans(forTextStyle: .callout, weight: .medium),
+                    .foregroundColor: Token.additionalColorsBlack
                 ]
             )
         )
@@ -51,7 +51,10 @@ final class HomeActivityCell: UICollectionViewCell {
     }
     
     private lazy var imageView: UIImageView = createImageView()
+    private lazy var locationView: UIView = createLocationView()
     private lazy var areaView: UIView = createAreaView()
+    private lazy var priceView: UIView = createPriceView()
+    
     private lazy var areaLabel: UILabel = UILabel(
         font: .jakartaSans(forTextStyle: .title3, weight: .bold),
         textColor: Token.additionalColorsBlack,
@@ -70,28 +73,28 @@ final class HomeActivityCell: UICollectionViewCell {
     private lazy var priceLabel: UILabel = UILabel(
         font: .jakartaSans(forTextStyle: .body, weight: .bold),
         textColor: Token.additionalColorsBlack,
-        numberOfLines: 2
+        numberOfLines: 1
     )
 }
 
 private extension HomeActivityCell {
     func setupView() {
-        let locationView = createLocationView()
-        
         let stackView: UIStackView = UIStackView(
             arrangedSubviews: [
                 imageView,
                 locationView,
                 areaView,
-                priceLabel
+                priceView
             ]
         )
-        stackView.spacing = 4.0
+        stackView.spacing = 8.0
         stackView.axis = .vertical
         stackView.alignment = .fill
         stackView.distribution = .fill
         
         stackView.setCustomSpacing(12.0, after: imageView)
+        stackView.setCustomSpacing(8.0, after: locationView)
+        stackView.setCustomSpacing(4.0, after: areaView)
         
         contentView.addSubviewAndLayout(stackView)
     }
@@ -105,20 +108,6 @@ private extension HomeActivityCell {
         imageView.layer.cornerRadius = 12.0
         imageView.clipsToBounds = true
         return imageView
-    }
-    
-    func createAreaView() -> UIView {
-        let ContentView = UIView()
-        ContentView.addSubview(areaLabel)
-        
-        areaLabel.layout {
-            $0.leading(to: ContentView.leadingAnchor)
-                .trailing(to: ContentView.trailingAnchor)
-                .top(to: ContentView.topAnchor)
-                .bottom(to: ContentView.bottomAnchor)
-        }
-        
-        return ContentView
     }
     
     func createLocationView() -> UIView {
@@ -138,6 +127,34 @@ private extension HomeActivityCell {
             $0.leading(to: pinIcon.trailingAnchor, constant: 4.0)
             $0.trailing(to: containerView.trailingAnchor)
             $0.centerY(to: containerView.centerYAnchor)
+        }
+        
+        return containerView
+    }
+    
+    func createAreaView() -> UIView {
+        let containerView = UIView()
+        containerView.addSubview(areaLabel)
+        
+        areaLabel.layout {
+            $0.leading(to: containerView.leadingAnchor)
+                .trailing(to: containerView.trailingAnchor)
+                .top(to: containerView.topAnchor)
+                .bottom(to: containerView.bottomAnchor)
+        }
+        
+        return containerView
+    }
+    
+    func createPriceView() -> UIView {
+        let containerView = UIView()
+        containerView.addSubview(priceLabel)
+        
+        priceLabel.layout {
+            $0.leading(to: containerView.leadingAnchor)
+                .trailing(to: containerView.trailingAnchor)
+                .top(to: containerView.topAnchor)
+                .bottom(to: containerView.bottomAnchor)
         }
         
         return containerView

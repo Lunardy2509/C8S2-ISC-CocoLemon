@@ -9,6 +9,7 @@ import Foundation
 
 protocol HomeCollectionViewModelDelegate: AnyObject {
     func notifyCollectionViewActivityDidTap(_ dataModel: HomeActivityCellDataModel)
+    func notifyCollectionViewClearAllFilters()
 }
 
 protocol HomeCollectionViewModelAction: AnyObject {
@@ -25,4 +26,5 @@ protocol HomeCollectionViewModelProtocol: AnyObject {
     func onViewDidLoad()
     func updateActivity(activity: HomeActivityCellSectionDataModel)
     func onActivityDidTap(_ dataModel: HomeActivityCellDataModel)
+    func onClearAllFilters()
 }

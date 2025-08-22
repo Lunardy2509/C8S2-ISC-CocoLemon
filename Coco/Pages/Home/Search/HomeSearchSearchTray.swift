@@ -14,11 +14,15 @@ struct HomeSearchSearchTray: View {
     @State var latestSearches: [HomeSearchSearchLocationData]
     
     let searchDidApply: ((_ query: String) -> Void)
+    let onSearchHistoryRemove: ((_ searchData: HomeSearchSearchLocationData) -> Void)?
+    let onSearchReset: (() -> Void)?
     
     init(
         selectedQuery: String,
         latestSearches: [HomeSearchSearchLocationData],
-        searchDidApply: @escaping (_: String) -> Void
+        searchDidApply: @escaping (_: String) -> Void,
+        onSearchHistoryRemove: ((_ searchData: HomeSearchSearchLocationData) -> Void)? = nil,
+        onSearchReset: (() -> Void)? = nil
     ) {
         _viewModel = StateObject(
             wrappedValue: HomeSearchSearchTrayViewModel(
@@ -35,41 +39,38 @@ struct HomeSearchSearchTray: View {
         
         self.latestSearches = latestSearches
         self.searchDidApply = searchDidApply
+        self.onSearchHistoryRemove = onSearchHistoryRemove
+        self.onSearchReset = onSearchReset
     }
     
     var body: some View {
         VStack(alignment: .center) {
-            Text("Filter Service")
-                .multilineTextAlignment(.center)
-                .font(.jakartaSans(forTextStyle: .body, weight: .semibold))
-                .foregroundStyle(Token.additionalColorsBlack.toColor())
-            
             ScrollView {
                 VStack(alignment: .leading, spacing: 24.0) {
-                    HomeSearchBarView(viewModel: viewModel.searchBarViewModel)
+                    HomeSearchBarView(
+                        viewModel: viewModel.searchBarViewModel,
+                        onReturnKeyAction: {
+                            searchDidApply(viewModel.searchBarViewModel.currentTypedText)
+                        },
+                        onClearAction: {
+                            onSearchReset?()
+                        },
+                        shouldAutoFocus: true
+                    )
                     
                     if !latestSearches.isEmpty {
-                        createSectionView(title: "Last Search") {
+                        createSectionView(title: "Last Searches") {
                             lastSearchSectionView()
                         }
                     }
                     
                     if !viewModel.popularLocations.isEmpty {
-                        createSectionView(title: "Popular Location") {
+                        createSectionView(title: "Popular Locations") {
                             popularLocationSectionView()
                         }
                     }
                     
                     Spacer()
-                    CocoButton(
-                        action: {
-                            searchDidApply(viewModel.searchBarViewModel.currentTypedText)
-                        },
-                        text: "Search",
-                        style: .large,
-                        type: .primary
-                    )
-                    .stretch()
                 }
             }
         }
@@ -108,6 +109,7 @@ private extension HomeSearchSearchTray {
         }
         .onTapGesture {
             viewModel.searchBarViewModel.currentTypedText = name
+            searchDidApply(name)
         }
     }
     
@@ -121,6 +123,15 @@ private extension HomeSearchSearchTray {
             Image(uiImage: CocoIcon.icCross.image)
                 .resizable()
                 .frame(width: 15.0, height: 15.0)
+                .onTapGesture {
+                    // Only tapping the X mark should remove the search history
+                    if let onSearchHistoryRemove = onSearchHistoryRemove,
+                       let index = latestSearches.firstIndex(where: { $0.name == name }) {
+                        let location = latestSearches[index]
+                        onSearchHistoryRemove(location)
+                        latestSearches.remove(at: index)
+                    }
+                }
         }
         .padding(.vertical, 12.0)
         .padding(.horizontal, 20.0)
@@ -130,6 +141,10 @@ private extension HomeSearchSearchTray {
                 .stroke(Token.grayscale30.toColor(), lineWidth: 1.0)
         )
         .cornerRadius(14.0)
+        .onTapGesture {
+            // Tapping the main area should fill the text field with the search term
+            viewModel.searchBarViewModel.currentTypedText = name
+        }
     }
     
     func lastSearchSectionView() -> some View {
@@ -137,11 +152,6 @@ private extension HomeSearchSearchTray {
             HStack(alignment: .center, spacing: 16.0) {
                 ForEach(Array(latestSearches.enumerated()), id: \.0) { (index, location) in
                     createLastSearchView(name: location.name)
-                        .onTapGesture {
-                            withAnimation {
-                                _ = latestSearches.remove(at: index)
-                            }
-                        }
                 }
             }
         }

@@ -11,12 +11,13 @@ import Testing
 
 struct HomeViewModelTest {
     private struct TestContext {
+        // --- GIVEN ---
         let fetcher: MockActivityFetcher
         let actionDelegate: MockHomeViewModelAction
         let navigationDelegate: MockHomeViewModelNavigationDelegate
         let viewModel: HomeViewModel
         let activities: ActivityModelArray
-        
+        // --- WHEN ---
         static func setup() throws -> TestContext {
             let fetcher = MockActivityFetcher()
             let actionDelegate = MockHomeViewModelAction()
@@ -38,9 +39,9 @@ struct HomeViewModelTest {
             )
         }
     }
+    // --- THEN ---
     
-    // MARK: - Filter Tests
-    
+    // MARK: - Filter Testsf
     @Test("filter tray - should open on icon tap")
     func filterTray_whenIconTapped_shouldOpen() async throws {
         // --- GIVEN ---
@@ -264,14 +265,14 @@ private extension HomeViewModelTest {
 private final class MockHomeViewModelAction: HomeViewModelAction {
     var invokedConstructFilterCarousel = false
     var invokedConstructFilterCarouselCount = 0
-    var invokedConstructFilterCarouselParameters: (filterPillStates: [HomeFilterPillState], Void)?
-    var invokedConstructFilterCarouselParametersList = [(filterPillStates: [HomeFilterPillState], Void)]()
+    var invokedConstructFilterCarouselParameters: (filterPillStates: [HomeFilterPillState], filterDestinationPillStates: [HomeFilterDestinationPillState])?
+    var invokedConstructFilterCarouselParametersList = [(filterPillStates: [HomeFilterPillState], filterDestinationPillStates: [HomeFilterDestinationPillState])]()
 
-    func constructFilterCarousel(filterPillStates: [Coco.HomeFilterPillState]) {
+    func constructFilterCarousel(filterPillStates: [Coco.HomeFilterPillState], filterDestinationPillStates: [Coco.HomeFilterDestinationPillState]) {
         invokedConstructFilterCarousel = true
         invokedConstructFilterCarouselCount += 1
-        invokedConstructFilterCarouselParameters = (filterPillStates, ())
-        invokedConstructFilterCarouselParametersList.append((filterPillStates, ()))
+        invokedConstructFilterCarouselParameters = (filterPillStates, filterDestinationPillStates)
+        invokedConstructFilterCarouselParametersList.append((filterPillStates, filterDestinationPillStates))
     }
     
 

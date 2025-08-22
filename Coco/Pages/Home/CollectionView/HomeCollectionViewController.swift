@@ -85,7 +85,7 @@ private extension HomeCollectionViewController {
     func createCollectionView() -> UICollectionView {
         let collectionView: UICollectionView = UICollectionView(frame: .zero, collectionViewLayout: createLayout())
         collectionView.showsHorizontalScrollIndicator = false
-        collectionView.contentInset = .init(top: 0, left: 0, bottom: 8.0, right: 0)
+        collectionView.contentInset = .init(top: 0, left: 0, bottom: 0, right: 0)
         
         return collectionView
     }
@@ -108,17 +108,23 @@ private extension HomeCollectionViewController {
                     alignment: .top
                 )
                 section.boundarySupplementaryItems = [sectionHeader]
-                section.interGroupSpacing = CGFloat(20)
-                section.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 24.0, bottom: 8.0, trailing: 24.0)
+                section.interGroupSpacing = CGFloat(12)
+                section.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 24, bottom: 0, trailing: 24)
                 return section
                 
             case .noResult:
-                let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .estimated(100))
+                let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .fractionalHeight(1.0))
                 let item = NSCollectionLayoutItem(layoutSize: itemSize)
-                let groupSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .estimated(100))
+                let groupSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .fractionalHeight(1.0))
                 let group = NSCollectionLayoutGroup.horizontal(layoutSize: groupSize, subitems: [item])
                 let section = NSCollectionLayoutSection(group: group)
-                section.contentInsets = NSDirectionalEdgeInsets(top: 40, leading: 24, bottom: 40, trailing: 24)
+                
+                // Add section header for no result section as well
+                let sectionHeaderSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .estimated(70))
+                let sectionHeader = NSCollectionLayoutBoundarySupplementaryItem(layoutSize: sectionHeaderSize, elementKind: UICollectionView.elementKindSectionHeader, alignment: .top)
+                section.boundarySupplementaryItems = [sectionHeader]
+                
+                section.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 24, bottom: 0, trailing: 24)
                 return section
             }
         }
@@ -130,7 +136,7 @@ private extension HomeCollectionViewController {
     typealias ActivityCellRegistration = UICollectionView.CellRegistration<HomeActivityCell, HomeActivityCellDataModel>
     func createActivityCellRegistration() -> ActivityCellRegistration {
         .init { [weak self] cell, _, itemIdentifier in
-            guard let self else { return }
+            guard self != nil else { return }
             cell.configureCell(itemIdentifier)
         }
     }
@@ -150,7 +156,13 @@ private extension HomeCollectionViewController {
             else {
                 return
             }
-            supplementaryView.configureView(title: sectionTitle)
+            
+            let showClearAll = sectionTitle == "Your Result"
+            supplementaryView.configureView(title: sectionTitle, showClearAll: showClearAll)
+            
+            supplementaryView.onClearAllTap = { [weak self] in
+                self?.viewModel.onClearAllFilters()
+            }
         }
     }
 }

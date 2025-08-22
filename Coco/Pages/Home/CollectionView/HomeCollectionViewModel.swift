@@ -29,6 +29,10 @@ extension HomeCollectionViewModel: HomeCollectionViewModelProtocol {
     func onActivityDidTap(_ dataModel: HomeActivityCellDataModel) {
         delegate?.notifyCollectionViewActivityDidTap(dataModel)
     }
+    
+    func onClearAllFilters() {
+        delegate?.notifyCollectionViewClearAllFilters()
+    }
 }
 
 private extension HomeCollectionViewModel {
@@ -58,11 +62,10 @@ private extension HomeCollectionViewModel {
         if let activitySectionDataModel: HomeCollectionContent {
             contents.append(activitySectionDataModel)
         } else {
-            // Add "No Result" section when there are no activities
             contents.append(.init(
                 section: .init(
                     type: .noResult,
-                    title: nil
+                    title: "Your Result"
                 ),
                 items: [NoResultCellDataModel()]
             ))
