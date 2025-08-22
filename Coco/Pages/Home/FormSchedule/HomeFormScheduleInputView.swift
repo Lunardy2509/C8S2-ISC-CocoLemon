@@ -14,7 +14,6 @@ struct HomeFormScheduleInputView: View {
     var actionButtonAction: () -> Void
     var actionButtonText: String = "Checkout"
     var showActionButton: Bool = true
-    var showPaxInput: Bool = true
     
     var body: some View {
         VStack(alignment: .leading, spacing: 16.0) {

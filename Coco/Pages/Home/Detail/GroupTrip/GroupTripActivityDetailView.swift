@@ -29,56 +29,7 @@ final class GroupTripActivityDetailView: UIView {
     func configureView(_ data: ActivityDetailDataModel) {
         titleLabel.text = data.title
         locationLabel.text = data.location
-        
-        // Detail section
-//        let detailDescription: UILabel = UILabel(
-//            font: .jakartaSans(forTextStyle: .headline, weight: .regular),
-//            textColor: Token.grayscale70,
-//            numberOfLines: 0
-//        )
-//        detailDescription.text = data.detailInfomation.content
-//        contentStackView.addArrangedSubview(
-//            createSectionView(
-//                title: data.detailInfomation.title,
-//                view: detailDescription
-//            )
-//        )
-        
-        // Trip Provider
-//        contentStackView.addArrangedSubview(
-//            createSectionView(
-//                title: data.providerDetail.title,
-//                view: createProviderDetail(
-//                    imageUrl: data.providerDetail.content.imageUrlString,
-//                    name: data.providerDetail.content.name,
-//                    description: data.providerDetail.content.description
-//                )
-//            )
-//        )
-        
-//        // Facilities
-//        if !data.tripFacilities.content.isEmpty {
-//            contentStackView.addArrangedSubview(
-//                createSectionView(
-//                    title: data.tripFacilities.title,
-//                    view: createBenefitListView(titles: data.tripFacilities.content)
-//                )
-//            )
-//        }
-//        
-//        // TnC
-//        if !data.tnc.isEmpty {
-//            let tncLabel: UILabel = UILabel(
-//                font: .jakartaSans(forTextStyle: .footnote, weight: .regular),
-//                textColor: Token.additionalColorsBlack,
-//                numberOfLines: 0
-//            )
-//            tncLabel.text = data.tnc
-//            contentStackView.addArrangedSubview(createSectionView(
-//                title: "Terms and Conditon",
-//                view: tncLabel
-//            ))
-//        }
+        contentStackView.addArrangedSubview(scheduleSection)
         
         if !data.availablePackages.content.isEmpty {
             contentStackView.addArrangedSubview(packageSection)
@@ -144,18 +95,17 @@ final class GroupTripActivityDetailView: UIView {
         }
     }
     
+    func addScheduleInputView(with view: UIView) {
+        scheduleInputContainer.subviews.forEach { $0.removeFromSuperview() }
+        scheduleInputContainer.addSubviewAndLayout(view)
+    }
+    
     private lazy var imageSliderView: UIView = UIView()
     private lazy var titleView: UIView = createTitleView()
     private lazy var titleLabel: UILabel = UILabel(
         font: .jakartaSans(forTextStyle: .title2, weight: .bold),
         textColor: Token.additionalColorsBlack,
         numberOfLines: 2
-    )
-    
-    private lazy var dateLabel: UILabel = UILabel(
-        font: .jakartaSans(forTextStyle: .subheadline, weight: .medium),
-        textColor: Token.grayscale80,
-        numberOfLines: 1
     )
     
     private lazy var locationLabel: UILabel = UILabel(
@@ -187,6 +137,9 @@ final class GroupTripActivityDetailView: UIView {
         view.layer.shadowRadius = 4
         return view
     }()
+    
+    private lazy var scheduleSection: UIView = createScheduleSection()
+    private lazy var scheduleInputContainer: UIView = UIView()
 }
 
 extension GroupTripActivityDetailView {
@@ -355,8 +308,7 @@ private extension GroupTripActivityDetailView {
         let contentView: UIView = UIView()
         contentView.addSubviews([
             titleLabel,
-            locationView,
-            dateLabel
+            locationView
         ])
         
         titleLabel.layout {
@@ -367,12 +319,6 @@ private extension GroupTripActivityDetailView {
         
         locationView.layout {
             $0.top(to: titleLabel.bottomAnchor, constant: 8.0)
-                .leading(to: contentView.leadingAnchor)
-                .trailing(to: contentView.trailingAnchor)
-        }
-        
-        dateLabel.layout { 
-            $0.top(to: locationView.bottomAnchor, constant: 8.0)
                 .leading(to: contentView.leadingAnchor)
                 .trailing(to: contentView.trailingAnchor)
                 .bottom(to: contentView.bottomAnchor)
@@ -464,7 +410,7 @@ private extension GroupTripActivityDetailView {
         contentView.addSubviews([
             imageView,
             nameLabel,
-            descriptionLabel,
+            descriptionLabel
         ])
         
         imageView.layout {
@@ -663,5 +609,9 @@ private extension GroupTripActivityDetailView {
         isPackageButtonStateHidden.toggle()
         packageButton.setTitle(isPackageButtonStateHidden ? "Show All" : "Show Less", for: .normal)
         delegate?.notifyPackagesButtonDidTap(shouldShowAll: !isPackageButtonStateHidden)
+    }
+    
+    func createScheduleSection() -> UIView {
+        return createSectionView(title: "Trip Detail", view: scheduleInputContainer)
     }
 }
