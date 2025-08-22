@@ -26,23 +26,16 @@ final class HomeSearchSearchTrayViewModel: ObservableObject {
     
     @MainActor
     func onAppear() {
-        // Fetch popular destinations from activity data instead of top destination API
-        activityFetcher.fetchActivity(
-            request: ActivitySearchRequest(pSearchText: "")
-        ) { [weak self] result in
+        // Fetch popular destinations from top destination API
+        activityFetcher.fetchTopDestination { [weak self] result in
             guard let self else { return }
             switch result {
             case .success(let response):
-                // Extract unique location parts (after comma) from activity responses
-                let uniqueDestinations = Set(response.values.map { $0.destination.name })
-                
-                // Convert to HomeSearchSearchLocationData and sort alphabetically
-                self.popularLocations = Array(uniqueDestinations.enumerated().map { index, name in
-                    HomeSearchSearchLocationData(id: index, name: name)
+                // Convert top destinations directly to HomeSearchSearchLocationData
+                self.popularLocations = response.values.map { destination in
+                    HomeSearchSearchLocationData(id: destination.id, name: destination.name)
                 }
-                    .sorted { $0.name < $1.name }
-                    .prefix(5)
-                )
+                .sorted { $0.name < $1.name }
                     
             case .failure:
                 break

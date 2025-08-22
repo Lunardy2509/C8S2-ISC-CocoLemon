@@ -75,19 +75,9 @@ final class HomeSearchPageViewController: UIViewController {
     private func setupNavigation() {
         title = ""
         
-        // Custom Back Button
-        let button = UIButton(type: .system)
-        button.setImage(UIImage(systemName: "chevron.left"), for: .normal)
-        button.setTitle(" Home", for: .normal)
-        button.titleLabel?.font = UIFont.systemFont(ofSize: 17, weight: .regular)
-        button.addTarget(self, action: #selector(backButtonTapped), for: .touchUpInside)
-        
-        navigationItem.leftBarButtonItem = UIBarButtonItem(customView: button)
-    }
-    
-    @objc private func backButtonTapped() {
-        // Reset search when going back
-        onSearchReset?()
-        navigationController?.popViewController(animated: true)
+        // Use native back button with custom text
+        let backButton = UIBarButtonItem()
+        backButton.title = "Home"
+        navigationController?.navigationBar.topItem?.backBarButtonItem = backButton
     }
 }

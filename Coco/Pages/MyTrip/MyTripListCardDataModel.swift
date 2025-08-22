@@ -47,6 +47,6 @@ struct MyTripListCardDataModel {
         title = bookingDetail.activityTitle
         location = bookingDetail.destination.name
         totalPax = bookingDetail.participants
-        price = "Rp \(bookingDetail.totalPrice)"
+        price = "\(bookingDetail.totalPrice.toRupiah())"
     }
 }

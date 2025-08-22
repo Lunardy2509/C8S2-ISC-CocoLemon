@@ -2,7 +2,8 @@
 //  Double+ext.swift
 //  Coco
 //
-//  Created by Teuku Fazariz Basya on 14/08/25
+//  Created by Teuku Fazariz Bas
+ya on 14/08/25
 //
 
 import Foundation
@@ -12,8 +13,8 @@ extension Double {
         let formatter = NumberFormatter()
         formatter.numberStyle = .currency
         formatter.locale = Locale(identifier: "id_ID")
-        formatter.currencySymbol = "Rp"
+        formatter.currencySymbol = "IDR"
         formatter.maximumFractionDigits = 0
-        return formatter.string(from: NSNumber(value: self)) ?? "Rp0"
+        return formatter.string(from: NSNumber(value: self)) ?? "IDR 0"
     }
 }
