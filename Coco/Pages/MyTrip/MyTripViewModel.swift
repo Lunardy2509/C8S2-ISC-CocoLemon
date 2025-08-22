@@ -40,4 +40,46 @@ extension MyTripViewModel: MyTripViewModelProtocol {
         guard index < responses.count else { return }
         actionDelegate?.goToBookingDetail(with: responses[index])
     }
+    
+    func onTripDidDelete(at index: Int) {
+        guard index < responses.count else { return }
+        
+        let bookingToDelete = responses[index]
+        
+        // Remove from local array first for immediate UI update
+        responses.remove(at: index)
+        
+        // Update UI
+        actionDelegate?.configureView(datas: responses.map({ listData in
+            MyTripListCardDataModel(bookingDetail: listData)
+        }))
+        
+        // TODO: Uncomment when delete API is ready
+        /*
+        Task { @MainActor in
+            do {
+                let deleteRequest = DeleteBookingSpec(
+                    bookingId: bookingToDelete.bookingId,
+                    userId: UserDefaults.standard.value(forKey: "user-id") as? String ?? ""
+                )
+                
+                let _ = try await fetcher.deleteBooking(request: deleteRequest)
+                print("Trip successfully deleted from backend")
+            } catch {
+                // If API call fails, restore the item
+                responses.insert(bookingToDelete, at: index)
+                actionDelegate?.configureView(datas: responses.map({ listData in
+                    MyTripListCardDataModel(bookingDetail: listData)
+                }))
+                print("Failed to delete trip: \(error)")
+            }
+        }
+        */
+        
+        print("Trip deleted at index: \(index)")
+    }
+    
+    func onNotificationButtonTapped() {
+        actionDelegate?.goToNotificationPage()
+    }
 }

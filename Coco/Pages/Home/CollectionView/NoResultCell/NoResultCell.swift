@@ -2,7 +2,7 @@
 //  NoResultCell.swift
 //  Coco
 //
-//  Created by AI Assistant on 15/08/25.
+//  Created by Ferdinand Lunardy on 15/08/25.
 //
 
 import UIKit

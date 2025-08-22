@@ -27,5 +27,5 @@ struct HomeCollectionContent {
 }
 
 struct NoResultCellDataModel: Hashable {
-    let message: String = "No Results"
+    let message: String = "No perfect match yet, let’s try another city or activity!"
 }

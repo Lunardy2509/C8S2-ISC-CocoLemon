@@ -9,6 +9,7 @@ import Foundation
 
 protocol MyTripBookingListFetcherProtocol {
     func fetchTripBookingList(request: TripBookingListSpec) async throws -> JSONArray<BookingDetails>
+    func deleteBooking(request: DeleteBookingSpec) async throws -> DeleteBookingResponse
 }
 
 final class MyTripBookingListFetcher: MyTripBookingListFetcherProtocol {
@@ -19,6 +20,16 @@ final class MyTripBookingListFetcher: MyTripBookingListFetcherProtocol {
     func fetchTripBookingList(request: TripBookingListSpec) async throws -> JSONArray<BookingDetails> {
         try await networkService.request(
             urlString: CreateBookingEndpoint.getBookings.urlString,
+            method: .post,
+            parameters: [:],
+            headers: [:],
+            body: request
+        )
+    }
+    
+    func deleteBooking(request: DeleteBookingSpec) async throws -> DeleteBookingResponse {
+        try await networkService.request(
+            urlString: CreateBookingEndpoint.deleteBooking.urlString,
             method: .post,
             parameters: [:],
             headers: [:],

@@ -30,4 +30,5 @@ enum CocoIcon {
     static let splashLogo: Icon = Icon(iconName: "splashLogo")
     static let logoSymbol: Icon = Icon(iconName: "logoSymbol")
     static let logoSymbolGray: Icon = Icon(iconName: "logoSymbolGray")
+    static let logoEmptyStateSymbol: Icon = Icon(iconName: "logoEmptyStateSymbol")
 }

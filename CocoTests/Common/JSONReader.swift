@@ -39,7 +39,10 @@ final class JSONReader {
             }
             else if let jsonArray = jsonResult as? [JSONObject],
                     let arrayResult = T.self as? JSONArrayProtocol.Type {
-                return try arrayResult.init(jsonArray: jsonArray) as! T
+                guard let result = try arrayResult.init(jsonArray: jsonArray) as? T else {
+                    throw ReadError.invalidData("Failed to cast result to expected type for \(jsonPath)")
+                }
+                return result
             }
             else {
                 throw ReadError.invalidData("Unexpected JSON format in \(jsonPath)")
