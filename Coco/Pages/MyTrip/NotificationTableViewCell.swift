@@ -2,7 +2,7 @@
 //  NotificationTableViewCell.swift
 //  Coco
 //
-//  Created by Ferdinand Lunardy on 22/08/25.
+//  Created by Assistant on 22/08/25.
 //
 
 import UIKit

@@ -2,7 +2,7 @@
 //  MyTripNoTripDataModel.swift
 //  Coco
 //
-//  Created by Assistant on 22/08/25.
+//  Created by Ferdinand Lunardy on 22/08/25.
 //
 
 import Foundation
