@@ -2,8 +2,7 @@
 //  Double+ext.swift
 //  Coco
 //
-//  Created by Teuku Fazariz Bas
-ya on 14/08/25
+//  Created by Teuku Fazariz Basya on 14/08/25
 //
 
 import Foundation
