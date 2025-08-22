@@ -134,7 +134,7 @@ struct HomeViewModelTest {
         let activityData = HomeActivityCellDataModel(
             id: 1,
             area: "area",
-            name: "name",
+            name: "name", location: "location",
             priceText: "priceText",
             imageUrl: nil
         )
@@ -183,7 +183,7 @@ struct HomeViewModelTest {
         let invalidActivityData = HomeActivityCellDataModel(
             id: 999,
             area: "area",
-            name: "name",
+            name: "name", location: "location",
             priceText: "priceText",
             imageUrl: nil
         )
