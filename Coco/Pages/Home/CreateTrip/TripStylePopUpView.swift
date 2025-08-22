@@ -35,7 +35,7 @@ struct TripStylePopUpView: View {
                     text: "Group",
                     style: .normal,
                     type: .primary
-                )
+                )   
                 .stretch()
                 
                 CocoButton(
