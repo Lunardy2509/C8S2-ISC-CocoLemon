@@ -73,6 +73,7 @@ final class CocoButtonHostingController: UIHostingController<AnyView> {
                    .environment(\.isStretch, isStretch) // Inject environment here
 
         super.init(rootView: AnyView(view))
+        self.view.backgroundColor = .clear
     }
 
     @MainActor @objc required dynamic init?(coder aDecoder: NSCoder) {
