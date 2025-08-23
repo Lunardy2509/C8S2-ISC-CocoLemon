@@ -233,7 +233,8 @@ extension HomeViewModel: HomeViewModelProtocol {
                 dataModel: tempResponseData.map {
                     HomeActivityCellDataModel(activity: $0)
                 }
-            )
+            ),
+            isFromSearch: !currentSearchQuery.isEmpty
         )
         
         // Update filter carousel with current filter states
@@ -272,7 +273,8 @@ extension HomeViewModel: HomeViewModelProtocol {
             activity: (
                 title: sectionTitle,
                 dataModel: filteredActivities.map { HomeActivityCellDataModel(activity: $0) }
-            )
+            ),
+            isFromSearch: hasActiveSearch
         )
         
         let selectedTitles = filterDataModel.filterPillDataState
@@ -361,7 +363,10 @@ private extension HomeViewModel {
                 
                 // Set section title based on whether there's an active search
                 let sectionTitle = searchText.isEmpty ? "Most Popular" : "Your Result"
-                collectionViewModel.updateActivity(activity: (title: sectionTitle, dataModel: sectionData))
+                collectionViewModel.updateActivity(
+                    activity: (title: sectionTitle, dataModel: sectionData),
+                    isFromSearch: !searchText.isEmpty
+                )
                 
                 constructFilterData()
                 

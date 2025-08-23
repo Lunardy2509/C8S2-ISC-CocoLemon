@@ -23,7 +23,7 @@ struct HomeFilterTray: View {
                 
                 Spacer()
                 
-                customButton
+                dismissButton
             }
             .padding(.top, 10)
             
@@ -103,26 +103,20 @@ private extension HomeFilterTray {
         }
     }
     
-    var customButton: some View {
-        Group {
-            if viewModel.hasActiveFilters {
-                Button(action: {
-                    viewModel.clearAllFilters()
-                }) {
-                    Text("Clear All")
-                        .font(.jakartaSans(forTextStyle: .footnote, weight: .regular))
-                        .foregroundColor(Token.mainColorPrimary.toColor())
-                }
-            } else {
-                Button(action: {
-                    dismiss()
-                }) {
-                    Text("Close")
-                        .font(.jakartaSans(forTextStyle: .footnote, weight: .regular))
-                        .foregroundColor(Token.mainColorPrimary.toColor())
-                }
+    var dismissButton: some View {
+        Button(action: {
+            dismiss()
+        }, label: {
+            ZStack {
+                Image(systemName: "circle.fill")
+                    .resizable()
+                    .frame(width: 24.0, height: 24.0)
+                    .foregroundColor(Token.grayscale30.toColor())
+                Image(systemName: "xmark")
+                    .resizable()
+                    .frame(width: 10.0, height: 10.0)
+                    .foregroundStyle(Token.additionalColorsBlack.toColor())
             }
-
-        }
+        })
     }
 }

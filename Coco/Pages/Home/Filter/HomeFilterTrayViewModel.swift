@@ -13,7 +13,7 @@ final class HomeFilterTrayViewModel: ObservableObject {
     let filterDidApplyPublisher = PassthroughSubject<HomeFilterTrayDataModel, Never>()
 
     @Published var dataModel: HomeFilterTrayDataModel
-    @Published var applyButtonTitle: String = "See Results"
+    @Published var applyButtonTitle: String = "See Result"
 
     private let activities: [Activity]
 
@@ -58,7 +58,7 @@ final class HomeFilterTrayViewModel: ObservableObject {
         let hasActiveFilters = filterAppliedCount > 0
 
         guard hasActiveFilters else {
-            applyButtonTitle = "See Results"
+            applyButtonTitle = "See Result"
             return
         }
 

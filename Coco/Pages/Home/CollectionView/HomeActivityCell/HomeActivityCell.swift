@@ -112,7 +112,7 @@ private extension HomeActivityCell {
     
     func createLocationView() -> UIView {
         let containerView = UIView()
-        let pinIcon = UIImageView(image: CocoIcon.icPinPointBlue.image)
+        let pinIcon = UIImageView(image: CocoIcon.icPinPointBlack.image)
         pinIcon.contentMode = .scaleAspectFit
         
         containerView.addSubviews([pinIcon, locationLabel])

@@ -16,7 +16,14 @@ final class HomeCollectionViewModel {
         reloadCollection()
     }
     
+    func updateActivity(activity: HomeActivityCellSectionDataModel, isFromSearch: Bool) {
+        activityData = activity
+        self.isFromSearch = isFromSearch
+        reloadCollection()
+    }
+    
     private(set) var activityData: HomeActivityCellSectionDataModel = (nil, [])
+    private(set) var isFromSearch: Bool = false
 }
 
 extension HomeCollectionViewModel: HomeCollectionViewModelProtocol {

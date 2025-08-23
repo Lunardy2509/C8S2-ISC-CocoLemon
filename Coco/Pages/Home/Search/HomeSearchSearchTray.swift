@@ -131,14 +131,13 @@ private extension HomeSearchSearchTray {
         HStack(alignment: .center, spacing: 6.0) {
             Text(name)
                 .lineLimit(1)
-                .font(.jakartaSans(forTextStyle: .body, weight: .light))
+                .font(.jakartaSans(forTextStyle: .footnote, weight: .light))
                 .foregroundStyle(Token.grayscale60.toColor())
             
             Image(uiImage: CocoIcon.icCross.image)
                 .resizable()
                 .frame(width: 12.0, height: 12.0)
                 .onTapGesture {
-                    // Only tapping the X mark should remove the search history
                     if let onSearchHistoryRemove = onSearchHistoryRemove,
                        let index = latestSearches.firstIndex(where: { $0.name == name }) {
                         let location = latestSearches[index]
@@ -150,13 +149,15 @@ private extension HomeSearchSearchTray {
         .padding(.vertical, 12.0)
         .padding(.horizontal, 20.0)
         .background(Token.additionalColorsWhite.toColor())
-        .overlay(
-            RoundedRectangle(cornerRadius: 14.0)
-                .stroke(Token.grayscale30.toColor(), lineWidth: 1.0)
-        )
-        .cornerRadius(14.0)
+        .overlay {
+            RoundedRectangle(cornerRadius: 24.0)
+                .stroke(
+                    Token.grayscale30.toColor(),
+                    lineWidth: 1.0
+                )
+        }
+        .cornerRadius(24.0)
         .onTapGesture {
-            // Tapping the main area should fill the text field with the search term
             viewModel.searchBarViewModel.currentTypedText = name
         }
     }
@@ -189,7 +190,7 @@ private extension HomeSearchSearchTray {
     var dismissButton: some View {
         Button(action: {
             dismiss()
-        }) {
+        }, label: {
             ZStack {
                 Image(systemName: "circle.fill")
                     .resizable()
@@ -200,6 +201,6 @@ private extension HomeSearchSearchTray {
                     .frame(width: 10.0, height: 10.0)
                     .foregroundStyle(Token.additionalColorsBlack.toColor())
             }
-        }
+        })
     }
 }

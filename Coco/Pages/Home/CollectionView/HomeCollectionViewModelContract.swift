@@ -22,9 +22,11 @@ protocol HomeCollectionViewModelProtocol: AnyObject {
     var delegate: HomeCollectionViewModelDelegate? { get set }
     
     var activityData: HomeActivityCellSectionDataModel { get }
+    var isFromSearch: Bool { get }
     
     func onViewDidLoad()
     func updateActivity(activity: HomeActivityCellSectionDataModel)
+    func updateActivity(activity: HomeActivityCellSectionDataModel, isFromSearch: Bool)
     func onActivityDidTap(_ dataModel: HomeActivityCellDataModel)
     func onClearAllFilters()
 }

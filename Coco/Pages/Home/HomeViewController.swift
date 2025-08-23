@@ -133,11 +133,11 @@ extension HomeViewController: HomeViewModelAction {
             }
         )
         
-        presentTray(view: searchTrayView)
+        presentSearchTray(view: searchTrayView)
     }
     
     func openFilterTray(_ viewModel: HomeFilterTrayViewModel) {
-        presentTray(view: HomeFilterTray(viewModel: viewModel))
+        presentFilterTray(view: HomeFilterTray(viewModel: viewModel))
     }
     
     func dismissTray() {
@@ -146,10 +146,25 @@ extension HomeViewController: HomeViewModelAction {
 }
 
 private extension HomeViewController {
-    func presentTray(view: some View) {
+    func presentSearchTray(view: some View) {
         let trayVC: UIHostingController = UIHostingController(rootView: view)
         if let sheet: UISheetPresentationController = trayVC.sheetPresentationController {
             sheet.detents = [.large()]
+            sheet.prefersGrabberVisible = true
+            sheet.prefersScrollingExpandsWhenScrolledToEdge = false
+            sheet.prefersEdgeAttachedInCompactHeight = true
+            sheet.preferredCornerRadius = 32.0
+        }
+        present(trayVC, animated: true)
+    }
+    
+    func presentFilterTray(view: some View) {
+        let trayVC: UIHostingController = UIHostingController(rootView: view)
+        let fractionalDetent = UISheetPresentationController.Detent.custom(identifier: .init("fractionalDetent")) { context in
+            return context.maximumDetentValue * 0.85
+        }
+        if let sheet: UISheetPresentationController = trayVC.sheetPresentationController {
+            sheet.detents = [fractionalDetent, .large()]
             sheet.prefersGrabberVisible = true
             sheet.prefersScrollingExpandsWhenScrolledToEdge = false
             sheet.prefersEdgeAttachedInCompactHeight = true

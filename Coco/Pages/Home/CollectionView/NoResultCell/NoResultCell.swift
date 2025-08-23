@@ -57,7 +57,7 @@ final class NoResultCell: UICollectionViewCell {
         
         NSLayoutConstraint.activate([
             stack.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
-            stack.centerYAnchor.constraint(equalTo: contentView.centerYAnchor),
+            stack.centerYAnchor.constraint(lessThanOrEqualTo: contentView.centerYAnchor, constant: -60),
             stack.leadingAnchor.constraint(greaterThanOrEqualTo: contentView.leadingAnchor, constant: 16),
             stack.trailingAnchor.constraint(lessThanOrEqualTo: contentView.trailingAnchor, constant: -16),
             

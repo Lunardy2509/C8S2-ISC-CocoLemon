@@ -35,7 +35,7 @@ final class HomeReusableHeader: UICollectionReusableView {
         let button = UIButton(type: .system)
         button.setTitle("Clear All", for: .normal)
         button.titleLabel?.font = .jakartaSans(forTextStyle: .caption1)
-        button.configuration?.baseForegroundColor = Token.mainColorPrimary
+        button.setTitleColor(Token.mainColorPrimary, for: .normal)
         button.addTarget(self, action: #selector(clearAllTapped), for: .touchUpInside)
         button.isHidden = true
         return button
