@@ -87,60 +87,42 @@ extension HomeCoordinator: ActivityDetailNavigationDelegate {
 
     func notifyCreateTripTapped() {
         if UserDefaults.standard.string(forKey: "user-id") != nil {
-            showTripStylePopup()
+            navigateToTripStylePage()
         } else {
-            showSignInPopup()
+            guard let tabBarController = parentCoordinator?.navigationController?.tabBarController as? BaseTabBarViewController else {
+                return
+            }
+            tabBarController.selectedIndex = 2
         }
     }
-    
-    private func showTripStylePopup() {
+
+    private func navigateToTripStylePage() {
         guard case let .activityDetail(data) = input.flow else {
             return
         }
 
-        let tripStylePopUpView = TripStylePopUpView { [weak self] style in
-            self?.navigationController?.dismiss(animated: true, completion: {
-                guard let self = self else { return }
-                switch style {
-                case .solo:
-                    let soloViewModel = SoloTripActivityDetailViewModel(data: data)
-                    soloViewModel.navigationDelegate = self
-                    let soloVC = SoloTripActivityDetailViewController(viewModel: soloViewModel)
-                    self.start(viewController: soloVC)
-                case .group:
-                    let groupViewModel = GroupTripActivityDetailViewModel(data: data)
-                    groupViewModel.navigationDelegate = self
-                    let groupVC = GroupTripActivityDetailViewController(viewModel: groupViewModel)
-                    self.start(viewController: groupVC)
-                }
-            })
+        let tripStyleVC = TripStyleViewController { [weak self] style in
+            guard let self = self else { return }
+            
+            // The style selection triggers navigation, so we can pop the current
+            // controller before pushing the new one.
+            self.navigationController?.popViewController(animated: false)
+
+            switch style {
+            case .solo:
+                let soloViewModel = SoloTripActivityDetailViewModel(data: data)
+                soloViewModel.navigationDelegate = self
+                let soloVC = SoloTripActivityDetailViewController(viewModel: soloViewModel)
+                self.start(viewController: soloVC)
+            case .group:
+                let groupViewModel = GroupTripActivityDetailViewModel(data: data)
+                groupViewModel.navigationDelegate = self
+                let groupVC = GroupTripActivityDetailViewController(viewModel: groupViewModel)
+                self.start(viewController: groupVC)
+            }
         }
         
-        let hostingController = UIHostingController(rootView: tripStylePopUpView)
-        let popupViewController = CocoPopupViewController(child: hostingController)
-        
-        navigationController?.present(popupViewController, animated: true)
-    }
-    
-    private func showSignInPopup() {
-        let signInPopUpView = SignInPopUpView(
-            signInDidTap: { [weak self] in
-                self?.navigationController?.dismiss(animated: true, completion: {
-                    guard let tabBarController = self?.parentCoordinator?.navigationController?.tabBarController as? BaseTabBarViewController else {
-                        return
-                    }
-                    tabBarController.selectedIndex = 2 // Profile Tab
-                })
-            },
-            cancelDidTap: { [weak self] in
-                self?.navigationController?.dismiss(animated: true)
-            }
-        )
-        
-        let hostingController = UIHostingController(rootView: signInPopUpView)
-        let popupViewController = CocoPopupViewController(child: hostingController)
-        
-        navigationController?.present(popupViewController, animated: true)
+        start(viewController: tripStyleVC)
     }
 }
 
@@ -158,7 +140,7 @@ extension HomeCoordinator: SoloTripActivityDetailNavigationDelegate {
     }
     
     func notifySoloTripCreateTripTapped() {
-        // This will not be called as the button is removed from SoloTripActivityDetailViewController
+     
     }
 }
 
@@ -176,6 +158,6 @@ extension HomeCoordinator: GroupTripActivityDetailNavigationDelegate {
     }
     
     func notifyGroupTripCreateTripTapped() {
-        // This will not be called as the button is removed from GroupTripActivityDetailViewController
+       
     }
 }
