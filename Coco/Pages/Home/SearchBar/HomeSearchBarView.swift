@@ -78,10 +78,11 @@ struct HomeSearchBarView: View {
             // Trailing icons area
             HStack(spacing: 8.0) {
                 if showClearButton {
-                    Image(uiImage: CocoIcon.icCross.image)
+                    Image(systemName: "xmark")
                         .resizable()
                         .scaledToFit()
-                        .frame(width: 18.0, height: 18.0)
+                        .frame(width: 10.0, height: 10.0)
+                        .foregroundColor(Token.additionalColorsBlack.toColor())
                         .onTapGesture {
                             viewModel.currentTypedText = ""
                             onClearAction?()

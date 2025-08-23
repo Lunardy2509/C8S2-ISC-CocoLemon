@@ -8,9 +8,6 @@
 import Foundation
 import UIKit
 
-import Foundation
-import UIKit
-
 final class MyTripViewController: UIViewController {
     init(viewModel: MyTripViewModelProtocol) {
         self.viewModel = viewModel
@@ -25,6 +22,7 @@ final class MyTripViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         title = "My Trip"
+        setupNavigationBar()
         thisView.delegate = self
     }
     
@@ -57,10 +55,84 @@ extension MyTripViewController: MyTripViewModelAction {
         coordinator.parentCoordinator = AppCoordinator.shared
         coordinator.start()
     }
+    
+    func goToNotificationPage() {
+        let notificationVC = NotificationViewController()
+        navigationController?.pushViewController(notificationVC, animated: true)
+    }
+    
+    func showDeleteConfirmation(for index: Int, completion: @escaping (Bool) -> Void) {
+        let alert = UIAlertController(
+            title: "Delete Trip",
+            message: "Are you sure you want to delete this trip? This action cannot be undone.",
+            preferredStyle: .alert
+        )
+        
+        let deleteAction = UIAlertAction(title: "Delete", style: .destructive) { _ in
+            completion(true)
+        }
+        
+        let cancelAction = UIAlertAction(title: "Cancel", style: .cancel) { _ in
+            completion(false)
+        }
+        
+        alert.addAction(deleteAction)
+        alert.addAction(cancelAction)
+        
+        present(alert, animated: true)
+    }
 }
 
 extension MyTripViewController: MyTripViewDelegate {
     func notifyTripListCardDidTap(at index: Int) {
         viewModel.onTripListDidTap(at: index)
+    }
+    
+    func notifyTripListCardDidDelete(at index: Int) {
+        showDeleteConfirmation(for: index) { [weak self] shouldDelete in
+            if shouldDelete {
+                self?.viewModel.onTripDidDelete(at: index)
+            }
+        }
+    }
+}
+
+private extension MyTripViewController {
+    func setupNavigationBar() {
+        // Add plus button
+        let plusButton = UIBarButtonItem(
+            image: UIImage(systemName: "plus") ?? UIImage(),
+            style: .plain,
+            target: self,
+            action: #selector(plusButtonTapped)
+        )
+        
+        // Add notification button  
+        let notificationButton = UIBarButtonItem(
+            image: UIImage(systemName: "bell") ?? UIImage(),
+            style: .plain,
+            target: self,
+            action: #selector(notificationButtonTapped)
+        )
+        
+        navigationItem.rightBarButtonItems = [notificationButton, plusButton]
+    }
+    
+    @objc private func plusButtonTapped() {
+        // Navigate to create trip functionality
+        // For now, switch to home tab
+        guard let tabBarController = tabBarController as? BaseTabBarViewController else { return }
+        tabBarController.selectedIndex = 0
+    }
+    
+    @objc private func notificationButtonTapped() {
+        viewModel.onNotificationButtonTapped()
+    }
+    
+    typealias MyTripNoTripRegistration = UICollectionView.CellRegistration<MyTripNoTrip,MyTripNoTripDataModel>
+    func createMyTripNoTripRegistration() -> MyTripNoTripRegistration {
+        .init { cell, _, itemIdentifier in
+            // No need Configuration
+        }
     }
 }

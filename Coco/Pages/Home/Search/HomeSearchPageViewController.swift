@@ -38,7 +38,6 @@ final class HomeSearchPageViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         setupView()
-        setupNavigation()
     }
     
     private func setupView() {
@@ -70,24 +69,5 @@ final class HomeSearchPageViewController: UIViewController {
             hostingController.view.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             hostingController.view.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         ])
-    }
-    
-    private func setupNavigation() {
-        title = ""
-        
-        // Custom Back Button
-        let button = UIButton(type: .system)
-        button.setImage(UIImage(systemName: "chevron.left"), for: .normal)
-        button.setTitle(" Home", for: .normal)
-        button.titleLabel?.font = UIFont.systemFont(ofSize: 17, weight: .regular)
-        button.addTarget(self, action: #selector(backButtonTapped), for: .touchUpInside)
-        
-        navigationItem.leftBarButtonItem = UIBarButtonItem(customView: button)
-    }
-    
-    @objc private func backButtonTapped() {
-        // Reset search when going back
-        onSearchReset?()
-        navigationController?.popViewController(animated: true)
     }
 }

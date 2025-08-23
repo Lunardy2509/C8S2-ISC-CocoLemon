@@ -11,28 +11,36 @@ import SwiftUI
 struct HomeFilterTray: View {
     @ObservedObject var viewModel: HomeFilterTrayViewModel
     
+    @Environment(\.dismiss) private var dismiss
+    
     var body: some View {
         VStack(alignment: .center) {
-            Text("Filter Services")
-                .multilineTextAlignment(.center)
-                .font(.jakartaSans(forTextStyle: .body, weight: .semibold))
-                .foregroundStyle(Token.additionalColorsBlack.toColor())
+            HStack {
+                Text("Filter")
+                    .multilineTextAlignment(.leading)
+                    .font(.jakartaSans(forTextStyle: .title1, weight: .bold))
+                    .foregroundStyle(Token.additionalColorsBlack.toColor())
+                
+                Spacer()
+                
+                dismissButton
+            }
+            .padding(.top, 10)
             
             ScrollView {
                 VStack(alignment: .leading, spacing: 24.0) {
                     if !viewModel.dataModel.filterPillDataState.isEmpty {
-                        VStack(alignment: .leading, spacing: 12.0) {
+                        VStack(alignment: .leading, spacing: 4.0) {
                             Text("Activities")
                                 .foregroundStyle(Token.additionalColorsBlack.toColor())
                                 .font(.jakartaSans(forTextStyle: .body, weight: .semibold))
+                                .padding(.bottom, 10)
                             
-                            ScrollView(.horizontal) {
-                                HStack(spacing: 12.0) {
-                                    ForEach(viewModel.dataModel.filterPillDataState, id: \.id) { state in
-                                        HomeFilterPillView(state: state, didTap: {
-                                            viewModel.updateApplyButtonTitle()
-                                        })
-                                    }
+                            FlowLayout(spacing: 12.0) {
+                                ForEach(viewModel.dataModel.filterPillDataState, id: \.id) { state in
+                                    HomeFilterPillView(state: state, didTap: {
+                                        viewModel.updateApplyButtonTitle()
+                                    })
                                 }
                             }
                         }
@@ -43,14 +51,13 @@ struct HomeFilterTray: View {
                             Text("Popular Locations")
                                 .foregroundStyle(Token.additionalColorsBlack.toColor())
                                 .font(.jakartaSans(forTextStyle: .body, weight: .semibold))
+                                .padding(.bottom, 10)
                             
-                            ScrollView(.horizontal) {
-                                HStack(spacing: 12.0) {
-                                    ForEach(viewModel.dataModel.filterDestinationPillState, id: \.id) { state in
-                                        HomeFilterDestinationPillView(state: state, didTap: {
-                                            viewModel.updateApplyButtonTitle()
-                                        })
-                                    }
+                            FlowLayout(spacing: 12) {
+                                ForEach(viewModel.dataModel.filterDestinationPillState, id: \.id) { state in
+                                    HomeFilterDestinationPillView(state: state, didTap: {
+                                        viewModel.updateApplyButtonTitle()
+                                    })
                                 }
                             }
                         }
@@ -80,7 +87,6 @@ struct HomeFilterTray: View {
         .frame(maxWidth: .infinity)
         .padding(24.0)
         .background(Color.white)
-        .cornerRadius(16)
     }
 }
 
@@ -95,5 +101,22 @@ private extension HomeFilterTray {
                 .foregroundStyle(Token.additionalColorsBlack.toColor())
             view()
         }
+    }
+    
+    var dismissButton: some View {
+        Button(action: {
+            dismiss()
+        }, label: {
+            ZStack {
+                Image(systemName: "circle.fill")
+                    .resizable()
+                    .frame(width: 24.0, height: 24.0)
+                    .foregroundColor(Token.grayscale30.toColor())
+                Image(systemName: "xmark")
+                    .resizable()
+                    .frame(width: 10.0, height: 10.0)
+                    .foregroundStyle(Token.additionalColorsBlack.toColor())
+            }
+        })
     }
 }

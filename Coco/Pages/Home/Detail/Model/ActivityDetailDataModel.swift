@@ -67,7 +67,7 @@ struct ActivityDetailDataModel: Equatable {
                     imageUrlString: $0.imageUrl,
                     name: $0.name,
                     description: "Min.\($0.minParticipants) - Max.\($0.maxParticipants)",
-                    price: $0.pricePerPerson.toRupiah(),
+                    price: "\($0.pricePerPerson.toRupiah())",
                     id: $0.id
                 )
             }

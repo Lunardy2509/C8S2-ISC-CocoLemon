@@ -157,7 +157,8 @@ private extension HomeCollectionViewController {
                 return
             }
             
-            let showClearAll = sectionTitle == "Your Result"
+            // Only show "Clear All" for "Your Result" sections that are NOT from search results
+            let showClearAll = sectionTitle == "Your Result" && !(self?.viewModel.isFromSearch ?? false)
             supplementaryView.configureView(title: sectionTitle, showClearAll: showClearAll)
             
             supplementaryView.onClearAllTap = { [weak self] in

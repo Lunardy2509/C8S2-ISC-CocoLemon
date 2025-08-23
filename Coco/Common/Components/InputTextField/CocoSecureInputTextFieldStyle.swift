@@ -40,13 +40,13 @@ struct CocoSecureInputTextFieldStyle: TextFieldStyle {
             
             Button(action: {
                 isSecure.toggle()
-            }) {
+            }, label: {
                 Image(systemName: isSecure ? "eye.slash" : "eye")
                     .resizable()
                     .scaledToFit()
                     .frame(width: 18.0, height: 18.0)
                     .foregroundStyle(.gray)
-            }
+            })
             .buttonStyle(.plain)
         }
         .padding(.vertical, 14.0)
