@@ -18,12 +18,12 @@ struct TripStylePopUpView: View {
     var body: some View {
         VStack(alignment: .center, spacing: 24.0) {
             VStack(spacing: 4.0) {
-                Text("Trip Style")
+                Text("Are you in a group travel?")
                     .font(.jakartaSans(forTextStyle: .title3, weight: .semibold))
                     .foregroundStyle(Token.additionalColorsBlack.toColor())
                     .multilineTextAlignment(.center)
                 
-                Text("Choose the trip style that fits you best, how do you want to travel?")
+                Text("We can help you create a collaboration group trip")
                     .font(.jakartaSans(forTextStyle: .subheadline, weight: .regular))
                     .foregroundStyle(Token.grayscale70.toColor())
                     .multilineTextAlignment(.center)
