@@ -281,7 +281,7 @@ extension HomeViewModel: HomeViewModelProtocol {
         
         var filterInfo = "Applied filters: \(selectedTitles.joined(separator: ", "))"
         if let priceRange = filterDataModel.priceRangeModel {
-            filterInfo += " | Price: Rp\(Int(priceRange.minPrice).formatted()) - Rp\(Int(priceRange.maxPrice).formatted())"
+            filterInfo += " | Price: \(priceRange.minPrice.toRupiah()) - \(priceRange.maxPrice.toRupiah())"
         }
     }
 }
@@ -323,7 +323,7 @@ private extension HomeViewModel {
             case .success(let response):
                 
                 // Store the full response data first
-                var allActivities = response.values
+                let allActivities = response.values
                 
                 // Get the current search text for local filtering
                 let searchText = currentSearchQuery.isEmpty ? searchBarViewModel.currentTypedText : currentSearchQuery

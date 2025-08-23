@@ -12,7 +12,7 @@ struct HomeSearchSearchTray: View {
     @StateObject var viewModel: HomeSearchSearchTrayViewModel
     
     @State var latestSearches: [HomeSearchSearchLocationData]
-    
+        
     let searchDidApply: ((_ query: String) -> Void)
     let onSearchHistoryRemove: ((_ searchData: HomeSearchSearchLocationData) -> Void)?
     let onSearchReset: (() -> Void)?
@@ -43,8 +43,23 @@ struct HomeSearchSearchTray: View {
         self.onSearchReset = onSearchReset
     }
     
+    @Environment(\.dismiss) private var dismiss
     var body: some View {
         VStack(alignment: .center) {
+            HStack {
+                Spacer()
+                
+                Text("Search Destination")
+                    .multilineTextAlignment(.center)
+                    .font(.jakartaSans(forTextStyle: .title3, weight: .semibold))
+                    .foregroundStyle(Token.additionalColorsBlack.toColor())
+                
+                Spacer()
+                
+                dismissButton
+            }
+            .padding(.top, 10)
+            
             ScrollView {
                 VStack(alignment: .leading, spacing: 24.0) {
                     HomeSearchBarView(
@@ -77,7 +92,6 @@ struct HomeSearchSearchTray: View {
         .frame(maxWidth: .infinity)
         .padding(24.0)
         .background(Color.white)
-        .cornerRadius(16)
         .onAppear {
             viewModel.onAppear()
         }
@@ -122,7 +136,7 @@ private extension HomeSearchSearchTray {
             
             Image(uiImage: CocoIcon.icCross.image)
                 .resizable()
-                .frame(width: 15.0, height: 15.0)
+                .frame(width: 12.0, height: 12.0)
                 .onTapGesture {
                     // Only tapping the X mark should remove the search history
                     if let onSearchHistoryRemove = onSearchHistoryRemove,
@@ -168,6 +182,23 @@ private extension HomeSearchSearchTray {
                         .frame(height: 1.0)
                         .foregroundStyle(Token.additionalColorsLine.toColor())
                 }
+            }
+        }
+    }
+    
+    var dismissButton: some View {
+        Button(action: {
+            dismiss()
+        }) {
+            ZStack {
+                Image(systemName: "circle.fill")
+                    .resizable()
+                    .frame(width: 24.0, height: 24.0)
+                    .foregroundColor(Token.grayscale30.toColor())
+                Image(systemName: "xmark")
+                    .resizable()
+                    .frame(width: 10.0, height: 10.0)
+                    .foregroundStyle(Token.additionalColorsBlack.toColor())
             }
         }
     }

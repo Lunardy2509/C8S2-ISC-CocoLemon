@@ -38,7 +38,6 @@ final class HomeSearchPageViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         setupView()
-        setupNavigation()
     }
     
     private func setupView() {
@@ -70,14 +69,5 @@ final class HomeSearchPageViewController: UIViewController {
             hostingController.view.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             hostingController.view.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         ])
-    }
-    
-    private func setupNavigation() {
-        title = ""
-        
-        // Use native back button with custom text
-        let backButton = UIBarButtonItem()
-        backButton.title = "Home"
-        navigationController?.navigationBar.topItem?.backBarButtonItem = backButton
     }
 }

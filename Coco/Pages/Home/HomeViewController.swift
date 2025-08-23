@@ -115,21 +115,25 @@ extension HomeViewController: HomeViewModelAction {
         selectedQuery: String,
         latestSearches: [HomeSearchSearchLocationData]
     ) {
-        let searchPageVC = HomeSearchPageViewController(
+        let searchTrayView = HomeSearchSearchTray(
             selectedQuery: selectedQuery,
             latestSearches: latestSearches,
             searchDidApply: { [weak self] queryText in
-                self?.viewModel.onSearchDidApply(queryText)
+                self?.dismiss(animated: true) {
+                    self?.viewModel.onSearchDidApply(queryText)
+                }
             },
             onSearchHistoryRemove: { [weak self] searchData in
                 self?.viewModel.removeSearchFromHistory(searchData)
             },
             onSearchReset: { [weak self] in
-                self?.viewModel.onSearchReset()
+                self?.dismiss(animated: true) {
+                    self?.viewModel.onSearchReset()
+                }
             }
         )
         
-        navigationController?.pushViewController(searchPageVC, animated: true)
+        presentTray(view: searchTrayView)
     }
     
     func openFilterTray(_ viewModel: HomeFilterTrayViewModel) {
@@ -145,11 +149,7 @@ private extension HomeViewController {
     func presentTray(view: some View) {
         let trayVC: UIHostingController = UIHostingController(rootView: view)
         if let sheet: UISheetPresentationController = trayVC.sheetPresentationController {
-            let fractionalDetent = UISheetPresentationController.Detent.custom(identifier: .init("SixtyFivePercent")) { context in
-                return context.maximumDetentValue * 0.65
-            }
-            
-            sheet.detents = [fractionalDetent, .large()]
+            sheet.detents = [.large()]
             sheet.prefersGrabberVisible = true
             sheet.prefersScrollingExpandsWhenScrolledToEdge = false
             sheet.prefersEdgeAttachedInCompactHeight = true

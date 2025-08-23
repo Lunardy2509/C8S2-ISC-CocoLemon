@@ -14,7 +14,8 @@ struct HomeFilterPillView: View {
     
     var body: some View {
         Text(state.title)
-            .lineLimit(1)
+            .lineLimit(nil)
+            .multilineTextAlignment(.center)
             .font(.jakartaSans(forTextStyle: .footnote, weight: .semibold))
             .foregroundStyle(state.textColor)
             .padding(.vertical, 8.0)
