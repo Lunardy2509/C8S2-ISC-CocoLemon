@@ -181,7 +181,7 @@ final class ActivityDetailView: UIView {
     
     private lazy var createTripButtonContainer: UIView = {
         let view = UIView()
-        view.backgroundColor = .white
+        view.backgroundColor = .clear
         view.layer.shadowColor = UIColor.black.cgColor
         view.layer.shadowOpacity = 0
         view.layer.shadowOffset = .init(width: 0, height: -2)
@@ -205,7 +205,7 @@ extension ActivityDetailView {
             scrollView.topAnchor.constraint(equalTo: self.topAnchor),
             scrollView.leadingAnchor.constraint(equalTo: self.leadingAnchor),
             scrollView.trailingAnchor.constraint(equalTo: self.trailingAnchor),
-            scrollView.bottomAnchor.constraint(equalTo: buttonContainer.topAnchor)
+            scrollView.bottomAnchor.constraint(equalTo: self.bottomAnchor)
         ])
 
         buttonContainer.translatesAutoresizingMaskIntoConstraints = false
