@@ -11,6 +11,7 @@ import UIKit
 protocol GroupTripActivityDetailViewDelegate: AnyObject {
     func notifyPackagesButtonDidTap(shouldShowAll: Bool)
     func notifyPackagesDetailDidTap(with packageId: Int)
+    func notifyAddFriendButtonDidTap() // Add this new method
 }
 
 final class GroupTripActivityDetailView: UIView {
@@ -729,6 +730,6 @@ private extension GroupTripActivityDetailView {
     }
     
     @objc func didTapAddFriendButton() {
-        print("Add Friend button tapped")
+        delegate?.notifyAddFriendButtonDidTap()
     }
 }
