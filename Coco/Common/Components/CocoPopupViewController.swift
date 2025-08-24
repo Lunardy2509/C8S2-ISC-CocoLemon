@@ -66,7 +66,7 @@ final class CocoPopupViewController: UIViewController {
     
     private let child: UIViewController
     private let transitionDelegate: PopupTransitioningDelegate = PopupTransitioningDelegate()
-    private let container = UIView()
+    fileprivate let container = UIView()
 }
 
 extension CocoPopupViewController: UIGestureRecognizerDelegate {
@@ -100,6 +100,72 @@ private class PopupPresentationController: UIPresentationController {
     override var shouldRemovePresentersView: Bool { false }
 }
 
+private class PopupAnimator: NSObject, UIViewControllerAnimatedTransitioning {
+    private let isPresenting: Bool
+
+    init(isPresenting: Bool) {
+        self.isPresenting = isPresenting
+        super.init()
+    }
+
+    func transitionDuration(using transitionContext: UIViewControllerContextTransitioning?) -> TimeInterval {
+        return 0.4
+    }
+
+    func animateTransition(using transitionContext: UIViewControllerContextTransitioning) {
+        guard let targetView = transitionContext.view(forKey: isPresenting ? .to : .from) else {
+            transitionContext.completeTransition(false)
+            return
+        }
+
+        let containerView = transitionContext.containerView
+
+        guard let popupViewController = transitionContext.viewController(forKey: isPresenting ? .to : .from) as? CocoPopupViewController else {
+            transitionContext.completeTransition(false)
+            return
+        }
+        
+        let popupContainer = popupViewController.container
+
+        if isPresenting {
+            containerView.addSubview(targetView)
+            targetView.frame = containerView.bounds
+            
+            popupContainer.alpha = 0
+            popupContainer.transform = CGAffineTransform(scaleX: 1.1, y: 1.1)
+
+            UIView.animate(
+                withDuration: transitionDuration(using: transitionContext),
+                delay: 0,
+                usingSpringWithDamping: 0.8,
+                initialSpringVelocity: 0.5,
+                options: .curveEaseOut,
+                animations: {
+                    popupContainer.alpha = 1
+                    popupContainer.transform = .identity
+                },
+                completion: { finished in
+                    transitionContext.completeTransition(finished)
+                }
+            )
+        } else {
+            UIView.animate(
+                withDuration: transitionDuration(using: transitionContext),
+                delay: 0,
+                options: .curveEaseOut,
+                animations: {
+                    popupContainer.alpha = 0
+                    popupContainer.transform = CGAffineTransform(scaleX: 0.9, y: 0.9)
+                },
+                completion: { finished in
+                    targetView.removeFromSuperview()
+                    transitionContext.completeTransition(finished)
+                }
+            )
+        }
+    }
+}
+
 private class PopupTransitioningDelegate: NSObject, UIViewControllerTransitioningDelegate {
     func presentationController(
         forPresented presented: UIViewController,
@@ -107,5 +173,13 @@ private class PopupTransitioningDelegate: NSObject, UIViewControllerTransitionin
         source: UIViewController
     ) -> UIPresentationController? {
         PopupPresentationController(presentedViewController: presented, presenting: presenting)
+    }
+    
+    func animationController(forPresented presented: UIViewController, presenting: UIViewController, source: UIViewController) -> UIViewControllerAnimatedTransitioning? {
+        return PopupAnimator(isPresenting: true)
+    }
+
+    func animationController(forDismissed dismissed: UIViewController) -> UIViewControllerAnimatedTransitioning? {
+        return PopupAnimator(isPresenting: false)
     }
 }
