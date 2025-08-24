@@ -8,36 +8,22 @@
 import Foundation
 import UIKit
 
-protocol GroupTripActivityDetailViewDelegate: AnyObject {
-    func notifyPackagesButtonDidTap(shouldShowAll: Bool)
-    func notifyPackagesDetailDidTap(with packageId: Int)
-    func notifyAddFriendButtonDidTap()
-}
-
-struct TripMember {
-    let name: String
-    let email: String
-    let profileImageURL: String?
-    let isWaiting: Bool
-    
-    init(name: String, email: String, profileImageURL: String? = nil, isWaiting: Bool = false) {
-        self.name = name
-        self.email = email
-        self.profileImageURL = profileImageURL
-        self.isWaiting = isWaiting
-    }
-}
-
 final class GroupTripActivityDetailView: UIView {
     weak var delegate: GroupTripActivityDetailViewDelegate?
     
-    private var tripMembers: [TripMember] = [
+    var tripMembers: [TripMember] = [
         TripMember(name: "Adhis", email: "adhis@example.com", profileImageURL: nil, isWaiting: false)
     ]
     
-    private var selectedPackageIds: Set<Int> = []
-    
+    internal var selectedPackageIds: Set<Int> = []
     private var selectedPackageId: Int?
+    
+    // Change these from force-unwrapped to optional
+    private var activityImageView: UIImageView?
+    private var priceRangeLabel: UILabel?
+    
+    // Store the data temporarily until the views are created
+    private var pendingActivityData: ActivityDetailDataModel?
     
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -49,8 +35,38 @@ final class GroupTripActivityDetailView: UIView {
     }
     
     func configureView(_ data: ActivityDetailDataModel) {
-        titleLabel.text = data.title
-        locationLabel.text = data.location
+        // Store the data for later use when views are created
+        pendingActivityData = data
+        
+        // If views are already created, configure them now
+        if let titleLabel = self.titleLabel as UILabel?,
+           let locationLabel = self.locationLabel as UILabel? {
+            titleLabel.text = data.title
+            locationLabel.text = data.location
+            
+            // Load the first image if available and imageView exists
+            if let firstImage = data.imageUrlsString.first, 
+               let url = URL(string: firstImage),
+               let imageView = activityImageView {
+                imageView.loadImage(from: url)
+            }
+            
+            // Set price range from packages if priceLabel exists
+            if !data.availablePackages.content.isEmpty, let priceLabel = priceRangeLabel {
+                let prices = data.availablePackages.content.map { $0.price }
+                let minPrice = prices.min() ?? ""
+                let maxPrice = prices.max() ?? ""
+                
+                if minPrice == maxPrice {
+                    priceLabel.text = "\(minPrice)/Person"
+                } else {
+                    priceLabel.text = "\(minPrice) - \(maxPrice)/Person"
+                }
+            }
+        }
+        
+        // Add sections to content stack view
+        contentStackView.addArrangedSubview(tripDestinationSection)
         contentStackView.addArrangedSubview(scheduleSection)
         contentStackView.addArrangedSubview(tripMembersSection)
         
@@ -59,13 +75,12 @@ final class GroupTripActivityDetailView: UIView {
             
             if data.availablePackages.content.count == data.hiddenPackages.count {
                 packageButton.isHidden = true
-                data.availablePackages.content.forEach { data in
-                    packageContainer.addArrangedSubview(createPackageView(data: data))
+                data.availablePackages.content.forEach { packageData in
+                    packageContainer.addArrangedSubview(createPackageView(data: packageData))
                 }
-            }
-            else {
-                data.hiddenPackages.forEach { data in
-                    packageContainer.addArrangedSubview(createPackageView(data: data))
+            } else {
+                data.hiddenPackages.forEach { packageData in
+                    packageContainer.addArrangedSubview(createPackageView(data: packageData))
                 }
             }
             
@@ -84,35 +99,6 @@ final class GroupTripActivityDetailView: UIView {
         imageSliderView.isHidden = !isShown
     }
     
-    func updatePackageData(_ data: [ActivityDetailDataModel.Package]) {
-        packageContainer.arrangedSubviews.forEach { $0.removeFromSuperview() }
-        
-        for (index, item) in data.enumerated() {
-            let view: UIView = createPackageView(data: item)
-            view.alpha = 0
-            view.transform = CGAffineTransform(translationX: 0, y: 8)
-            packageContainer.addArrangedSubview(view)
-
-            UIView.animate(
-                withDuration: 0.3,
-                delay: 0.05 * Double(index),
-                usingSpringWithDamping: 0.8,
-                initialSpringVelocity: 0.5,
-                options: [.curveEaseOut],
-                animations: {
-                    view.alpha = 1
-                    view.transform = .identity
-                }
-            )
-        }
-       
-        if !selectedPackageIds.isEmpty {
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { [weak self] in
-                self?.refreshPackageViews()
-            }
-        }
-    }
-    
     func addCreateTripButton(button: UIView) {
         createTripButtonContainer.addSubview(button)
         button.translatesAutoresizingMaskIntoConstraints = false
@@ -129,31 +115,31 @@ final class GroupTripActivityDetailView: UIView {
         scheduleInputContainer.addSubviewAndLayout(view)
     }
     
+    // MARK: - Lazy Properties
     private lazy var imageSliderView: UIView = UIView()
     private lazy var titleView: UIView = createTitleView()
-    private lazy var titleLabel: UILabel = UILabel(
+    internal lazy var titleLabel: UILabel = UILabel(
         font: .jakartaSans(forTextStyle: .title2, weight: .bold),
         textColor: Token.additionalColorsBlack,
         numberOfLines: 2
     )
     
-    private lazy var locationLabel: UILabel = UILabel(
+    internal lazy var locationLabel: UILabel = UILabel(
         font: .jakartaSans(forTextStyle: .footnote, weight: .medium),
         textColor: Token.grayscale90,
         numberOfLines: 2
     )
     
-    private lazy var packageSection: UIView = createPackageSection()
-    private lazy var packageLabel: UILabel = UILabel(
+    internal lazy var packageSection: UIView = createPackageSection()
+    internal lazy var packageLabel: UILabel = UILabel(
         font: .jakartaSans(forTextStyle: .subheadline, weight: .bold),
         textColor: Token.additionalColorsBlack,
         numberOfLines: 2
     )
-    private lazy var packageButton: UIButton = createPackageTextButton()
+    internal lazy var packageButton: UIButton = createPackageTextButton()
     
-    private lazy var packageContainer: UIStackView = createStackView(spacing: 18.0)
+    internal lazy var packageContainer: UIStackView = createStackView(spacing: 18.0)
     private lazy var contentStackView: UIStackView = createStackView(spacing: 29.0)
-    private lazy var headerStackView: UIStackView = createStackView(spacing: 0)
     
     private lazy var isPackageButtonStateHidden: Bool = true
     
@@ -172,6 +158,8 @@ final class GroupTripActivityDetailView: UIView {
     
     private lazy var tripMembersSection: UIView = createTripMembersSection()
     private lazy var tripMembersContainer: UIView = createTripMembersContainer()
+    
+    private lazy var tripDestinationSection: UIView = createTripDestinationSection()
 }
 
 extension GroupTripActivityDetailView {
@@ -204,23 +192,10 @@ extension GroupTripActivityDetailView {
             $0.widthAnchor(to: scrollView.widthAnchor)
         }
         
-        contentView.addSubviews([
-            headerStackView,
-            contentStackView
-        ])
-        
-        headerStackView.backgroundColor = UIColor.from("#F5F5F5")
-        headerStackView.addArrangedSubview(imageSliderView)
-        headerStackView.addArrangedSubview(titleView)
-        
-        headerStackView.layout {
-            $0.top(to: contentView.topAnchor)
-                .leading(to: contentView.leadingAnchor)
-                .trailing(to: contentView.trailingAnchor)
-        }
+        contentView.addSubview(contentStackView)
         
         contentStackView.layout {
-            $0.top(to: headerStackView.bottomAnchor, constant: -8.0)
+            $0.top(to: contentView.topAnchor)
                 .leading(to: contentView.leadingAnchor)
                 .trailing(to: contentView.trailingAnchor)
                 .bottom(to: contentView.bottomAnchor)
@@ -233,12 +208,11 @@ extension GroupTripActivityDetailView {
         
         scrollView.backgroundColor = UIColor.from("#F5F5F5")
         backgroundColor = .white
-        
-        imageSliderView.isHidden = true
     }
 }
 
-private extension GroupTripActivityDetailView {
+// MARK: - Internal Helper Methods (accessible by extensions)
+internal extension GroupTripActivityDetailView {
     func createStackView(
         spacing: CGFloat,
         axis: NSLayoutConstraint.Axis = .vertical
@@ -279,343 +253,126 @@ private extension GroupTripActivityDetailView {
         
         return contentView
     }
-    
-    func createIconTextView(image: UIImage, text: String) -> UIView {
-        let imageView: UIImageView = UIImageView(image: image)
-        imageView.layout {
-            $0.size(20.0)
-        }
-        
-        let label: UILabel = UILabel(
-            font: .jakartaSans(forTextStyle: .footnote, weight: .medium),
-            textColor: Token.grayscale90,
-            numberOfLines: 2
-        )
-        label.text = text
-        
-        let containerView: UIView = UIView()
-        containerView.addSubviews([
-            imageView,
-            label
-        ])
-        
-        imageView.layout {
-            $0.leading(to: containerView.leadingAnchor)
-                .centerY(to: containerView.centerYAnchor)
-        }
-        
-        label.layout {
-            $0.leading(to: imageView.trailingAnchor, constant: 4.0)
-                .trailing(to: containerView.trailingAnchor)
-                .centerY(to: containerView.centerYAnchor)
-        }
-        
-        return containerView
+}
+
+// MARK: - Private UI Creation Methods
+private extension GroupTripActivityDetailView {
+    func createTripDestinationSection() -> UIView {
+        return createSectionView(title: "Trip Destination", view: titleView)
     }
     
     func createTitleView() -> UIView {
-        let pinPointImage: UIImageView = UIImageView(image: CocoIcon.icPinPointBlue.image)
-        pinPointImage.layout {
-            $0.size(20.0)
-        }
+        // Create a card-style container similar to package cards
+        let cardContainer = UIView()
+        cardContainer.backgroundColor = Token.additionalColorsWhite
+        cardContainer.layer.cornerRadius = 16.0
+        cardContainer.layer.borderWidth = 1.0
+        cardContainer.layer.borderColor = Token.additionalColorsLine.cgColor
         
-        let locationView: UIView = UIView()
-        locationView.addSubviews([
-            pinPointImage,
-            locationLabel
-        ])
+        // Create horizontal stack view for image and content
+        let contentStackView = createStackView(spacing: 12.0, axis: .horizontal)
         
-        pinPointImage.layout {
-            $0.leading(to: locationView.leadingAnchor)
-                .bottom(to: locationView.bottomAnchor)
-                .top(to: locationView.topAnchor)
-        }
-        
-        locationLabel.layout {
-            $0.leading(to: pinPointImage.trailingAnchor, constant: 4.0)
-                .trailing(to: locationView.trailingAnchor)
-                .centerY(to: locationView.centerYAnchor)
-        }
-        
-        let contentView: UIView = UIView()
-        contentView.addSubviews([
-            titleLabel,
-            locationView
-        ])
-        
-        titleLabel.layout {
-            $0.leading(to: contentView.leadingAnchor)
-                .trailing(to: contentView.trailingAnchor)
-                .top(to: contentView.topAnchor)
-        }
-        
-        locationView.layout {
-            $0.top(to: titleLabel.bottomAnchor, constant: 8.0)
-                .leading(to: contentView.leadingAnchor)
-                .trailing(to: contentView.trailingAnchor)
-                .bottom(to: contentView.bottomAnchor)
-        }
-        
-        let contentWrapperView: UIView = UIView()
-        contentWrapperView.addSubviewAndLayout(
-            contentView,
-            insets: .init(
-                top: 16.0,
-                left: 24.0,
-                bottom: 16.0 + 8.0,
-                right: 16.0
-            )
-        )
-        
-        return contentWrapperView
-    }
-    
-    func createBenefitView(title: String) -> UIView {
-        let contentView: UIView = UIView()
-        let benefitImageView: UIImageView = UIImageView(image: CocoIcon.icCheckMarkFill.image)
-        benefitImageView.layout {
-            $0.size(24.0)
-        }
-        let benefitLabel: UILabel = UILabel(
-            font: .jakartaSans(forTextStyle: .footnote, weight: .regular),
-            textColor: Token.additionalColorsBlack,
-            numberOfLines: 0
-        )
-        benefitLabel.text = title
-        
-        contentView.addSubviews([
-            benefitImageView,
-            benefitLabel
-        ])
-        
-        benefitImageView.layout {
-            $0.top(to: contentView.topAnchor)
-                .leading(to: contentView.leadingAnchor)
-                .bottom(to: contentView.bottomAnchor, relation: .lessThanOrEqual)
-        }
-        
-        benefitLabel.layout {
-            $0.leading(to: benefitImageView.trailingAnchor, constant: 4.0)
-                .top(to: contentView.topAnchor)
-                .bottom(to: contentView.bottomAnchor)
-                .trailing(to: contentView.trailingAnchor)
-        }
-        
-        return contentView
-    }
-    
-    func createBenefitListView(titles: [String]) -> UIView {
-        let stackView: UIStackView = createStackView(spacing: 12.0)
-        
-        titles.forEach { title in
-            stackView.addArrangedSubview(createBenefitView(title: title))
-        }
-        
-        return stackView
-    }
-    
-    func createProviderDetail(imageUrl: String, name: String, description: String) -> UIView {
-        let contentView: UIView = UIView()
-        let imageView: UIImageView = UIImageView()
-        imageView.contentMode = .scaleAspectFill
-        imageView.layout {
+        // Create image view (similar to package image)
+        let activityImageView = UIImageView()
+        activityImageView.contentMode = .scaleAspectFill
+        activityImageView.layout {
             $0.size(92.0)
         }
-        imageView.layer.cornerRadius = 14.0
-        imageView.loadImage(from: URL(string: imageUrl))
-        imageView.clipsToBounds = true
+        activityImageView.layer.cornerRadius = 14.0
+        activityImageView.clipsToBounds = true
+        activityImageView.backgroundColor = Token.grayscale30
         
-        let nameLabel: UILabel = UILabel(
+        // Create vertical stack for text content
+        let textStackView = createStackView(spacing: 8.0)
+        
+        // Activity title label
+        let titleLabel = UILabel(
             font: .jakartaSans(forTextStyle: .subheadline, weight: .bold),
             textColor: Token.additionalColorsBlack,
             numberOfLines: 2
         )
-        nameLabel.text = name
         
-        let descriptionLabel: UILabel = UILabel(
-            font: .jakartaSans(forTextStyle: .footnote, weight: .medium),
-            textColor: Token.grayscale90,
-            numberOfLines: 0
-        )
-        descriptionLabel.text = description
-        
-        contentView.addSubviews([
-            imageView,
-            nameLabel,
-            descriptionLabel
-        ])
-        
-        imageView.layout {
-            $0.leading(to: contentView.leadingAnchor)
-                .top(to: contentView.topAnchor)
-                .bottom(to: contentView.bottomAnchor, relation: .lessThanOrEqual)
+        // Location container with pin icon
+        let locationContainer = UIView()
+        let pinIcon = UIImageView(image: CocoIcon.icPinPointBlue.image)
+        pinIcon.layout {
+            $0.size(16.0)
         }
         
-        nameLabel.layout {
-            $0.leading(to: imageView.trailingAnchor, constant: 10.0)
-                .top(to: contentView.topAnchor)
-                .trailing(to: contentView.trailingAnchor)
-        }
-        
-        descriptionLabel.layout {
-            $0.leading(to: nameLabel.leadingAnchor)
-                .top(to: nameLabel.bottomAnchor, constant: 8.0)
-                .trailing(to: contentView.trailingAnchor)
-                .bottom(to: contentView.bottomAnchor, relation: .lessThanOrEqual)
-        }
-        
-        return contentView
-    }
-    
-    func createPackageView(data: ActivityDetailDataModel.Package) -> UIView {
-        let containerStackView: UIStackView = createStackView(spacing: 12.0, axis: .horizontal)
-        let contentStackView: UIStackView = createStackView(spacing: 8.0)
-        
-        let nameLabel: UILabel = UILabel(
-            font: .jakartaSans(forTextStyle: .subheadline, weight: .bold),
-            textColor: Token.additionalColorsBlack,
-            numberOfLines: 0
-        )
-        nameLabel.text = data.name
-        
-        let capacityLabel: UILabel = UILabel(
+        let locationLabel = UILabel(
             font: .jakartaSans(forTextStyle: .caption1, weight: .medium),
             textColor: Token.grayscale70,
             numberOfLines: 1
         )
-        capacityLabel.text = data.description
         
-        let priceLabel: UILabel = UILabel(
+        locationContainer.addSubviews([pinIcon, locationLabel])
+        
+        pinIcon.layout {
+            $0.leading(to: locationContainer.leadingAnchor)
+                .centerY(to: locationContainer.centerYAnchor)
+        }
+        
+        locationLabel.layout {
+            $0.leading(to: pinIcon.trailingAnchor, constant: 4.0)
+                .trailing(to: locationContainer.trailingAnchor)
+                .centerY(to: locationContainer.centerYAnchor)
+                .top(to: locationContainer.topAnchor)
+                .bottom(to: locationContainer.bottomAnchor)
+        }
+        
+        // Price range label
+        let priceLabel = UILabel(
             font: .jakartaSans(forTextStyle: .subheadline, weight: .semibold),
             textColor: Token.additionalColorsBlack,
             numberOfLines: 1
         )
         
-        let imageView: UIImageView = UIImageView()
-        imageView.contentMode = .scaleAspectFill
-        imageView.layout {
-            $0.size(92.0)
-        }
-        imageView.layer.cornerRadius = 14.0
-        imageView.loadImage(from: URL(string: data.imageUrlString))
-        imageView.clipsToBounds = true
+        // Add labels to text stack
+        textStackView.addArrangedSubview(titleLabel)
+        textStackView.addArrangedSubview(locationContainer)
+        textStackView.addArrangedSubview(priceLabel)
         
-        // Create checkbox instead of radio button
-        let checkboxButton = UIButton(type: .custom)
-        checkboxButton.layout {
-            $0.size(24.0)
-        }
+        // Add image and text stack to content stack
+        contentStackView.addArrangedSubview(activityImageView)
+        contentStackView.addArrangedSubview(textStackView)
         
-        // Set initial state based on multiple selection
-        let isSelected = selectedPackageIds.contains(data.id)
-        updateCheckboxButton(checkboxButton, isSelected: isSelected)
-        
-        // Add tap gesture to the entire container
-        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(packageViewTapped(_:)))
-        containerStackView.addGestureRecognizer(tapGesture)
-        containerStackView.isUserInteractionEnabled = true
-        containerStackView.tag = data.id
-        
-        // Price formatting
-        let attributedString = NSMutableAttributedString()
-        
-        let priceString = NSAttributedString(
-            string: data.price,
-            attributes: [
-                .font : UIFont.jakartaSans(forTextStyle: .subheadline, weight: .semibold),
-                .foregroundColor : Token.additionalColorsBlack
-            ]
-        )
-        
-        let perPersonString = NSAttributedString(
-            string: "/Person",
-            attributes: [
-                .font : UIFont.jakartaSans(forTextStyle: .subheadline, weight: .medium),
-                .foregroundColor : Token.grayscale60
-            ]
-        )
-        
-        attributedString.append(priceString)
-        attributedString.append(perPersonString)
-        priceLabel.attributedText = attributedString
-        
-        let contentContainer = UIView()
-        contentContainer.addSubviews([contentStackView, checkboxButton])
-        
-        // Layout content stack view (name, capacity, price)
-        contentStackView.addArrangedSubview(nameLabel)
-        contentStackView.addArrangedSubview(capacityLabel)
-        contentStackView.addArrangedSubview(priceLabel)
-        
+        // Add content stack to card with padding
+        cardContainer.addSubview(contentStackView)
         contentStackView.layout {
-            $0.leading(to: contentContainer.leadingAnchor)
-                .top(to: contentContainer.topAnchor)
-                .bottom(to: contentContainer.bottomAnchor)
-                .trailing(to: checkboxButton.leadingAnchor, constant: -12.0)
-        }
-   
-        checkboxButton.layout {
-            $0.trailing(to: contentContainer.trailingAnchor)
-                .centerY(to: capacityLabel.centerYAnchor)
+            $0.edges(to: cardContainer, insets: UIEdgeInsets(top: 12.0, left: 12.0, bottom: 12.0, right: 12.0))
         }
         
-        checkboxButton.setContentHuggingPriority(.required, for: .horizontal)
-        checkboxButton.setContentCompressionResistancePriority(.required, for: .horizontal)
+        // Store references for data binding (now as optionals)
+        self.titleLabel = titleLabel
+        self.locationLabel = locationLabel
+        self.activityImageView = activityImageView
+        self.priceRangeLabel = priceLabel
         
-        containerStackView.addArrangedSubview(imageView)
-        containerStackView.addArrangedSubview(contentContainer)
-        
-        updateContainerStyling(containerStackView, isSelected: isSelected)
-        
-        containerStackView.isLayoutMarginsRelativeArrangement = true
-        containerStackView.layoutMargins = .init(edges: 12.0)
-        containerStackView.layer.cornerRadius = 16.0
-        
-        return containerStackView
-    }
-    
-    func createPackageSection() -> UIView {
-        let containerView: UIView = UIView()
-        containerView.addSubviews([
-            packageLabel,
-            packageButton
-        ])
-        
-        packageButton.setContentHuggingPriority(.required, for: .horizontal)
-        packageButton.setContentCompressionResistancePriority(.required, for: .horizontal)
-        
-        packageLabel.layout {
-            $0.leading(to: containerView.leadingAnchor)
-                .top(to: containerView.topAnchor)
-                .bottom(to: containerView.bottomAnchor)
+        // Configure with pending data if available
+        if let data = pendingActivityData {
+            titleLabel.text = data.title
+            locationLabel.text = data.location
+            
+            // Load the first image if available
+            if let firstImage = data.imageUrlsString.first, let url = URL(string: firstImage) {
+                activityImageView.loadImage(from: url)
+            }
+            
+            // Set price range from packages
+            if !data.availablePackages.content.isEmpty {
+                let prices = data.availablePackages.content.map { $0.price }
+                let minPrice = prices.min() ?? ""
+                let maxPrice = prices.max() ?? ""
+                
+                if minPrice == maxPrice {
+                    priceLabel.text = "\(minPrice)/Person"
+                } else {
+                    priceLabel.text = "\(minPrice) - \(maxPrice)/Person"
+                }
+            }
         }
         
-        packageButton.layout {
-            $0.leading(to: packageLabel.trailingAnchor, constant: 4.0)
-                .trailing(to: containerView.trailingAnchor)
-                .centerY(to: containerView.centerYAnchor)
-        }
-        
-        let contentView: UIView = UIView()
-        contentView.addSubviews([
-            containerView,
-            packageContainer
-        ])
-        
-        containerView.layout {
-            $0.top(to: contentView.topAnchor)
-                .leading(to: contentView.leadingAnchor)
-                .trailing(to: contentView.trailingAnchor)
-        }
-        
-        packageContainer.layout {
-            $0.top(to: containerView.bottomAnchor, constant: 16.0)
-                .bottom(to: contentView.bottomAnchor)
-                .leading(to: contentView.leadingAnchor)
-                .trailing(to: contentView.trailingAnchor)
-        }
-        
-        return contentView
+        return cardContainer
     }
     
     func createPackageTextButton() -> UIButton {
@@ -659,119 +416,23 @@ private extension GroupTripActivityDetailView {
         
         containerView.addSubview(collectionView)
         collectionView.layout {
-            $0.top(to: containerView.topAnchor)
-                .leading(to: containerView.leadingAnchor)
-                .trailing(to: containerView.trailingAnchor)
-                .bottom(to: containerView.bottomAnchor)
+            $0.edges(to: containerView)
                 .height(90)
         }
         
         return containerView
     }
-  
-    public func addTripMember(name: String, email: String) {
+}
+
+// Change this method from private to internal so the view controller can access it
+extension GroupTripActivityDetailView {
+    // Move addTripMember from private extension to public extension
+    func addTripMember(name: String, email: String) {
         let newMember = TripMember(name: name, email: email, profileImageURL: nil, isWaiting: true)
         tripMembers.append(newMember)
         
         if let collectionView = tripMembersContainer.subviews.first as? UICollectionView {
             collectionView.reloadData()
-        }
-    }
-    
-    func setSelectedPackages(ids: Set<Int>) {
-        selectedPackageIds = ids
-        refreshPackageViews()
-    }
-    
-    func getSelectedPackageIds() -> Set<Int> {
-        return selectedPackageIds
-    }
-}
-
-extension GroupTripActivityDetailView: UICollectionViewDataSource, UICollectionViewDelegate {
-    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return tripMembers.count + 1 
-    }
-    
-    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        if indexPath.item < tripMembers.count {
-            guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "TripMemberCell", for: indexPath) as? TripMemberCell else {
-                return UICollectionViewCell()
-            }
-            cell.configure(with: tripMembers[indexPath.item])
-            return cell
-        } else {
-            guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "AddFriendCell", for: indexPath) as? AddFriendCell else {
-                return UICollectionViewCell()
-            }
-            return cell
-        }
-    }
-    
-    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        if indexPath.item >= tripMembers.count {
-            delegate?.notifyAddFriendButtonDidTap()
-        }
-    }
-}
-
-private extension GroupTripActivityDetailView {
-    func updateCheckboxButton(_ button: UIButton, isSelected: Bool) {
-        if isSelected {
-            button.setImage(UIImage(systemName: "checkmark.circle.fill"), for: .normal)
-            button.tintColor = Token.mainColorPrimary
-        } else {
-            button.setImage(UIImage(systemName: "circle"), for: .normal)
-            button.tintColor = Token.grayscale40
-        }
-    }
-    
-    func updateContainerStyling(_ container: UIStackView, isSelected: Bool) {
-        if isSelected {
-            container.layer.borderWidth = 2.0
-            container.layer.borderColor = Token.mainColorPrimary.cgColor
-            container.backgroundColor = Token.additionalColorsWhite
-        } else {
-            container.layer.borderWidth = 1.0
-            container.layer.borderColor = Token.additionalColorsLine.cgColor
-            container.backgroundColor = Token.additionalColorsWhite
-        }
-    }
-    
-    @objc func packageViewTapped(_ gesture: UITapGestureRecognizer) {
-        guard let containerView = gesture.view as? UIStackView else { return }
-        let packageId = containerView.tag
-        
-        // Toggle selection instead of single selection
-        if selectedPackageIds.contains(packageId) {
-            selectedPackageIds.remove(packageId)
-        } else {
-            selectedPackageIds.insert(packageId)
-        }
-        
-        // Refresh all package views to update their appearance
-        refreshPackageViews()
-        
-        // Notify delegate with the package ID and current selection state
-        delegate?.notifyPackagesDetailDidTap(with: packageId)
-    }
-    
-    func refreshPackageViews() {
-        // Refresh all package container views
-        for subview in packageContainer.arrangedSubviews {
-            guard let containerStack = subview as? UIStackView else { continue }
-            
-            let packageId = containerStack.tag
-            let isSelected = selectedPackageIds.contains(packageId)
-            
-            // Update container styling
-            updateContainerStyling(containerStack, isSelected: isSelected)
-            
-            // Find and update checkbox button
-            if let contentContainer = containerStack.arrangedSubviews.last as? UIView,
-               let checkboxButton = contentContainer.subviews.compactMap({ $0 as? UIButton }).first {
-                updateCheckboxButton(checkboxButton, isSelected: isSelected)
-            }
         }
     }
 }
