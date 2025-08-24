@@ -612,6 +612,6 @@ private extension GroupTripActivityDetailView {
     }
     
     func createScheduleSection() -> UIView {
-        return createSectionView(title: "Trip Detail", view: scheduleInputContainer)
+        return createSectionView(title: "Trip Details", view: scheduleInputContainer)
     }
 }

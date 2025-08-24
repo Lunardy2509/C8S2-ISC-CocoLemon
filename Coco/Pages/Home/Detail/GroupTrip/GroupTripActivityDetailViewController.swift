@@ -33,14 +33,13 @@ final class GroupTripActivityDetailViewController: UIViewController {
     
     private let viewModel: GroupTripActivityDetailViewModelProtocol
     private let thisView: GroupTripActivityDetailView = GroupTripActivityDetailView()
+    private var calendarType: CalendarType?
     
     private func setupScheduleInputView() {
-        let inputView = HomeFormScheduleInputView(
+        let inputView = GroupTripFormInputView(
+            tripNameViewModel: viewModel.tripNameInputViewModel,
             calendarViewModel: viewModel.calendarInputViewModel,
-            paxInputViewModel: viewModel.paxInputViewModel,
-            actionButtonAction: { },
-            showActionButton: false,
-            showPaxInput: false
+            dueDateViewModel: viewModel.dueDateInputViewModel
         )
         let hostingVC = UIHostingController(rootView: inputView)
         addChild(hostingVC)
@@ -69,9 +68,10 @@ extension GroupTripActivityDetailViewController: GroupTripActivityDetailViewMode
         thisView.updatePackageData(data)
     }
     
-    func showCalendarOption() {
+    func showCalendarOption(for type: CalendarType) {
         let calendarVC: CocoCalendarViewController = CocoCalendarViewController()
         calendarVC.delegate = self
+        self.calendarType = type
         let popup: CocoPopupViewController = CocoPopupViewController(child: calendarVC)
         present(popup, animated: true)
     }
@@ -89,7 +89,8 @@ extension GroupTripActivityDetailViewController: GroupTripActivityDetailViewDele
 
 extension GroupTripActivityDetailViewController: CocoCalendarViewControllerDelegate {
     func notifyCalendarDidChooseDate(date: Date?, calendar: CocoCalendarViewController) {
-        guard let date: Date else { return }
-        viewModel.onCalendarDidChoose(date: date)
+        guard let date: Date, let type = self.calendarType else { return }
+        viewModel.onCalendarDidChoose(date: date, for: type)
+        self.calendarType = nil
     }
 }
