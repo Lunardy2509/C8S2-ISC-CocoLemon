@@ -30,21 +30,37 @@ final class SignInView: UIView {
         }
     }
     
+    func configureAddHorizontalElement(with view: UIView) {
+        actionHorizontalStackView.addArrangedSubview(view)
+    }
+
+    
     func addActionButton(with view: UIView) {
         actionButtonContainerView.subviews.forEach { $0.removeFromSuperview() }
         actionButtonContainerView.addSubviewAndLayout(view)
     }
     
+    func addStatusLabel(with view: UIView){
+        statusLabel.addArrangedSubview(view)
+    }
+     
     private lazy var inputStackView: UIStackView = createStackView()
+    private lazy var actionHorizontalStackView: UIStackView = createStackHorizontalView()
     private lazy var actionButtonContainerView: UIView = UIView()
+    private lazy var statusLabel: UIStackView = createContainerLabelView()
+
+    
 }
 
 private extension SignInView {
     func setupView() {
         let contentView: UIView = UIView()
+        
         contentView.addSubviews([
             inputStackView,
-            actionButtonContainerView
+            actionHorizontalStackView,
+            actionButtonContainerView,
+            statusLabel
         ])
         
         inputStackView.layout {
@@ -53,14 +69,29 @@ private extension SignInView {
                 .trailing(to: contentView.trailingAnchor)
         }
         
+        actionHorizontalStackView.layout{
+            $0.top(to: inputStackView.bottomAnchor, constant: 8.0)
+                .leading(to: contentView.leadingAnchor)
+                .trailing(to: contentView.trailingAnchor)
+        }
+    
+        
         actionButtonContainerView.layout {
-            $0.top(to: inputStackView.bottomAnchor, constant: 32.0)
+            $0.top(to: actionHorizontalStackView.bottomAnchor, constant: 32.0)
+                .leading(to: contentView.leadingAnchor)
+                .trailing(to: contentView.trailingAnchor)
+        }
+        
+        statusLabel.layout {
+            $0.top(to: actionButtonContainerView.bottomAnchor, constant: 8.0)
                 .leading(to: contentView.leadingAnchor)
                 .trailing(to: contentView.trailingAnchor)
                 .bottom(to: contentView.bottomAnchor)
+
         }
         
         addSubview(contentView)
+        
         contentView.layout {
             $0.top(to: self.safeAreaLayoutGuide.topAnchor, constant: 24.0)
                 .leading(to: self.leadingAnchor, constant: 24.0)
@@ -73,7 +104,21 @@ private extension SignInView {
         let stackView: UIStackView = UIStackView()
         stackView.spacing = 16.0
         stackView.axis = .vertical
-        
+        return stackView
+    }
+    
+    func createStackHorizontalView() -> UIStackView {
+           let stackView = UIStackView()
+           stackView.axis = .horizontal
+        stackView.spacing = 8.0
+           stackView.distribution = .equalSpacing
+           stackView.alignment = .center
+        return stackView
+    }
+    
+    func createContainerLabelView() ->UIStackView{
+        let stackView = UIStackView()
+        stackView.axis = .horizontal
         return stackView
     }
     

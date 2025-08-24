@@ -13,7 +13,6 @@ struct BookingDetailDataModel {
     let activityName: String
     let packageName: String
     let location: String
-    
     let bookingDateText: String
     let status: StatusLabel
     let paxNumber: Int

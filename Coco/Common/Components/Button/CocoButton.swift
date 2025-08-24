@@ -3,7 +3,6 @@
 //  Coco
 //
 //  Created by Jackie Leonardy on 07/07/25.
-//
 
 import Foundation
 import SwiftUI
@@ -13,7 +12,6 @@ struct CocoButton: View {
     
     private let action: () -> Void
     private let text: String
-    
     private let style: CocoButtonStyle
     private let type: CocoButtonType
     
@@ -33,6 +31,7 @@ struct CocoButton: View {
         Button(action: action) {
             Text(text)
                 .font(.jakartaSans(forTextStyle: .body, weight: .semibold))
+                .font(type.font)
                 .frame(maxWidth: isStretch ? .infinity : nil)
         }
         .disabled(type == .disabled)
