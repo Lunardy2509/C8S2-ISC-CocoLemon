@@ -11,7 +11,7 @@ import UIKit
 protocol GroupTripActivityDetailViewDelegate: AnyObject {
     func notifyPackagesButtonDidTap(shouldShowAll: Bool)
     func notifyPackagesDetailDidTap(with packageId: Int)
-    func notifyAddFriendButtonDidTap() // Add this new method
+    func notifyAddFriendButtonDidTap()
 }
 
 struct TripMember {
@@ -34,6 +34,8 @@ final class GroupTripActivityDetailView: UIView {
     private var tripMembers: [TripMember] = [
         TripMember(name: "Adhis", email: "adhis@example.com", profileImageURL: nil, isWaiting: false)
     ]
+    
+    private var selectedPackageIds: Set<Int> = []
     
     private var selectedPackageId: Int?
     
@@ -104,7 +106,7 @@ final class GroupTripActivityDetailView: UIView {
             )
         }
        
-        if selectedPackageId != nil {
+        if !selectedPackageIds.isEmpty {
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { [weak self] in
                 self?.refreshPackageViews()
             }
@@ -498,15 +500,15 @@ private extension GroupTripActivityDetailView {
         imageView.loadImage(from: URL(string: data.imageUrlString))
         imageView.clipsToBounds = true
         
-        // Create radio button
-        let radioButton = UIButton(type: .custom)
-        radioButton.layout {
+        // Create checkbox instead of radio button
+        let checkboxButton = UIButton(type: .custom)
+        checkboxButton.layout {
             $0.size(24.0)
         }
         
-        // Set initial state
-        let isSelected = selectedPackageId == data.id
-        updateRadioButton(radioButton, isSelected: isSelected)
+        // Set initial state based on multiple selection
+        let isSelected = selectedPackageIds.contains(data.id)
+        updateCheckboxButton(checkboxButton, isSelected: isSelected)
         
         // Add tap gesture to the entire container
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(packageViewTapped(_:)))
@@ -537,36 +539,32 @@ private extension GroupTripActivityDetailView {
         attributedString.append(perPersonString)
         priceLabel.attributedText = attributedString
         
-        // Create content container with radio button positioned relative to capacity label
         let contentContainer = UIView()
-        contentContainer.addSubviews([contentStackView, radioButton])
+        contentContainer.addSubviews([contentStackView, checkboxButton])
         
         // Layout content stack view (name, capacity, price)
         contentStackView.addArrangedSubview(nameLabel)
-        contentStackView.addArrangedSubview(capacityLabel) // Capacity above price
-        contentStackView.addArrangedSubview(priceLabel)   // Price below capacity
+        contentStackView.addArrangedSubview(capacityLabel)
+        contentStackView.addArrangedSubview(priceLabel)
         
         contentStackView.layout {
             $0.leading(to: contentContainer.leadingAnchor)
                 .top(to: contentContainer.topAnchor)
                 .bottom(to: contentContainer.bottomAnchor)
-                .trailing(to: radioButton.leadingAnchor, constant: -12.0) // Leave space for radio button
+                .trailing(to: checkboxButton.leadingAnchor, constant: -12.0)
         }
-        
-        // Position radio button aligned with capacity label (middle element)
-        radioButton.layout {
+   
+        checkboxButton.layout {
             $0.trailing(to: contentContainer.trailingAnchor)
-                .centerY(to: capacityLabel.centerYAnchor) // Align with capacity label instead of content container
+                .centerY(to: capacityLabel.centerYAnchor)
         }
         
-        radioButton.setContentHuggingPriority(.required, for: .horizontal)
-        radioButton.setContentCompressionResistancePriority(.required, for: .horizontal)
+        checkboxButton.setContentHuggingPriority(.required, for: .horizontal)
+        checkboxButton.setContentCompressionResistancePriority(.required, for: .horizontal)
         
-        // Add image and content to main container
         containerStackView.addArrangedSubview(imageView)
         containerStackView.addArrangedSubview(contentContainer)
         
-        // Set container styling based on selection
         updateContainerStyling(containerStackView, isSelected: isSelected)
         
         containerStackView.isLayoutMarginsRelativeArrangement = true
@@ -680,9 +678,13 @@ private extension GroupTripActivityDetailView {
         }
     }
     
-    func setSelectedPackage(id: Int?) {
-        selectedPackageId = id
+    func setSelectedPackages(ids: Set<Int>) {
+        selectedPackageIds = ids
         refreshPackageViews()
+    }
+    
+    func getSelectedPackageIds() -> Set<Int> {
+        return selectedPackageIds
     }
 }
 
@@ -714,13 +716,11 @@ extension GroupTripActivityDetailView: UICollectionViewDataSource, UICollectionV
 }
 
 private extension GroupTripActivityDetailView {
-    func updateRadioButton(_ button: UIButton, isSelected: Bool) {
+    func updateCheckboxButton(_ button: UIButton, isSelected: Bool) {
         if isSelected {
-            // Selected state - filled circle with checkmark
             button.setImage(UIImage(systemName: "checkmark.circle.fill"), for: .normal)
             button.tintColor = Token.mainColorPrimary
         } else {
-            // Unselected state - empty circle
             button.setImage(UIImage(systemName: "circle"), for: .normal)
             button.tintColor = Token.grayscale40
         }
@@ -728,15 +728,13 @@ private extension GroupTripActivityDetailView {
     
     func updateContainerStyling(_ container: UIStackView, isSelected: Bool) {
         if isSelected {
-            // Selected state - blue border and background
             container.layer.borderWidth = 2.0
             container.layer.borderColor = Token.mainColorPrimary.cgColor
-            container.backgroundColor = Token.mainColorPrimary.withAlphaComponent(0.1)
+            container.backgroundColor = Token.additionalColorsWhite
         } else {
-            // Unselected state - gray background
-            container.layer.borderWidth = 0.0
-            container.layer.borderColor = UIColor.clear.cgColor
-            container.backgroundColor = Token.mainColorForth
+            container.layer.borderWidth = 1.0
+            container.layer.borderColor = Token.additionalColorsLine.cgColor
+            container.backgroundColor = Token.additionalColorsWhite
         }
     }
     
@@ -744,13 +742,17 @@ private extension GroupTripActivityDetailView {
         guard let containerView = gesture.view as? UIStackView else { return }
         let packageId = containerView.tag
         
-        // Update selected package
-        selectedPackageId = packageId
+        // Toggle selection instead of single selection
+        if selectedPackageIds.contains(packageId) {
+            selectedPackageIds.remove(packageId)
+        } else {
+            selectedPackageIds.insert(packageId)
+        }
         
         // Refresh all package views to update their appearance
         refreshPackageViews()
         
-        // Notify delegate
+        // Notify delegate with the package ID and current selection state
         delegate?.notifyPackagesDetailDidTap(with: packageId)
     }
     
@@ -760,15 +762,15 @@ private extension GroupTripActivityDetailView {
             guard let containerStack = subview as? UIStackView else { continue }
             
             let packageId = containerStack.tag
-            let isSelected = selectedPackageId == packageId
+            let isSelected = selectedPackageIds.contains(packageId)
             
             // Update container styling
             updateContainerStyling(containerStack, isSelected: isSelected)
             
-            // Find and update radio button - adjusted for new structure
+            // Find and update checkbox button
             if let contentContainer = containerStack.arrangedSubviews.last as? UIView,
-               let radioButton = contentContainer.subviews.compactMap({ $0 as? UIButton }).first {
-                updateRadioButton(radioButton, isSelected: isSelected)
+               let checkboxButton = contentContainer.subviews.compactMap({ $0 as? UIButton }).first {
+                updateCheckboxButton(checkboxButton, isSelected: isSelected)
             }
         }
     }
