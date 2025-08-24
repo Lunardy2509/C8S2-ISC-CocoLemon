@@ -1,4 +1,3 @@
-
 //
 //  GroupTripActivityDetailView.swift
 //  Coco
@@ -30,6 +29,7 @@ final class GroupTripActivityDetailView: UIView {
         titleLabel.text = data.title
         locationLabel.text = data.location
         contentStackView.addArrangedSubview(scheduleSection)
+        contentStackView.addArrangedSubview(tripMembersSection)
         
         if !data.availablePackages.content.isEmpty {
             contentStackView.addArrangedSubview(packageSection)
@@ -140,6 +140,9 @@ final class GroupTripActivityDetailView: UIView {
     
     private lazy var scheduleSection: UIView = createScheduleSection()
     private lazy var scheduleInputContainer: UIView = UIView()
+    
+    private lazy var tripMembersSection: UIView = createTripMembersSection()
+    private lazy var tripMembersContainer: UIView = createTripMembersContainer()
 }
 
 extension GroupTripActivityDetailView {
@@ -613,5 +616,119 @@ private extension GroupTripActivityDetailView {
     
     func createScheduleSection() -> UIView {
         return createSectionView(title: "Trip Details", view: scheduleInputContainer)
+    }
+    
+    func createTripMembersSection() -> UIView {
+        return createSectionView(title: "Trip Members", view: tripMembersContainer)
+    }
+    
+    func createTripMembersContainer() -> UIView {
+        let containerView = UIView()
+        
+        let memberStackView = createStackView(spacing: 16.0, axis: .horizontal)
+        memberStackView.alignment = .center
+        
+        let userProfileView = createUserProfileView()
+      
+        let addFriendButton = createAddFriendButton()
+        
+        memberStackView.addArrangedSubview(userProfileView)
+        memberStackView.addArrangedSubview(addFriendButton)
+        
+        containerView.addSubview(memberStackView)
+        memberStackView.layout {
+            $0.top(to: containerView.topAnchor)
+                .leading(to: containerView.leadingAnchor)
+                .trailing(to: containerView.trailingAnchor, relation: .lessThanOrEqual)
+                .bottom(to: containerView.bottomAnchor)
+        }
+        
+        return containerView
+    }
+    
+    func createUserProfileView() -> UIView {
+        let containerView = UIView()
+        let profileImageView = UIImageView()
+        profileImageView.backgroundColor = Token.grayscale30
+        profileImageView.layer.cornerRadius = 25.0
+        profileImageView.clipsToBounds = true
+        profileImageView.contentMode = .scaleAspectFill
+        profileImageView.layout {
+            $0.size(50.0)
+        }
+        
+        profileImageView.image = UIImage(named: "adhis")
+        
+        let nameLabel = UILabel(
+            font: .jakartaSans(forTextStyle: .footnote, weight: .medium),
+            textColor: Token.additionalColorsBlack,
+            numberOfLines: 1
+        )
+        nameLabel.text = "Adhis" 
+        nameLabel.textAlignment = .center
+        
+        let stackView = createStackView(spacing: 8.0)
+        stackView.alignment = .center
+        
+        stackView.addArrangedSubview(profileImageView)
+        stackView.addArrangedSubview(nameLabel)
+        
+        containerView.addSubview(stackView)
+        stackView.layout {
+            $0.top(to: containerView.topAnchor)
+                .leading(to: containerView.leadingAnchor)
+                .trailing(to: containerView.trailingAnchor)
+                .bottom(to: containerView.bottomAnchor)
+        }
+        
+        return containerView
+    }
+    
+    func createAddFriendButton() -> UIView {
+        let containerView = UIView()
+        let addButton = UIButton(type: .system)
+        addButton.backgroundColor = Token.mainColorPrimary.withAlphaComponent(0.1)
+        addButton.layer.cornerRadius = 25.0
+        addButton.layer.borderWidth = 2.0
+        addButton.layer.borderColor = Token.mainColorPrimary.cgColor
+        
+        let plusIcon = UIImage(systemName: "plus")?.withConfiguration(
+            UIImage.SymbolConfiguration(pointSize: 16, weight: .medium)
+        )
+        addButton.setImage(plusIcon, for: .normal)
+        addButton.tintColor = Token.mainColorPrimary
+        
+        addButton.layout {
+            $0.size(50.0)
+        }
+        addButton.addTarget(self, action: #selector(didTapAddFriendButton), for: .touchUpInside)
+        
+        let titleLabel = UILabel(
+            font: .jakartaSans(forTextStyle: .footnote, weight: .medium),
+            textColor: Token.mainColorPrimary,
+            numberOfLines: 1
+        )
+        titleLabel.text = "Add Friend"
+        titleLabel.textAlignment = .center
+        
+        let stackView = createStackView(spacing: 8.0)
+        stackView.alignment = .center
+        
+        stackView.addArrangedSubview(addButton)
+        stackView.addArrangedSubview(titleLabel)
+        
+        containerView.addSubview(stackView)
+        stackView.layout {
+            $0.top(to: containerView.topAnchor)
+                .leading(to: containerView.leadingAnchor)
+                .trailing(to: containerView.trailingAnchor)
+                .bottom(to: containerView.bottomAnchor)
+        }
+        
+        return containerView
+    }
+    
+    @objc func didTapAddFriendButton() {
+        print("Add Friend button tapped")
     }
 }
