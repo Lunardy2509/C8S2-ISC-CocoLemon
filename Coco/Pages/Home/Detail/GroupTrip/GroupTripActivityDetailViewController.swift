@@ -118,9 +118,10 @@ private extension GroupTripActivityDetailViewController {
     func handleSendInvite(email: String) {
         print("Sending invite to: \(email)")
         
-        dismiss(animated: true) {
-         
+        let name = email.components(separatedBy: "@").first ?? "New Member"
+
+        dismiss(animated: true) { [weak self] in
+            self?.thisView.addTripMember(name: name, email: email)
         }
-        
     }
 }

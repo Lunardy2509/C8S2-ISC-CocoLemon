@@ -14,8 +14,26 @@ protocol GroupTripActivityDetailViewDelegate: AnyObject {
     func notifyAddFriendButtonDidTap() // Add this new method
 }
 
+struct TripMember {
+    let name: String
+    let email: String
+    let profileImageURL: String?
+    let isWaiting: Bool
+    
+    init(name: String, email: String, profileImageURL: String? = nil, isWaiting: Bool = false) {
+        self.name = name
+        self.email = email
+        self.profileImageURL = profileImageURL
+        self.isWaiting = isWaiting
+    }
+}
+
 final class GroupTripActivityDetailView: UIView {
     weak var delegate: GroupTripActivityDetailViewDelegate?
+    
+    private var tripMembers: [TripMember] = [
+        TripMember(name: "Adhis", email: "adhis@example.com", profileImageURL: nil, isWaiting: false)
+    ]
     
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -626,110 +644,66 @@ private extension GroupTripActivityDetailView {
     func createTripMembersContainer() -> UIView {
         let containerView = UIView()
         
-        let memberStackView = createStackView(spacing: 16.0, axis: .horizontal)
-        memberStackView.alignment = .center
+        // Create a collection view for better handling of multiple members
+        let flowLayout = UICollectionViewFlowLayout()
+        flowLayout.itemSize = CGSize(width: 70, height: 90)
+        flowLayout.minimumInteritemSpacing = 16
+        flowLayout.minimumLineSpacing = 16
+        flowLayout.scrollDirection = .horizontal
         
-        let userProfileView = createUserProfileView()
-      
-        let addFriendButton = createAddFriendButton()
+        let collectionView = UICollectionView(frame: .zero, collectionViewLayout: flowLayout)
+        collectionView.backgroundColor = .clear
+        collectionView.showsHorizontalScrollIndicator = false
+        collectionView.register(TripMemberCell.self, forCellWithReuseIdentifier: "TripMemberCell")
+        collectionView.register(AddFriendCell.self, forCellWithReuseIdentifier: "AddFriendCell")
+        collectionView.dataSource = self
+        collectionView.delegate = self
         
-        memberStackView.addArrangedSubview(userProfileView)
-        memberStackView.addArrangedSubview(addFriendButton)
-        
-        containerView.addSubview(memberStackView)
-        memberStackView.layout {
-            $0.top(to: containerView.topAnchor)
-                .leading(to: containerView.leadingAnchor)
-                .trailing(to: containerView.trailingAnchor, relation: .lessThanOrEqual)
-                .bottom(to: containerView.bottomAnchor)
-        }
-        
-        return containerView
-    }
-    
-    func createUserProfileView() -> UIView {
-        let containerView = UIView()
-        let profileImageView = UIImageView()
-        profileImageView.backgroundColor = Token.grayscale30
-        profileImageView.layer.cornerRadius = 25.0
-        profileImageView.clipsToBounds = true
-        profileImageView.contentMode = .scaleAspectFill
-        profileImageView.layout {
-            $0.size(50.0)
-        }
-        
-        profileImageView.image = UIImage(named: "adhis")
-        
-        let nameLabel = UILabel(
-            font: .jakartaSans(forTextStyle: .footnote, weight: .medium),
-            textColor: Token.additionalColorsBlack,
-            numberOfLines: 1
-        )
-        nameLabel.text = "Adhis" 
-        nameLabel.textAlignment = .center
-        
-        let stackView = createStackView(spacing: 8.0)
-        stackView.alignment = .center
-        
-        stackView.addArrangedSubview(profileImageView)
-        stackView.addArrangedSubview(nameLabel)
-        
-        containerView.addSubview(stackView)
-        stackView.layout {
+        containerView.addSubview(collectionView)
+        collectionView.layout {
             $0.top(to: containerView.topAnchor)
                 .leading(to: containerView.leadingAnchor)
                 .trailing(to: containerView.trailingAnchor)
                 .bottom(to: containerView.bottomAnchor)
+                .height(90)
         }
         
         return containerView
     }
-    
-    func createAddFriendButton() -> UIView {
-        let containerView = UIView()
-        let addButton = UIButton(type: .system)
-        addButton.backgroundColor = Token.mainColorPrimary.withAlphaComponent(0.1)
-        addButton.layer.cornerRadius = 25.0
-        addButton.layer.borderWidth = 2.0
-        addButton.layer.borderColor = Token.mainColorPrimary.cgColor
+  
+    public func addTripMember(name: String, email: String) {
+        let newMember = TripMember(name: name, email: email, profileImageURL: nil, isWaiting: true)
+        tripMembers.append(newMember)
         
-        let plusIcon = UIImage(systemName: "plus")?.withConfiguration(
-            UIImage.SymbolConfiguration(pointSize: 16, weight: .medium)
-        )
-        addButton.setImage(plusIcon, for: .normal)
-        addButton.tintColor = Token.mainColorPrimary
-        
-        addButton.layout {
-            $0.size(50.0)
+        if let collectionView = tripMembersContainer.subviews.first as? UICollectionView {
+            collectionView.reloadData()
         }
-        addButton.addTarget(self, action: #selector(didTapAddFriendButton), for: .touchUpInside)
-        
-        let titleLabel = UILabel(
-            font: .jakartaSans(forTextStyle: .footnote, weight: .medium),
-            textColor: Token.mainColorPrimary,
-            numberOfLines: 1
-        )
-        titleLabel.text = "Add Friend"
-        titleLabel.textAlignment = .center
-        
-        let stackView = createStackView(spacing: 8.0)
-        stackView.alignment = .center
-        
-        stackView.addArrangedSubview(addButton)
-        stackView.addArrangedSubview(titleLabel)
-        
-        containerView.addSubview(stackView)
-        stackView.layout {
-            $0.top(to: containerView.topAnchor)
-                .leading(to: containerView.leadingAnchor)
-                .trailing(to: containerView.trailingAnchor)
-                .bottom(to: containerView.bottomAnchor)
-        }
-        
-        return containerView
+    }
+}
+
+extension GroupTripActivityDetailView: UICollectionViewDataSource, UICollectionViewDelegate {
+    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        return tripMembers.count + 1 
     }
     
-    @objc func didTapAddFriendButton() {
-        delegate?.notifyAddFriendButtonDidTap()
+    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        if indexPath.item < tripMembers.count {
+            guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "TripMemberCell", for: indexPath) as? TripMemberCell else {
+                return UICollectionViewCell()
+            }
+            cell.configure(with: tripMembers[indexPath.item])
+            return cell
+        } else {
+            guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "AddFriendCell", for: indexPath) as? AddFriendCell else {
+                return UICollectionViewCell()
+            }
+            return cell
+        }
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        if indexPath.item >= tripMembers.count {
+            delegate?.notifyAddFriendButtonDidTap()
+        }
     }
 }
