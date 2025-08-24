@@ -17,6 +17,15 @@ final class GroupTripActivityDetailViewModel: NSObject {
     
     private let data: ActivityDetailDataModel
     
+    private(set) lazy var tripNameInputViewModel: HomeSearchBarViewModel = HomeSearchBarViewModel(
+        leadingIcon: nil,
+        placeholderText: "Enter trip name",
+        currentTypedText: "",
+        trailingIcon: nil,
+        isTypeAble: true,
+        delegate: self
+    )
+    
     private(set) lazy var calendarInputViewModel: HomeSearchBarViewModel = HomeSearchBarViewModel(
         leadingIcon: nil,
         placeholderText: "DD/MM/YYYY",
@@ -28,20 +37,34 @@ final class GroupTripActivityDetailViewModel: NSObject {
         isTypeAble: false,
         delegate: self
     )
-    private(set) lazy var paxInputViewModel: HomeSearchBarViewModel = HomeSearchBarViewModel(
+    
+    private(set) lazy var dueDateInputViewModel: HomeSearchBarViewModel = HomeSearchBarViewModel(
         leadingIcon: nil,
-        placeholderText: "Input total Pax...",
+        placeholderText: "DD/MM/YYYY",
         currentTypedText: "",
-        trailingIcon: nil,
-        isTypeAble: true,
+        trailingIcon: (
+            image: CocoIcon.icCalendarIcon.image,
+            didTap: openDueDateCalendar
+        ),
+        isTypeAble: false,
         delegate: self
     )
+    
     private var chosenDateInput: Date? {
         didSet {
             guard let chosenDateInput else { return }
             let dateFormatter: DateFormatter = DateFormatter()
             dateFormatter.dateFormat = "dd MMMM, yyyy"
             calendarInputViewModel.currentTypedText = dateFormatter.string(from: chosenDateInput)
+        }
+    }
+    
+    private var chosenDueDateInput: Date? {
+        didSet {
+            guard let chosenDueDateInput else { return }
+            let dateFormatter: DateFormatter = DateFormatter()
+            dateFormatter.dateFormat = "dd MMMM, yyyy"
+            dueDateInputViewModel.currentTypedText = dateFormatter.string(from: chosenDueDateInput)
         }
     }
 }
@@ -63,21 +86,32 @@ extension GroupTripActivityDetailViewModel: GroupTripActivityDetailViewModelProt
         navigationDelegate?.notifyGroupTripCreateTripTapped()
     }
     
-    func onCalendarDidChoose(date: Date) {
-        chosenDateInput = date
+    func onCalendarDidChoose(date: Date, for type: CalendarType) {
+        switch type {
+        case .visitDate:
+            chosenDateInput = date
+        case .dueDate:
+            chosenDueDateInput = date
+        }
     }
 }
 
 extension GroupTripActivityDetailViewModel: HomeSearchBarViewModelDelegate {
     func notifyHomeSearchBarDidTap(isTypeAble: Bool, viewModel: HomeSearchBarViewModel) {
         if viewModel === calendarInputViewModel {
-            actionDelegate?.showCalendarOption()
+            actionDelegate?.showCalendarOption(for: .visitDate)
+        } else if viewModel === dueDateInputViewModel {
+            actionDelegate?.showCalendarOption(for: .dueDate)
         }
     }
 }
 
 private extension GroupTripActivityDetailViewModel {
     func openCalendar() {
-        actionDelegate?.showCalendarOption()
+        actionDelegate?.showCalendarOption(for: .visitDate)
+    }
+    
+    func openDueDateCalendar() {
+        actionDelegate?.showCalendarOption(for: .dueDate)
     }
 }
