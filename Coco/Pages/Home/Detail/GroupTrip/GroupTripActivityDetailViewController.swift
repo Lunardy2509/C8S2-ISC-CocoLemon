@@ -26,10 +26,56 @@ final class GroupTripActivityDetailViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        setupNavigationBar()
         thisView.delegate = self
         viewModel.onViewDidLoad()
-        setupScheduleInputView()
+        
+        // Add the create trip button
+        let createTripButtonVC = CocoButtonHostingController(
+            action: { [weak self] in
+                self?.viewModel.onCreateTripTapped()
+            },
+            text: "Create Trip",
+            style: .large,
+            type: .primary,
+            isStretch: true
+        )
+        addChild(createTripButtonVC)
+        thisView.addCreateTripButton(button: createTripButtonVC.view)
+        
+        // Add the schedule input view
+        let scheduleInputVC = UIHostingController(rootView: GroupTripFormInputView(
+            tripNameViewModel: viewModel.tripNameInputViewModel,
+            calendarViewModel: viewModel.calendarInputViewModel,
+            dueDateViewModel: viewModel.dueDateInputViewModel
+        ))
+        addChild(scheduleInputVC)
+        thisView.addScheduleInputView(with: scheduleInputVC.view)
     }
+    
+    private func setupNavigationBar() {
+        // Set the title
+        title = "Create Group Form"
+        
+        // Customize navigation bar appearance
+        navigationController?.navigationBar.prefersLargeTitles = false
+        
+        // Add back button (this should be automatic, but we can customize if needed)
+        navigationItem.hidesBackButton = false
+        
+        // Optional: Custom back button if needed
+        // let backButton = UIBarButtonItem(
+        //     image: UIImage(systemName: "chevron.left"),
+        //     style: .plain,
+        //     target: self,
+        //     action: #selector(backButtonTapped)
+        // )
+        // navigationItem.leftBarButtonItem = backButton
+    }
+    
+    // @objc private func backButtonTapped() {
+    //     navigationController?.popViewController(animated: true)
+    // }
     
     private let viewModel: GroupTripActivityDetailViewModelProtocol
     private let thisView: GroupTripActivityDetailView = GroupTripActivityDetailView()
