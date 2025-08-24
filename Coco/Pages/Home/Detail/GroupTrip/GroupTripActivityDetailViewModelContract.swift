@@ -8,7 +8,6 @@
 import Foundation
 
 protocol GroupTripActivityDetailNavigationDelegate: AnyObject {
-    func notifyGroupTripActivityDetailPackageDidSelect(package: ActivityDetailDataModel, selectedPackageId: Int)
     func notifyGroupTripCreateTripTapped()
 }
 
@@ -36,4 +35,5 @@ protocol GroupTripActivityDetailViewModelProtocol: AnyObject {
     func onPackagesDetailDidTap(with packageId: Int)
     func onCreateTripTapped()
     func onCalendarDidChoose(date: Date, for type: CalendarType)
+    func getSelectedPackageIds() -> Set<Int> 
 }

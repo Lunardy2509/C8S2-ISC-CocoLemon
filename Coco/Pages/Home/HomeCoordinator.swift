@@ -146,19 +146,7 @@ extension HomeCoordinator: SoloTripActivityDetailNavigationDelegate {
 }
 
 extension HomeCoordinator: GroupTripActivityDetailNavigationDelegate {
-    func notifyGroupTripActivityDetailPackageDidSelect(package: ActivityDetailDataModel, selectedPackageId: Int) {
-        let viewModel: HomeFormScheduleViewModel = HomeFormScheduleViewModel(
-            input: HomeFormScheduleViewModelInput(
-                package: package,
-                selectedPackageId: selectedPackageId
-            )
-        )
-        viewModel.delegate = self
-        let viewController: HomeFormScheduleViewController = HomeFormScheduleViewController(viewModel: viewModel)
-        start(viewController: viewController)
-    }
-    
     func notifyGroupTripCreateTripTapped() {
-       
+        
     }
 }

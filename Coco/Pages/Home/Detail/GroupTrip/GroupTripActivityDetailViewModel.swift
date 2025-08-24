@@ -7,7 +7,7 @@
 
 import Foundation
 
-final class GroupTripActivityDetailViewModel: NSObject {
+final class GroupTripActivityDetailViewModel {
     weak var actionDelegate: GroupTripActivityDetailViewModelAction?
     weak var navigationDelegate: GroupTripActivityDetailNavigationDelegate?
     
@@ -16,6 +16,7 @@ final class GroupTripActivityDetailViewModel: NSObject {
     }
     
     private let data: ActivityDetailDataModel
+    private var selectedPackageIds: Set<Int> = []
     
     private(set) lazy var tripNameInputViewModel: HomeSearchBarViewModel = HomeSearchBarViewModel(
         leadingIcon: nil,
@@ -79,11 +80,20 @@ extension GroupTripActivityDetailViewModel: GroupTripActivityDetailViewModelProt
     }
     
     func onPackagesDetailDidTap(with packageId: Int) {
-        navigationDelegate?.notifyGroupTripActivityDetailPackageDidSelect(package: data, selectedPackageId: packageId)
+        // Just update the internal selection state, don't navigate
+        if selectedPackageIds.contains(packageId) {
+            selectedPackageIds.remove(packageId)
+        } else {
+            selectedPackageIds.insert(packageId)
+        }
     }
     
     func onCreateTripTapped() {
         navigationDelegate?.notifyGroupTripCreateTripTapped()
+    }
+    
+    func getSelectedPackageIds() -> Set<Int> {
+        return selectedPackageIds
     }
     
     func onCalendarDidChoose(date: Date, for type: CalendarType) {
