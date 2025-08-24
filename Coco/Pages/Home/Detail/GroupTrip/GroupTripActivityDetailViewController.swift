@@ -85,6 +85,10 @@ extension GroupTripActivityDetailViewController: GroupTripActivityDetailViewDele
     func notifyPackagesDetailDidTap(with packageId: Int) {
         viewModel.onPackagesDetailDidTap(with: packageId)
     }
+    
+    func notifyAddFriendButtonDidTap() {
+        showInviteFriendPopup()
+    }
 }
 
 extension GroupTripActivityDetailViewController: CocoCalendarViewControllerDelegate {
@@ -92,5 +96,31 @@ extension GroupTripActivityDetailViewController: CocoCalendarViewControllerDeleg
         guard let date: Date, let type = self.calendarType else { return }
         viewModel.onCalendarDidChoose(date: date, for: type)
         self.calendarType = nil
+    }
+}
+
+private extension GroupTripActivityDetailViewController {
+    func showInviteFriendPopup() {
+        let popupView = InviteFriendPopUpView(
+            onSendInvite: { [weak self] email in
+                self?.handleSendInvite(email: email)
+            },
+            onDismiss: { [weak self] in
+                self?.dismiss(animated: true)
+            }
+        )
+        
+        let hostingVC = UIHostingController(rootView: popupView)
+        let popupVC = CocoPopupViewController(child: hostingVC)
+        present(popupVC, animated: true)
+    }
+    
+    func handleSendInvite(email: String) {
+        print("Sending invite to: \(email)")
+        
+        dismiss(animated: true) {
+         
+        }
+        
     }
 }
