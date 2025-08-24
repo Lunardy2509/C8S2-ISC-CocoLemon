@@ -74,7 +74,7 @@ final class CocoPopupViewController: UIViewController {
     
     private let child: UIViewController
     private let transitionDelegate: PopupTransitioningDelegate = PopupTransitioningDelegate()
-    private let container = UIView()
+    fileprivate let container = UIView()
 }
 
 extension CocoPopupViewController: UIGestureRecognizerDelegate {
