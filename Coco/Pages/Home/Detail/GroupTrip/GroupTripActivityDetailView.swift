@@ -35,6 +35,8 @@ final class GroupTripActivityDetailView: UIView {
         TripMember(name: "Adhis", email: "adhis@example.com", profileImageURL: nil, isWaiting: false)
     ]
     
+    private var selectedPackageId: Int?
+    
     override init(frame: CGRect) {
         super.init(frame: frame)
         setupView()
@@ -100,6 +102,12 @@ final class GroupTripActivityDetailView: UIView {
                     view.transform = .identity
                 }
             )
+        }
+       
+        if selectedPackageId != nil {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { [weak self] in
+                self?.refreshPackageViews()
+            }
         }
     }
     
@@ -459,12 +467,27 @@ private extension GroupTripActivityDetailView {
     
     func createPackageView(data: ActivityDetailDataModel.Package) -> UIView {
         let containerStackView: UIStackView = createStackView(spacing: 12.0, axis: .horizontal)
-        let contentStackView: UIStackView = createStackView(spacing: 10.0)
+        let contentStackView: UIStackView = createStackView(spacing: 8.0)
         
-        let headerStackView: UIStackView = createStackView(spacing: 12.0)
-        headerStackView.alignment = .leading
+        let nameLabel: UILabel = UILabel(
+            font: .jakartaSans(forTextStyle: .subheadline, weight: .bold),
+            textColor: Token.additionalColorsBlack,
+            numberOfLines: 0
+        )
+        nameLabel.text = data.name
         
-        let footerContentView: UIView = UIView()
+        let capacityLabel: UILabel = UILabel(
+            font: .jakartaSans(forTextStyle: .caption1, weight: .medium),
+            textColor: Token.grayscale70,
+            numberOfLines: 1
+        )
+        capacityLabel.text = data.description
+        
+        let priceLabel: UILabel = UILabel(
+            font: .jakartaSans(forTextStyle: .subheadline, weight: .semibold),
+            textColor: Token.additionalColorsBlack,
+            numberOfLines: 1
+        )
         
         let imageView: UIImageView = UIImageView()
         imageView.contentMode = .scaleAspectFill
@@ -475,103 +498,80 @@ private extension GroupTripActivityDetailView {
         imageView.loadImage(from: URL(string: data.imageUrlString))
         imageView.clipsToBounds = true
         
-        let nameLabel: UILabel = UILabel(
-            font: .jakartaSans(forTextStyle: .subheadline, weight: .bold),
-            textColor: Token.additionalColorsBlack,
-            numberOfLines: 2
-        )
-        nameLabel.text = data.name
+        // Create radio button
+        let radioButton = UIButton(type: .custom)
+        radioButton.layout {
+            $0.size(24.0)
+        }
         
-        let ratingAreaStackView: UIStackView = createStackView(spacing: 4.0, axis: .horizontal)
-        ratingAreaStackView.alignment = .leading
+        // Set initial state
+        let isSelected = selectedPackageId == data.id
+        updateRadioButton(radioButton, isSelected: isSelected)
         
-        ratingAreaStackView.addArrangedSubview(
-            createIconTextView(
-                image: CocoIcon.icActivityAreaIcon.getImageWithTintColor(Token.grayscale70),
-                text: data.description
-            )
-        )
+        // Add tap gesture to the entire container
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(packageViewTapped(_:)))
+        containerStackView.addGestureRecognizer(tapGesture)
+        containerStackView.isUserInteractionEnabled = true
+        containerStackView.tag = data.id
         
-        let priceLabel: UILabel = UILabel(
-            font: .jakartaSans(forTextStyle: .subheadline, weight: .bold),
-            textColor: Token.additionalColorsBlack,
-            numberOfLines: 2
-        )
+        // Price formatting
+        let attributedString = NSMutableAttributedString()
         
-        let attributedString: NSMutableAttributedString = NSMutableAttributedString(
+        let priceString = NSAttributedString(
             string: data.price,
             attributes: [
-                .font : UIFont.jakartaSans(forTextStyle: .subheadline, weight: .bold),
+                .font : UIFont.jakartaSans(forTextStyle: .subheadline, weight: .semibold),
                 .foregroundColor : Token.additionalColorsBlack
             ]
         )
         
-        attributedString.append(
-            NSAttributedString(
-                string: "/Person",
-                attributes: [
-                    .font : UIFont.jakartaSans(forTextStyle: .subheadline, weight: .medium),
-                    .foregroundColor : Token.grayscale60
-                ]
-            )
+        let perPersonString = NSAttributedString(
+            string: "/Person",
+            attributes: [
+                .font : UIFont.jakartaSans(forTextStyle: .subheadline, weight: .medium),
+                .foregroundColor : Token.grayscale60
+            ]
         )
         
-        priceLabel.setContentHuggingPriority(.defaultLow - 1, for: .horizontal)
-        priceLabel.setContentCompressionResistancePriority(.defaultHigh, for: .horizontal)
-        
+        attributedString.append(priceString)
+        attributedString.append(perPersonString)
         priceLabel.attributedText = attributedString
         
+        // Create content container with radio button positioned relative to capacity label
+        let contentContainer = UIView()
+        contentContainer.addSubviews([contentStackView, radioButton])
+        
+        // Layout content stack view (name, capacity, price)
+        contentStackView.addArrangedSubview(nameLabel)
+        contentStackView.addArrangedSubview(capacityLabel) // Capacity above price
+        contentStackView.addArrangedSubview(priceLabel)   // Price below capacity
+        
+        contentStackView.layout {
+            $0.leading(to: contentContainer.leadingAnchor)
+                .top(to: contentContainer.topAnchor)
+                .bottom(to: contentContainer.bottomAnchor)
+                .trailing(to: radioButton.leadingAnchor, constant: -12.0) // Leave space for radio button
+        }
+        
+        // Position radio button aligned with capacity label (middle element)
+        radioButton.layout {
+            $0.trailing(to: contentContainer.trailingAnchor)
+                .centerY(to: capacityLabel.centerYAnchor) // Align with capacity label instead of content container
+        }
+        
+        radioButton.setContentHuggingPriority(.required, for: .horizontal)
+        radioButton.setContentCompressionResistancePriority(.required, for: .horizontal)
+        
+        // Add image and content to main container
         containerStackView.addArrangedSubview(imageView)
-        containerStackView.addArrangedSubview(contentStackView)
+        containerStackView.addArrangedSubview(contentContainer)
         
-        contentStackView.addArrangedSubview(headerStackView)
-        contentStackView.addArrangedSubview(footerContentView)
-        
-        headerStackView.addArrangedSubview(nameLabel)
-        headerStackView.addArrangedSubview(ratingAreaStackView)
-        
-        let action: UIAction = UIAction { [weak self] _ in
-            self?.delegate?.notifyPackagesDetailDidTap(with: data.id)
-        }
-         
-        var config = UIButton.Configuration.filled()
-        config.image = CocoIcon.icArrowTopRight.image
-        config.baseBackgroundColor = Token.mainColorPrimary
-        config.baseForegroundColor = .white
-        config.cornerStyle = .capsule
-
-        let button: UIButton = UIButton(configuration: config, primaryAction: action)
-        button.layout {
-            $0.size(40.0)
-        }
-        
-        button.setContentHuggingPriority(.required + 1, for: .horizontal)
-        button.setContentHuggingPriority(.required + 1, for: .vertical)
-
-        button.setContentCompressionResistancePriority(.required, for: .horizontal)
-        button.setContentCompressionResistancePriority(.required, for: .vertical)
-        
-        footerContentView.addSubviews([
-            priceLabel,
-            button
-        ])
-        
-        priceLabel.layout {
-            $0.leading(to: footerContentView.leadingAnchor)
-                .top(to: footerContentView.topAnchor)
-                .bottom(to: footerContentView.bottomAnchor)
-        }
-        
-        button.layout {
-            $0.leading(to: priceLabel.trailingAnchor, relation: .lessThanOrEqual)
-                .centerY(to: footerContentView.centerYAnchor)
-                .trailing(to: footerContentView.trailingAnchor)
-        }
+        // Set container styling based on selection
+        updateContainerStyling(containerStackView, isSelected: isSelected)
         
         containerStackView.isLayoutMarginsRelativeArrangement = true
         containerStackView.layoutMargins = .init(edges: 12.0)
         containerStackView.layer.cornerRadius = 16.0
-        containerStackView.backgroundColor = Token.mainColorForth
         
         return containerStackView
     }
@@ -679,6 +679,11 @@ private extension GroupTripActivityDetailView {
             collectionView.reloadData()
         }
     }
+    
+    func setSelectedPackage(id: Int?) {
+        selectedPackageId = id
+        refreshPackageViews()
+    }
 }
 
 extension GroupTripActivityDetailView: UICollectionViewDataSource, UICollectionViewDelegate {
@@ -704,6 +709,67 @@ extension GroupTripActivityDetailView: UICollectionViewDataSource, UICollectionV
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         if indexPath.item >= tripMembers.count {
             delegate?.notifyAddFriendButtonDidTap()
+        }
+    }
+}
+
+private extension GroupTripActivityDetailView {
+    func updateRadioButton(_ button: UIButton, isSelected: Bool) {
+        if isSelected {
+            // Selected state - filled circle with checkmark
+            button.setImage(UIImage(systemName: "checkmark.circle.fill"), for: .normal)
+            button.tintColor = Token.mainColorPrimary
+        } else {
+            // Unselected state - empty circle
+            button.setImage(UIImage(systemName: "circle"), for: .normal)
+            button.tintColor = Token.grayscale40
+        }
+    }
+    
+    func updateContainerStyling(_ container: UIStackView, isSelected: Bool) {
+        if isSelected {
+            // Selected state - blue border and background
+            container.layer.borderWidth = 2.0
+            container.layer.borderColor = Token.mainColorPrimary.cgColor
+            container.backgroundColor = Token.mainColorPrimary.withAlphaComponent(0.1)
+        } else {
+            // Unselected state - gray background
+            container.layer.borderWidth = 0.0
+            container.layer.borderColor = UIColor.clear.cgColor
+            container.backgroundColor = Token.mainColorForth
+        }
+    }
+    
+    @objc func packageViewTapped(_ gesture: UITapGestureRecognizer) {
+        guard let containerView = gesture.view as? UIStackView else { return }
+        let packageId = containerView.tag
+        
+        // Update selected package
+        selectedPackageId = packageId
+        
+        // Refresh all package views to update their appearance
+        refreshPackageViews()
+        
+        // Notify delegate
+        delegate?.notifyPackagesDetailDidTap(with: packageId)
+    }
+    
+    func refreshPackageViews() {
+        // Refresh all package container views
+        for subview in packageContainer.arrangedSubviews {
+            guard let containerStack = subview as? UIStackView else { continue }
+            
+            let packageId = containerStack.tag
+            let isSelected = selectedPackageId == packageId
+            
+            // Update container styling
+            updateContainerStyling(containerStack, isSelected: isSelected)
+            
+            // Find and update radio button - adjusted for new structure
+            if let contentContainer = containerStack.arrangedSubviews.last as? UIView,
+               let radioButton = contentContainer.subviews.compactMap({ $0 as? UIButton }).first {
+                updateRadioButton(radioButton, isSelected: isSelected)
+            }
         }
     }
 }
