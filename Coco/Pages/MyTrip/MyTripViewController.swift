@@ -139,12 +139,4 @@ private extension MyTripViewController {
     @objc private func notificationButtonTapped() {
         viewModel.onNotificationButtonTapped()
     }
-    
-    func createMyTripNoTripYetRegistration() -> MyTripNoTripYetRegistration {
-        .init { cell, _, itemIdentifier in
-            // No need Configuration
-        }
-    }
-    
-    typealias MyTripNoTripYetRegistration = UICollectionView.CellRegistration<MyTripNoTripYet,MyTripNoTripYetDataModel>
 }

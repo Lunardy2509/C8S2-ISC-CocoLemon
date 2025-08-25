@@ -13,6 +13,5 @@ protocol GroupTripActivityDetailViewDelegate: AnyObject {
     func notifyAddFriendButtonDidTap()
     func notifyRemoveActivityButtonDidTap()
     func notifySearchActivityTapped()
-    func notifySearchActivitySelected(_ data: ActivityDetailDataModel)
     func notifySearchBarTapped(with query: String)
 }

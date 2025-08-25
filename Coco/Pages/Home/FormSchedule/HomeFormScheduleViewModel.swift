@@ -106,6 +106,6 @@ extension HomeFormScheduleViewModel: HomeSearchBarViewModelDelegate {
 
 private extension HomeFormScheduleViewModel {
     func openCalendar() {
-        
+       
     }
 }
