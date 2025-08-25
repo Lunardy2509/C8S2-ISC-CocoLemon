@@ -7,13 +7,12 @@
 
 import Foundation
 import UIKit
+import SwiftUI 
 
 final class GroupTripActivityDetailView: UIView {
     weak var delegate: GroupTripActivityDetailViewDelegate?
     
-    var tripMembers: [TripMember] = [
-        TripMember(name: "Adhis", email: "adhis@example.com", profileImageURL: nil, isWaiting: false)
-    ]
+    var tripMembers: [TripMember] = []
     
     internal var selectedPackageIds: Set<Int> = []
     private var selectedPackageId: Int?
@@ -24,6 +23,9 @@ final class GroupTripActivityDetailView: UIView {
     
     // Store the data temporarily until the views are created
     private var pendingActivityData: ActivityDetailDataModel?
+    
+    // Move the stored property inside the main class
+    private var currentSearchBarViewModel: HomeSearchBarViewModel?
     
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -343,6 +345,7 @@ private extension GroupTripActivityDetailView {
         removeButton.layout {
             $0.size(20.0)
         }
+        removeButton.addTarget(self, action: #selector(didTapRemoveButton), for: .touchUpInside)
         
         // Add image and text stack to content stack
         contentStackView.addArrangedSubview(activityImageView)
@@ -468,5 +471,95 @@ extension GroupTripActivityDetailView {
         if let collectionView = tripMembersContainer.subviews.first as? UICollectionView {
             collectionView.reloadData()
         }
+    }
+    
+    // Move these @objc methods inside the class extension
+    @objc private func didTapRemoveButton() {
+        delegate?.notifyRemoveActivityButtonDidTap()
+    }
+    
+    @objc private func didTapSearchContainer() {
+        delegate?.notifySearchActivityTapped()
+    }
+    
+    func showSearchBar() {
+        let searchBarContainer = UIView()
+        
+        // Create search icon
+        let searchIconView = UIImageView(image: CocoIcon.icSearchLoop.image)
+        searchIconView.tintColor = Token.grayscale60
+        searchIconView.contentMode = .scaleAspectFit
+        
+        // Create placeholder label
+        let placeholderLabel = UILabel(
+            font: .jakartaSans(forTextStyle: .body, weight: .regular),
+            textColor: Token.grayscale60,
+            numberOfLines: 1
+        )
+        placeholderLabel.text = "Search for a new activity..."
+        
+        // Add subviews
+        searchBarContainer.addSubviews([searchIconView, placeholderLabel])
+        
+        // Layout
+        searchIconView.layout {
+            $0.leading(to: searchBarContainer.leadingAnchor, constant: 16.0)
+                .centerY(to: searchBarContainer.centerYAnchor)
+                .size(20.0)
+        }
+        
+        placeholderLabel.layout {
+            $0.leading(to: searchIconView.trailingAnchor, constant: 12.0)
+                .centerY(to: searchBarContainer.centerYAnchor)
+                .trailing(to: searchBarContainer.trailingAnchor, constant: -16.0)
+        }
+        
+        // Style the container
+        searchBarContainer.backgroundColor = Token.grayscale20
+        searchBarContainer.layer.cornerRadius = 12.0
+        searchBarContainer.layer.borderWidth = 1.0
+        searchBarContainer.layer.borderColor = Token.grayscale30.cgColor
+        
+        // Add tap gesture
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(didTapSearchContainer))
+        searchBarContainer.addGestureRecognizer(tapGesture)
+        searchBarContainer.isUserInteractionEnabled = true
+        
+        // Set height constraint
+        searchBarContainer.layout {
+            $0.height(56.0)
+        }
+        
+        updateTripDestinationSection(with: searchBarContainer)
+    }
+    
+    private func updateTripDestinationSection(with newView: UIView) {
+        // Find the trip destination section and update it
+        if let sectionView = contentStackView.arrangedSubviews.first {
+            // The content view to replace is the last subview in the section
+            if let existingContentView = sectionView.subviews.last {
+                existingContentView.removeFromSuperview()
+            }
+            
+            // Add the new view (search bar)
+            sectionView.addSubview(newView)
+            
+            // Re-apply constraints relative to the title label
+            if let titleLabel = sectionView.subviews.first {
+                newView.layout {
+                    $0.top(to: titleLabel.bottomAnchor, constant: 8.0)
+                        .leading(to: sectionView.leadingAnchor)
+                        .trailing(to: sectionView.trailingAnchor)
+                        .bottom(to: sectionView.bottomAnchor)
+                }
+            }
+        }
+    }
+}
+
+// Add HomeSearchBarViewModelDelegate conformance
+extension GroupTripActivityDetailView: HomeSearchBarViewModelDelegate {
+    func notifyHomeSearchBarDidTap(isTypeAble: Bool, viewModel: HomeSearchBarViewModel) {
+        delegate?.notifySearchBarTapped(with: viewModel.currentTypedText)
     }
 }

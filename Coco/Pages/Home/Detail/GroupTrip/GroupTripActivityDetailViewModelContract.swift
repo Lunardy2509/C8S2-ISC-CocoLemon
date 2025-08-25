@@ -20,6 +20,9 @@ protocol GroupTripActivityDetailViewModelAction: AnyObject {
     func configureView(data: ActivityDetailDataModel)
     func updatePackageData(data: [ActivityDetailDataModel.Package])
     func showCalendarOption(for type: CalendarType)
+    func showSearchActivityTray()
+    func showSearchBar()
+    func showSearchResults(_ activities: [Activity])
 }
 
 protocol GroupTripActivityDetailViewModelProtocol: AnyObject {
@@ -36,4 +39,7 @@ protocol GroupTripActivityDetailViewModelProtocol: AnyObject {
     func onCreateTripTapped()
     func onCalendarDidChoose(date: Date, for type: CalendarType)
     func getSelectedPackageIds() -> Set<Int> 
+    func onRemoveActivityTapped()
+    func onSearchActivitySelected(_ newActivity: ActivityDetailDataModel)
+    func onSearchDidApply(_ queryText: String)
 }

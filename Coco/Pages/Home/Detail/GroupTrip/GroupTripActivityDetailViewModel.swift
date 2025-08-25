@@ -11,9 +11,15 @@ final class GroupTripActivityDetailViewModel {
     weak var actionDelegate: GroupTripActivityDetailViewModelAction?
     weak var navigationDelegate: GroupTripActivityDetailNavigationDelegate?
     
-    init(data: ActivityDetailDataModel) {
+    private let activityFetcher: ActivityFetcherProtocol
+
+    init(data: ActivityDetailDataModel, activityFetcher: ActivityFetcherProtocol = ActivityFetcher()) {
         self.data = data
+        self.activityFetcher = activityFetcher
+        self.currentData = data
     }
+    
+    private var currentData: ActivityDetailDataModel
     
     private let data: ActivityDetailDataModel
     private var selectedPackageIds: Set<Int> = []
@@ -102,6 +108,30 @@ extension GroupTripActivityDetailViewModel: GroupTripActivityDetailViewModelProt
             chosenDateInput = date
         case .dueDate:
             chosenDueDateInput = date
+        }
+    }
+    
+    func onRemoveActivityTapped() {
+        actionDelegate?.showSearchBar()
+    }
+    
+    func onSearchActivitySelected(_ newActivity: ActivityDetailDataModel) {
+        currentData = newActivity
+        actionDelegate?.configureView(data: newActivity)
+        actionDelegate?.updatePackageData(data: newActivity.availablePackages.content)
+    }
+
+    func onSearchDidApply(_ queryText: String) {
+        let activityFetcher = ActivityFetcher()
+        activityFetcher.fetchActivity(request: ActivitySearchRequest(pSearchText: queryText)) { [weak self] result in
+            guard let self = self else { return }
+            switch result {
+            case .success(let response):
+                let activities = response.values
+                self.actionDelegate?.showSearchResults(activities)
+            case .failure:
+                break
+            }
         }
     }
 }
