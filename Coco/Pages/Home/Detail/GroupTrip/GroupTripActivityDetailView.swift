@@ -285,11 +285,11 @@ private extension GroupTripActivityDetailView {
         // Create vertical stack for text content
         let textStackView = createStackView(spacing: 8.0)
         
-        // Activity title label
+        // Activity title label - increased font size
         let titleLabel = UILabel(
-            font: .jakartaSans(forTextStyle: .subheadline, weight: .bold),
+            font: .jakartaSans(forTextStyle: .title3, weight: .bold),
             textColor: Token.additionalColorsBlack,
-            numberOfLines: 2
+            numberOfLines: 1
         )
         
         // Location container with pin icon
@@ -300,7 +300,7 @@ private extension GroupTripActivityDetailView {
         }
         
         let locationLabel = UILabel(
-            font: .jakartaSans(forTextStyle: .caption1, weight: .medium),
+            font: .jakartaSans(forTextStyle: .caption2, weight: .medium),
             textColor: Token.grayscale70,
             numberOfLines: 1
         )
@@ -320,9 +320,9 @@ private extension GroupTripActivityDetailView {
                 .bottom(to: locationContainer.bottomAnchor)
         }
         
-        // Price range label
+        // Price range label - increased font size
         let priceLabel = UILabel(
-            font: .jakartaSans(forTextStyle: .subheadline, weight: .semibold),
+            font: .jakartaSans(forTextStyle: .caption2, weight: .semibold),
             textColor: Token.additionalColorsBlack,
             numberOfLines: 1
         )
@@ -332,14 +332,38 @@ private extension GroupTripActivityDetailView {
         textStackView.addArrangedSubview(locationContainer)
         textStackView.addArrangedSubview(priceLabel)
         
+        // Create remove/close button
+        let removeButton = UIButton(type: .system)
+        let xmarkImage = UIImage(systemName: "xmark")?.withConfiguration(
+            UIImage.SymbolConfiguration(pointSize: 12, weight: .medium)
+        )
+        removeButton.setImage(xmarkImage, for: .normal)
+        removeButton.tintColor = Token.grayscale60
+        removeButton.backgroundColor = Token.grayscale20
+        removeButton.layer.cornerRadius = 12.0
+        removeButton.layout {
+            $0.size(24.0)
+        }
+        
         // Add image and text stack to content stack
         contentStackView.addArrangedSubview(activityImageView)
         contentStackView.addArrangedSubview(textStackView)
         
-        // Add content stack to card with padding
-        cardContainer.addSubview(contentStackView)
+        // Add content stack and remove button to card
+        cardContainer.addSubviews([contentStackView, removeButton])
+        
+        // Layout content stack with padding
         contentStackView.layout {
-            $0.edges(to: cardContainer, insets: UIEdgeInsets(top: 12.0, left: 12.0, bottom: 12.0, right: 12.0))
+            $0.top(to: cardContainer.topAnchor, constant: 12.0)
+                .leading(to: cardContainer.leadingAnchor, constant: 12.0)
+                .bottom(to: cardContainer.bottomAnchor, constant: -12.0)
+                .trailing(to: removeButton.leadingAnchor, constant: -8.0)
+        }
+        
+        // Position remove button in top-right corner
+        removeButton.layout {
+            $0.top(to: cardContainer.topAnchor, constant: 12.0)
+                .trailing(to: cardContainer.trailingAnchor, constant: -12.0)
         }
         
         // Store references for data binding (now as optionals)
@@ -360,14 +384,25 @@ private extension GroupTripActivityDetailView {
             
             // Set price range from packages
             if !data.availablePackages.content.isEmpty {
-                let prices = data.availablePackages.content.map { $0.price }
-                let minPrice = prices.min() ?? ""
-                let maxPrice = prices.max() ?? ""
+                let numericPrices = data.availablePackages.content.compactMap { packageData in
+                    let cleanPrice = packageData.price.replacingOccurrences(of: "Rp", with: "").replacingOccurrences(of: ".", with: "").replacingOccurrences(of: ",", with: "")
+                    return Double(cleanPrice)
+                }
                 
-                if minPrice == maxPrice {
-                    priceLabel.text = "\(minPrice)/Person"
-                } else {
-                    priceLabel.text = "\(minPrice) - \(maxPrice)/Person"
+                if let minPrice = numericPrices.min(), let maxPrice = numericPrices.max() {
+                    // Format back to currency string
+                    let formatter = NumberFormatter()
+                    formatter.numberStyle = .decimal
+                    formatter.groupingSeparator = "."
+                    
+                    let minPriceString = "Rp\(formatter.string(from: NSNumber(value: minPrice)) ?? "")"
+                    let maxPriceString = "Rp\(formatter.string(from: NSNumber(value: maxPrice)) ?? "")"
+                    
+                    if minPrice == maxPrice {
+                        priceLabel.text = "\(minPriceString)/Person"
+                    } else {
+                        priceLabel.text = "\(minPriceString) - \(maxPriceString)/Person"
+                    }
                 }
             }
         }
