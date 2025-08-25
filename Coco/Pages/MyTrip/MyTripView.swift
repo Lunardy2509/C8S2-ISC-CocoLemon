@@ -72,7 +72,7 @@ private extension MyTripView {
         contentStackView.arrangedSubviews.forEach { $0.removeFromSuperview() }
         datas.enumerated().forEach { (index, data) in
             let view = MyTripListCardView()
-            view.delegate = delegate
+            view.delegate = self
             view.configureView(dataModel: data, index: index)
             contentStackView.addArrangedSubview(view)
         }
@@ -88,5 +88,12 @@ private extension MyTripView {
     func showEmptyState() {
         contentStackView.isHidden = true
         emptyStateView.isHidden = false
+    }
+}
+
+// MARK: - MyTripListCardViewDelegate
+extension MyTripView: MyTripListCardViewDelegate {
+    func notifyTripListCardDidTap(at index: Int) {
+        delegate?.notifyTripListCardDidTap(at: index)
     }
 }

@@ -45,7 +45,7 @@ extension MyTripViewController: MyTripViewModelAction {
     }
     
     func configureRecommendations(recommendations: [MyTripRecommendationDataModel]) {
-        thisView.configureRecommendations(recommendations: recommendations)
+//        thisView.configureRecommendations(recommendations: recommendations)
     }
     
     func goToBookingDetail(with data: BookingDetails) {
