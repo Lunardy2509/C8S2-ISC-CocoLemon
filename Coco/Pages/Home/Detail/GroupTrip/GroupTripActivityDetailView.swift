@@ -331,18 +331,17 @@ private extension GroupTripActivityDetailView {
         textStackView.addArrangedSubview(titleLabel)
         textStackView.addArrangedSubview(locationContainer)
         textStackView.addArrangedSubview(priceLabel)
-        
-        // Create remove/close button
+     
         let removeButton = UIButton(type: .system)
         let xmarkImage = UIImage(systemName: "xmark")?.withConfiguration(
-            UIImage.SymbolConfiguration(pointSize: 12, weight: .medium)
+            UIImage.SymbolConfiguration(pointSize: 10, weight: .medium)
         )
         removeButton.setImage(xmarkImage, for: .normal)
-        removeButton.tintColor = Token.grayscale60
-        removeButton.backgroundColor = Token.grayscale20
-        removeButton.layer.cornerRadius = 12.0
+        removeButton.tintColor = Token.additionalColorsWhite
+        removeButton.backgroundColor = Token.grayscale40
+        removeButton.layer.cornerRadius = 10.0
         removeButton.layout {
-            $0.size(24.0)
+            $0.size(20.0)
         }
         
         // Add image and text stack to content stack
@@ -360,10 +359,10 @@ private extension GroupTripActivityDetailView {
                 .trailing(to: removeButton.leadingAnchor, constant: -8.0)
         }
         
-        // Position remove button in top-right corner
+        // Position remove button exactly on the borderline (top-right corner)
         removeButton.layout {
-            $0.top(to: cardContainer.topAnchor, constant: 12.0)
-                .trailing(to: cardContainer.trailingAnchor, constant: -12.0)
+            $0.top(to: cardContainer.topAnchor, constant: -6.0) // Move it up by half its height
+                .trailing(to: cardContainer.trailingAnchor, constant: 6.0) // Move it right by half its width
         }
         
         // Store references for data binding (now as optionals)
