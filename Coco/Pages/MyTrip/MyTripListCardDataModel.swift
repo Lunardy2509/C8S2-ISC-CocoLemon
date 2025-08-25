@@ -7,7 +7,8 @@
 
 import Foundation
 
-struct MyTripListCardDataModel {
+struct MyTripListCardDataModel: Hashable {
+    let id: String // Add unique identifier for Hashable conformance
     let statusLabel: StatusLabel
     let imageUrl: String
     let dateText: String
@@ -16,12 +17,13 @@ struct MyTripListCardDataModel {
     let totalPax: Int
     let price: String
     
-    struct StatusLabel {
+    struct StatusLabel: Hashable {
         let text: String
         let style: CocoStatusLabelStyle
     }
     
     init(bookingDetail: BookingDetails) {
+        self.id = String(bookingDetail.bookingId) // Use bookingId as unique identifier
         var bookingStatus: String = bookingDetail.status
         var statusStyle: CocoStatusLabelStyle = .pending
         
@@ -47,6 +49,15 @@ struct MyTripListCardDataModel {
         title = bookingDetail.activityTitle
         location = bookingDetail.destination.name
         totalPax = bookingDetail.participants
-        price = "Rp \(bookingDetail.totalPrice)"
+        price = "\(bookingDetail.totalPrice.toRupiah())"
+    }
+    
+    // Hashable conformance
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
+    }
+    
+    static func == (lhs: MyTripListCardDataModel, rhs: MyTripListCardDataModel) -> Bool {
+        return lhs.id == rhs.id
     }
 }

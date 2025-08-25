@@ -31,8 +31,7 @@ struct CocoSecureInputTextField: View {
                     viewModel.placeholderText,
                     text: $viewModel.currentTypedText
                 )
-            }
-            else {
+            } else {
                 TextField(
                     viewModel.placeholderText,
                     text: $viewModel.currentTypedText

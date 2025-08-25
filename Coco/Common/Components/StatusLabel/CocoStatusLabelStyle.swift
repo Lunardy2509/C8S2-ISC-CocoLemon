@@ -8,9 +8,20 @@
 import Foundation
 import UIKit
 
-struct CocoStatusLabelStyle {
+struct CocoStatusLabelStyle: Hashable {
     let textColor: UIColor
     let backgroundColor: UIColor
+    
+    // Hashable conformance
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(textColor.cgColor.components)
+        hasher.combine(backgroundColor.cgColor.components)
+    }
+    
+    static func == (lhs: CocoStatusLabelStyle, rhs: CocoStatusLabelStyle) -> Bool {
+        return lhs.textColor.cgColor == rhs.textColor.cgColor &&
+               lhs.backgroundColor.cgColor == rhs.backgroundColor.cgColor
+    }
 }
 
 extension CocoStatusLabelStyle {

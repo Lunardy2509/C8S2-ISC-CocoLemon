@@ -10,6 +10,7 @@ import Foundation
 enum CreateBookingEndpoint: EndpointProtocol {
     case create
     case getBookings
+    case deleteBooking
     
     var path: String {
         switch self {
@@ -17,6 +18,8 @@ enum CreateBookingEndpoint: EndpointProtocol {
             return "rpc/create_booking"
         case .getBookings:
             return "rpc/get_user_bookings"
+        case .deleteBooking:
+            return "rpc/delete_booking"
         }
     }
 }

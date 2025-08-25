@@ -1,20 +1,21 @@
 //
-//  HomeSearchFilterPillView.swift
+//  HomeFilterDestinationPillView.swift
 //  Coco
 //
-//  Created by Jackie Leonardy on 09/07/25.
+//  Created by Ferdinand Lunardy on 19/08/25.
 //
 
 import Foundation
 import SwiftUI
 
-struct HomeSearchFilterPillView: View {
-    @ObservedObject var state: HomeSearchFilterPillState
+struct HomeFilterDestinationPillView: View {
+    @ObservedObject var state: HomeFilterDestinationPillState
     let didTap: () -> Void
     
     var body: some View {
         Text(state.title)
-            .lineLimit(1)
+            .lineLimit(nil)
+            .multilineTextAlignment(.center)
             .font(.jakartaSans(forTextStyle: .footnote, weight: .semibold))
             .foregroundStyle(state.textColor)
             .padding(.vertical, 8.0)

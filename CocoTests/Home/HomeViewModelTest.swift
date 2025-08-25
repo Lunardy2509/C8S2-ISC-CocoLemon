@@ -11,12 +11,13 @@ import Testing
 
 struct HomeViewModelTest {
     private struct TestContext {
+        // --- GIVEN ---
         let fetcher: MockActivityFetcher
         let actionDelegate: MockHomeViewModelAction
         let navigationDelegate: MockHomeViewModelNavigationDelegate
         let viewModel: HomeViewModel
         let activities: ActivityModelArray
-        
+        // --- WHEN ---
         static func setup() throws -> TestContext {
             let fetcher = MockActivityFetcher()
             let actionDelegate = MockHomeViewModelAction()
@@ -38,9 +39,9 @@ struct HomeViewModelTest {
             )
         }
     }
+    // --- THEN ---
     
-    // MARK: - Filter Tests
-    
+    // MARK: - Filter Testsf
     @Test("filter tray - should open on icon tap")
     func filterTray_whenIconTapped_shouldOpen() async throws {
         // --- GIVEN ---
@@ -63,9 +64,9 @@ struct HomeViewModelTest {
         context.viewModel.onViewDidLoad()
         context.viewModel.searchBarViewModel.trailingIcon?.didTap?()
         
-        let filterModel = HomeSearchFilterTrayDataModel(
+        let filterModel = HomeFilterTrayDataModel(
             filterPillDataState: [],
-            priceRangeModel: HomeSearchFilterPriceRangeModel(
+            priceRangeModel: HomeFilterPriceRangeModel(
                 minPrice: 499000.0,
                 maxPrice: 200000,
                 range: 0...0
@@ -134,7 +135,7 @@ struct HomeViewModelTest {
         let activityData = HomeActivityCellDataModel(
             id: 1,
             area: "area",
-            name: "name",
+            name: "name", location: "location",
             priceText: "priceText",
             imageUrl: nil
         )
@@ -183,7 +184,7 @@ struct HomeViewModelTest {
         let invalidActivityData = HomeActivityCellDataModel(
             id: 999,
             area: "area",
-            name: "name",
+            name: "name", location: "location",
             priceText: "priceText",
             imageUrl: nil
         )
@@ -262,10 +263,22 @@ private extension HomeViewModelTest {
 }
 
 private final class MockHomeViewModelAction: HomeViewModelAction {
+    var invokedConstructFilterCarousel = false
+    var invokedConstructFilterCarouselCount = 0
+    var invokedConstructFilterCarouselParameters: (filterPillStates: [HomeFilterPillState], filterDestinationPillStates: [HomeFilterDestinationPillState])?
+    var invokedConstructFilterCarouselParametersList = [(filterPillStates: [HomeFilterPillState], filterDestinationPillStates: [HomeFilterDestinationPillState])]()
+
+    func constructFilterCarousel(filterPillStates: [Coco.HomeFilterPillState], filterDestinationPillStates: [Coco.HomeFilterDestinationPillState]) {
+        invokedConstructFilterCarousel = true
+        invokedConstructFilterCarouselCount += 1
+        invokedConstructFilterCarouselParameters = (filterPillStates, filterDestinationPillStates)
+        invokedConstructFilterCarouselParametersList.append((filterPillStates, filterDestinationPillStates))
+    }
+    
 
     var invokedConstructCollectionView = false
     var invokedConstructCollectionViewCount = 0
-
+    
     func constructCollectionView(viewModel: some HomeCollectionViewModelProtocol) {
         invokedConstructCollectionView = true
         invokedConstructCollectionViewCount += 1
@@ -336,10 +349,10 @@ private final class MockHomeViewModelAction: HomeViewModelAction {
 
     var invokedOpenFilterTray = false
     var invokedOpenFilterTrayCount = 0
-    var invokedOpenFilterTrayParameters: (viewModel: HomeSearchFilterTrayViewModel, Void)?
-    var invokedOpenFilterTrayParametersList = [(viewModel: HomeSearchFilterTrayViewModel, Void)]()
+    var invokedOpenFilterTrayParameters: (viewModel: HomeFilterTrayViewModel, Void)?
+    var invokedOpenFilterTrayParametersList = [(viewModel: HomeFilterTrayViewModel, Void)]()
 
-    func openFilterTray(_ viewModel: HomeSearchFilterTrayViewModel) {
+    func openFilterTray(_ viewModel: HomeFilterTrayViewModel) {
         invokedOpenFilterTray = true
         invokedOpenFilterTrayCount += 1
         invokedOpenFilterTrayParameters = (viewModel, ())

@@ -9,29 +9,38 @@ import Foundation
 
 struct HomeActivityCellDataModel: Hashable {
     let id: Int
-    
-    let area: String
-    let name: String
+    let title: String
+    let location: String
     let priceText: String
     let imageUrl: URL?
     
-    init(id: Int, area: String, name: String, priceText: String, imageUrl: URL?) {
+    init(id: Int, title: String, location: String, priceText: String, imageUrl: URL?) {
         self.id = id
-        self.area = area
-        self.name = name
+        self.title = title
+        self.location = location
         self.priceText = priceText
         self.imageUrl = imageUrl
     }
     
     init(activity: Activity) {
         self.id = activity.id
-        self.area = activity.title
-        self.name = activity.description
-        self.priceText = "\(activity.pricing)"
-        self.imageUrl = if let thumbnail = activity.images.first { $0.imageType == .thumbnail }?.imageUrl {
-            URL(string: thumbnail)
+        self.title = activity.title
+        self.location = activity.destination.name
+        
+        let prices: [Double] = activity.packages.map { $0.pricePerPerson }
+        if let minPrice = prices.min(), let maxPrice = prices.max() {
+            if minPrice == maxPrice {
+                self.priceText = minPrice.toRupiah()
+            } else {
+                self.priceText = "\(minPrice.toRupiah()) - \(maxPrice.toRupiah())"
+            }
+        } else {
+            self.priceText = "-"
         }
-        else {
+        
+        self.imageUrl = if let thumbnailURLString = activity.images.first(where: { $0.imageType == .thumbnail })?.imageUrl {
+            URL(string: thumbnailURLString)
+        } else {
             nil
         }
     }

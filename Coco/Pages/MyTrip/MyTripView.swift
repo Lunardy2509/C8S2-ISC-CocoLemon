@@ -8,7 +8,11 @@
 import Foundation
 import UIKit
 
-protocol MyTripViewDelegate: MyTripListCardViewDelegate { }
+protocol MyTripViewDelegate: AnyObject {
+    func notifyTripListCardDidTap(at index: Int)
+    func notifyTripListCardDidDelete(at index: Int)
+    func notifyCreateTripDidTap()
+}
 
 final class MyTripView: UIView {
     weak var delegate: MyTripViewDelegate?

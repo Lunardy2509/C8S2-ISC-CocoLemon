@@ -20,14 +20,14 @@ final class HomeActivityCell: UICollectionViewCell {
     
     func configureCell(_ dataModel: HomeActivityCellDataModel) {
         imageView.loadImage(from: dataModel.imageUrl)
-        areaLabel.text = dataModel.area
-        nameLabel.text = dataModel.name
+        titleLabel.text = dataModel.title
+        locationLabel.text = dataModel.location
         
         let attributedString = NSMutableAttributedString(
             string: dataModel.priceText,
             attributes: [
-                .font : UIFont.jakartaSans(forTextStyle: .body, weight: .bold),
-                .foregroundColor : Token.additionalColorsBlack
+                .font: UIFont.jakartaSans(forTextStyle: .callout, weight: .bold),
+                .foregroundColor: Token.additionalColorsBlack
             ]
         )
         
@@ -35,8 +35,8 @@ final class HomeActivityCell: UICollectionViewCell {
             NSAttributedString(
                 string: "/Person",
                 attributes: [
-                    .font : UIFont.jakartaSans(forTextStyle: .callout, weight: .medium),
-                    .foregroundColor : Token.additionalColorsBlack
+                    .font: UIFont.jakartaSans(forTextStyle: .callout, weight: .medium),
+                    .foregroundColor: Token.additionalColorsBlack
                 ]
             )
         )
@@ -50,21 +50,24 @@ final class HomeActivityCell: UICollectionViewCell {
     }
     
     private lazy var imageView: UIImageView = createImageView()
-    private lazy var areaView: UIView = createAreaView()
-    private lazy var areaLabel: UILabel = UILabel(
-        font: .jakartaSans(forTextStyle: .callout, weight: .medium),
-        textColor: Token.additionalColorsBlack,
-        numberOfLines: 2
-    )
-    private lazy var nameLabel: UILabel = UILabel(
+    private lazy var locationView: UIView = createLocationView()
+    private lazy var titleView: UIView = createTitleView()
+    private lazy var priceView: UIView = createPriceView()
+    
+    private lazy var titleLabel: UILabel = UILabel(
         font: .jakartaSans(forTextStyle: .title3, weight: .bold),
         textColor: Token.additionalColorsBlack,
         numberOfLines: 2
     )
+    private lazy var locationLabel: UILabel = UILabel(
+        font: .jakartaSans(forTextStyle: .footnote, weight: .regular),
+        textColor: Token.grayscale90,
+        numberOfLines: 1
+    )
     private lazy var priceLabel: UILabel = UILabel(
         font: .jakartaSans(forTextStyle: .body, weight: .bold),
         textColor: Token.additionalColorsBlack,
-        numberOfLines: 2
+        numberOfLines: 1
     )
 }
 
@@ -73,15 +76,19 @@ private extension HomeActivityCell {
         let stackView: UIStackView = UIStackView(
             arrangedSubviews: [
                 imageView,
-                areaView,
-                nameLabel,
-                priceLabel,
+                locationView,
+                titleView,
+                priceView
             ]
         )
-        stackView.spacing = 4.0
+        stackView.spacing = 8.0
         stackView.axis = .vertical
         stackView.alignment = .fill
         stackView.distribution = .fill
+        
+        stackView.setCustomSpacing(12.0, after: imageView)
+        stackView.setCustomSpacing(8.0, after: locationView)
+        stackView.setCustomSpacing(4.0, after: titleView)
         
         contentView.addSubviewAndLayout(stackView)
     }
@@ -97,30 +104,53 @@ private extension HomeActivityCell {
         return imageView
     }
     
-    func createAreaView() -> UIView {
-        let imageView: UIImageView = UIImageView(image: CocoIcon.icActivityAreaIcon.image)
-        imageView.contentMode = .scaleAspectFill
-        imageView.layout {
-            $0.size(20)
-        }
-        let contentView: UIView = UIView()
-        contentView.addSubviews([
-            imageView,
-            areaLabel
-        ])
+    func createLocationView() -> UIView {
+        let containerView = UIView()
+        let pinIcon = UIImageView(image: CocoIcon.icPinPointBlack.image)
+        pinIcon.contentMode = .scaleAspectFit
         
-        imageView.layout {
-            $0.leading(to: contentView.leadingAnchor)
-                .top(to: contentView.topAnchor)
-                .bottom(to: contentView.bottomAnchor)
+        containerView.addSubviews([pinIcon, locationLabel])
+        
+        pinIcon.layout {
+            $0.leading(to: containerView.leadingAnchor)
+            $0.centerY(to: containerView.centerYAnchor)
+            $0.size(12)
         }
         
-        areaLabel.layout {
-            $0.leading(to: imageView.trailingAnchor, constant: 4.0)
-                .centerY(to: contentView.centerYAnchor)
-                .trailing(to: contentView.trailingAnchor, relation: .lessThanOrEqual)
+        locationLabel.layout {
+            $0.leading(to: pinIcon.trailingAnchor, constant: 4.0)
+            $0.trailing(to: containerView.trailingAnchor)
+            $0.centerY(to: containerView.centerYAnchor)
         }
         
-        return contentView
+        return containerView
+    }
+    
+    func createTitleView() -> UIView {
+        let containerView = UIView()
+        containerView.addSubview(titleLabel)
+        
+        titleLabel.layout {
+            $0.leading(to: containerView.leadingAnchor)
+                .trailing(to: containerView.trailingAnchor)
+                .top(to: containerView.topAnchor)
+                .bottom(to: containerView.bottomAnchor)
+        }
+        
+        return containerView
+    }
+    
+    func createPriceView() -> UIView {
+        let containerView = UIView()
+        containerView.addSubview(priceLabel)
+        
+        priceLabel.layout {
+            $0.leading(to: containerView.leadingAnchor)
+                .trailing(to: containerView.trailingAnchor)
+                .top(to: containerView.topAnchor)
+                .bottom(to: containerView.bottomAnchor)
+        }
+        
+        return containerView
     }
 }

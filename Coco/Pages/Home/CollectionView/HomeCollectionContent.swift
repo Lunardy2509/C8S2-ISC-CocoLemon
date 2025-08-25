@@ -17,10 +17,15 @@ struct HomeCollectionContent {
     
     enum SectionType: Hashable {
         case activity
+        case noResult
     }
     
     struct Section: Hashable {
         let type: SectionType
         let title: String?
     }
+}
+
+struct NoResultCellDataModel: Hashable {
+    let message: String = "No perfect match yet, let’s try another city or activity!"
 }
