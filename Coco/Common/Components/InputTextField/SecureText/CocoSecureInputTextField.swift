@@ -13,7 +13,6 @@ private let kInputHeight: CGFloat = 52.0
 struct CocoSecureInputTextField: View {
     @ObservedObject var viewModel: CocoSecureInputTextFieldViewModel
     @State private var isSecure: Bool = true
-    
     @FocusState private var isFocused: Bool
     private let onFocusedAction: ((Bool) -> Void)?
     

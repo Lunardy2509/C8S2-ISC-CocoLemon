@@ -44,6 +44,10 @@ extension MyTripViewController: MyTripViewModelAction {
         thisView.configureView(datas: datas)
     }
     
+    func configureRecommendations(recommendations: [MyTripRecommendationDataModel]) {
+//        thisView.configureRecommendations(recommendations: recommendations)
+    }
+    
     func goToBookingDetail(with data: BookingDetails) {
         guard let navigationController else { return }
         let coordinator: MyTripCoordinator = MyTripCoordinator(
@@ -95,6 +99,13 @@ extension MyTripViewController: MyTripViewDelegate {
             }
         }
     }
+    
+    func notifyCreateTripDidTap() {
+        // Navigate to GroupForm using standard UIKit navigation
+        let groupFormVC = GroupFormViewController()
+        groupFormVC.hidesBottomBarWhenPushed = true
+        navigationController?.pushViewController(groupFormVC, animated: true)
+    }
 }
 
 private extension MyTripViewController {
@@ -112,27 +123,28 @@ private extension MyTripViewController {
             image: UIImage(systemName: "bell") ?? UIImage(),
             style: .plain,
             target: self,
-            action: #selector(notificationButtonTapped)
+            action: #selector(notificationButtonTapped),
         )
         
         navigationItem.rightBarButtonItems = [notificationButton, plusButton]
     }
     
     @objc private func plusButtonTapped() {
-        // Navigate to create trip functionality
-        // For now, switch to home tab
-        guard let tabBarController = tabBarController as? BaseTabBarViewController else { return }
-        tabBarController.selectedIndex = 0
+        // Navigate to GroupForm using standard UIKit navigation
+        let groupFormVC = GroupFormViewController()
+        groupFormVC.hidesBottomBarWhenPushed = true
+        navigationController?.pushViewController(groupFormVC, animated: true)
     }
     
     @objc private func notificationButtonTapped() {
         viewModel.onNotificationButtonTapped()
     }
     
-    typealias MyTripNoTripRegistration = UICollectionView.CellRegistration<MyTripNoTrip,MyTripNoTripDataModel>
-    func createMyTripNoTripRegistration() -> MyTripNoTripRegistration {
+    func createMyTripNoTripYetRegistration() -> MyTripNoTripYetRegistration {
         .init { cell, _, itemIdentifier in
             // No need Configuration
         }
     }
+    
+    typealias MyTripNoTripYetRegistration = UICollectionView.CellRegistration<MyTripNoTripYet,MyTripNoTripYetDataModel>
 }

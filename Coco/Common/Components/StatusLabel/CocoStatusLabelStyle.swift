@@ -49,4 +49,8 @@ extension CocoStatusLabelStyle {
         textColor: Token.additionalColorsPurple,
         backgroundColor: UIColor.from("#F4F0FF")
     )
+    static let plain: Self = Self(
+        textColor: Token.alertsError,
+        backgroundColor: UIColor.clear
+    )
 }

@@ -20,7 +20,7 @@ final class NotificationTableViewCell: UITableViewCell {
     }
     
     func configure(with notification: NotificationItem) {
-        avatarImageView.image = UIImage(systemName: notification.avatarImageName) ?? UIImage()
+        avatarImageView = notification.avatarImage
         senderNameLabel.text = notification.senderName
         messageLabel.text = notification.message
         tripNameLabel.text = notification.tripName

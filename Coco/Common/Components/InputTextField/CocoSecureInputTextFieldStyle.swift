@@ -37,7 +37,6 @@ struct CocoSecureInputTextFieldStyle: TextFieldStyle {
             }
                 
             configuration
-            
             Button(action: {
                 isSecure.toggle()
             }, label: {

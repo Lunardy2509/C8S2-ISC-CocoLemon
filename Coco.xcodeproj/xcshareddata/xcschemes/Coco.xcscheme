@@ -41,6 +41,17 @@
                ReferencedContainer = "container:Coco.xcodeproj">
             </BuildableReference>
          </TestableReference>
+         <TestableReference
+            skipped = "NO"
+            parallelizable = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "1793C5E32E5B51A900760572"
+               BuildableName = "SignInTest.xctest"
+               BlueprintName = "SignInTest"
+               ReferencedContainer = "container:Coco.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
       </Testables>
    </TestAction>
    <LaunchAction

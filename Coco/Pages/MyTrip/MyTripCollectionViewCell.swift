@@ -11,6 +11,7 @@ import SwiftUI
 
 protocol MyTripCollectionViewCellDelegate: AnyObject {
     func notifyTripListCardDidTap(at index: Int)
+    func notifyTripListCardDidDelete(at index: Int)
 }
 
 final class MyTripCollectionViewCell: UICollectionViewCell {
