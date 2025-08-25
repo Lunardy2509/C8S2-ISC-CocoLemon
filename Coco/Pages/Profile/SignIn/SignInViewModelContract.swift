@@ -14,9 +14,9 @@ protocol SignInViewModelDelegate: AnyObject {
 protocol SignInViewModelAction: AnyObject {
     func configureView(
         emailInputVM: HomeSearchBarViewModel,
-        passwordInputVM: CocoSecureInputTextFieldViewModel
         passwordInputVM: CocoSecureInputTextFieldViewModel,
         rememberCheckBoxVM: CocoCheckBoxViewModel
+        
     )
     
     func showStatusMessage(message: String, style: CocoStatusLabelStyle)

@@ -30,7 +30,6 @@ struct CocoButton: View {
     var body: some View {
         Button(action: action) {
             Text(text)
-                .font(.jakartaSans(forTextStyle: .body, weight: .semibold))
                 .font(type.font)
                 .frame(maxWidth: isStretch ? .infinity : nil)
         }

@@ -23,23 +23,33 @@ final class MyTripView: UIView {
     }
     
     func configureView(datas: [MyTripListCardDataModel]) {
-        contentStackView.arrangedSubviews.forEach { $0.removeFromSuperview() }
-        datas.enumerated().forEach { (index, data) in
-            let view: MyTripListCardView = MyTripListCardView()
-            view.delegate = delegate
-            view.configureView(dataModel: data, index: index)
-            contentStackView.addArrangedSubview(view)
+        if datas.isEmpty {
+            showEmptyState()
+        } else {
+            showList(datas: datas)
         }
     }
-    
+
     private lazy var contentStackView: UIStackView = createStackView()
+    private lazy var emptyStateView: EmptyStateView = {
+        let view = EmptyStateView(
+            image: UIImage(named: "emptyStateLogo"),
+            caption: "No trips yet, let’s create your first one!",
+            buttonTitle: "Create Trip"
+        ) {
+            
+            // delegate
+        }
+        view.isHidden = true
+        return view
+    }()
 }
 
 private extension MyTripView {
     func setupView() {
         backgroundColor = Token.additionalColorsWhite
         
-        let scrollView: UIScrollView = UIScrollView()
+        let scrollView = UIScrollView()
         scrollView.showsVerticalScrollIndicator = false
         
         scrollView.addSubviewAndLayout(contentStackView)
@@ -48,6 +58,20 @@ private extension MyTripView {
         }
         
         addSubviewAndLayout(scrollView, insets: UIEdgeInsets(edges: 21.0))
+        addSubviewAndLayout(emptyStateView, insets: .zero)
+    }
+    
+    func showList(datas: [MyTripListCardDataModel]) {
+        emptyStateView.isHidden = true
+        contentStackView.isHidden = false
+        
+        contentStackView.arrangedSubviews.forEach { $0.removeFromSuperview() }
+        datas.enumerated().forEach { (index, data) in
+            let view = MyTripListCardView()
+            view.delegate = delegate
+            view.configureView(dataModel: data, index: index)
+            contentStackView.addArrangedSubview(view)
+        }
     }
     
     func createStackView() -> UIStackView {
@@ -56,5 +80,9 @@ private extension MyTripView {
         stackView.spacing = 16.0
         
         return stackView
+    }
+    func showEmptyState() {
+        contentStackView.isHidden = true
+        emptyStateView.isHidden = false
     }
 }

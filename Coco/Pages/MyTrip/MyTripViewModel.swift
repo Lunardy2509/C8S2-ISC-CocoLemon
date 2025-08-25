@@ -30,9 +30,13 @@ extension MyTripViewModel: MyTripViewModelProtocol {
             
             responses = response
             
-            actionDelegate?.configureView(datas: response.map({ listData in
-                MyTripListCardDataModel(bookingDetail: listData)
-            }))
+            if response.isEmpty {
+                actionDelegate?.configureView(datas: [])
+            }
+            
+//            actionDelegate?.configureView(datas: response.map({ listData in
+//                MyTripListCardDataModel(bookingDetail: listData)
+//            }))
         }
     }
     

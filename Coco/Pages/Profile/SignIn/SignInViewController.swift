@@ -22,8 +22,6 @@ final class SignInViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         viewModel.onViewDidLoad()
-        
-        title = "Sign in"
         title = "Sign In"
     }
     
@@ -40,7 +38,6 @@ extension SignInViewController: SignInViewModelAction {
 
     func configureView(
         emailInputVM: HomeSearchBarViewModel,
-        passwordInputVM: CocoSecureInputTextFieldViewModel
         passwordInputVM: CocoSecureInputTextFieldViewModel,
         rememberCheckBoxVM : CocoCheckBoxViewModel
         
@@ -54,6 +51,7 @@ extension SignInViewController: SignInViewModelAction {
         
         thisView.configureInputView(datas: [
             ("Email Address", emailInputVC.view),
+            ("Password", passwordInputVC.view),
         ])
         
         emailInputVC.didMove(toParent: self)
@@ -80,7 +78,7 @@ extension SignInViewController: SignInViewModelAction {
         
         statusSignInVC = CocoStatusLabelHostingController(
                    title: "",
-                   style: .failed
+                   style: .plain
                )
                
                if let statusVC = statusSignInVC {
@@ -95,6 +93,7 @@ extension SignInViewController: SignInViewModelAction {
             action: { [weak self] in
                 self?.viewModel.onSignInDidTap()
             },
+            text: "Sign In",
             style: .large,
             type: .primary
         )

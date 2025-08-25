@@ -42,7 +42,6 @@ extension SignInViewModel: SignInViewModelProtocol {
     func onViewDidLoad() {
         actionDelegate?.configureView(
             emailInputVM: emailInputVM,
-            passwordInputVM: passwordInputVM
             passwordInputVM: passwordInputVM,
             rememberCheckBoxVM: rememberCheckBoxVM
         )
@@ -59,7 +58,7 @@ extension SignInViewModel: SignInViewModelProtocol {
         if email.isEmpty || password.isEmpty {
             actionDelegate?.showStatusMessage(
                 message: "Please fill out Email Address and Password",
-                style: .failed
+                style: .plain
             )
             return
         }
@@ -118,7 +117,7 @@ extension SignInViewModel: SignInViewModelProtocol {
                 
                 self.actionDelegate?.showStatusMessage(
                     message: errorMessage,
-                    style: .failed
+                    style: .plain
                 )
             }
         }
