@@ -12,7 +12,9 @@ import SwiftUI
 final class GroupTripActivityDetailView: UIView {
     weak var delegate: GroupTripActivityDetailViewDelegate?
     
-    var tripMembers: [TripMember] = []
+    var tripMembers: [TripMember] = [
+        TripMember(name: "Adhis", email: "adhis@example.com", profileImageURL: nil, isWaiting: false)
+    ]
     
     internal var selectedPackageIds: Set<Int> = []
     private var selectedPackageId: Int?
@@ -450,6 +452,10 @@ private extension GroupTripActivityDetailView {
         collectionView.register(AddFriendCell.self, forCellWithReuseIdentifier: "AddFriendCell")
         collectionView.dataSource = self
         collectionView.delegate = self
+        
+        DispatchQueue.main.async {
+            collectionView.reloadData()
+        }
         
         containerView.addSubview(collectionView)
         collectionView.layout {

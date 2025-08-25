@@ -13,6 +13,10 @@ final class GroupTripActivityDetailViewModel {
     
     private let activityFetcher: ActivityFetcherProtocol
 
+    private var tripMembers: [TripMember] = [
+        TripMember(name: "Adhis", email: "adhis@example.com", profileImageURL: nil, isWaiting: false)
+    ]
+
     init(data: ActivityDetailDataModel, activityFetcher: ActivityFetcherProtocol = ActivityFetcher()) {
         self.data = data
         self.activityFetcher = activityFetcher
@@ -79,6 +83,10 @@ final class GroupTripActivityDetailViewModel {
 extension GroupTripActivityDetailViewModel: GroupTripActivityDetailViewModelProtocol {
     func onViewDidLoad() {
         actionDelegate?.configureView(data: data)
+        actionDelegate?.updatePackageData(data: data.availablePackages.content)
+        
+        // Make sure the view has the default trip members
+        // This should be handled by the view's initialization
     }
     
     func onPackageDetailStateDidChange(shouldShowAll: Bool) {
