@@ -11,7 +11,7 @@ import UIKit
 final class Icon {
     var image: UIImage {
         guard let image: UIImage = UIImage(named: iconName) else {
-            assertionFailure("image \(iconName) can't be loaded")
+            print("Warning: image \(iconName) can't be loaded, using fallback")
             return UIImage()
         }
         

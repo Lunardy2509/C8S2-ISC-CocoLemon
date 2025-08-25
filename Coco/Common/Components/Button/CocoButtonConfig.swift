@@ -101,7 +101,7 @@ enum CocoButtonType {
         case .secondary:
             return Token.mainColorPrimary.toColor()
         case .tertiary:
-            return nil
+            return Token.mainColorPrimary.toColor()
         case .disabled:
             return nil
         }

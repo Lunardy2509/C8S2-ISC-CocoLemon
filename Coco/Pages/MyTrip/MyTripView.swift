@@ -11,6 +11,7 @@ import UIKit
 protocol MyTripViewDelegate: AnyObject {
     func notifyTripListCardDidTap(at index: Int)
     func notifyTripListCardDidDelete(at index: Int)
+    func notifyCreateTripDidTap()
 }
 
 final class MyTripView: UIView {
@@ -30,7 +31,13 @@ final class MyTripView: UIView {
         updateCollectionView()
     }
     
+    func configureRecommendations(recommendations: [MyTripRecommendationDataModel]) {
+        self.recommendations = recommendations
+        updateCollectionView()
+    }
+    
     private var tripData: [MyTripListCardDataModel] = []
+    private var recommendations: [MyTripRecommendationDataModel] = []
     private lazy var collectionView: UICollectionView = createCollectionView()
     private var dataSource: UICollectionViewDiffableDataSource<Section, AnyHashable>?
     
@@ -100,8 +107,12 @@ private extension MyTripView {
             cell.delegate = self
         }
         
-        let emptyCellRegistration = UICollectionView.CellRegistration<MyTripNoTrip, MyTripNoTripDataModel> { cell, indexPath, item in
-            // Configuration handled in cell
+        let emptyCellRegistration = UICollectionView.CellRegistration<MyTripNoTripYet, MyTripNoTripYetDataModel> { [weak self] cell, indexPath, item in
+            // Pass recommendations to the empty state cell
+            if let recommendations = self?.recommendations {
+                cell.configureRecommendations(recommendations)
+            }
+            cell.delegate = self
         }
         
         dataSource = UICollectionViewDiffableDataSource<Section, AnyHashable>(
@@ -114,7 +125,7 @@ private extension MyTripView {
                     for: indexPath,
                     item: tripItem
                 )
-            case let emptyItem as MyTripNoTripDataModel:
+            case let emptyItem as MyTripNoTripYetDataModel:
                 return collectionView.dequeueConfiguredReusableCell(
                     using: emptyCellRegistration,
                     for: indexPath,
@@ -131,13 +142,24 @@ private extension MyTripView {
         
         if tripData.isEmpty {
             snapshot.appendSections([.empty])
-            snapshot.appendItems([MyTripNoTripDataModel()], toSection: .empty)
+            snapshot.appendItems([MyTripNoTripYetDataModel()], toSection: .empty)
         } else {
             snapshot.appendSections([.trips])
             snapshot.appendItems(tripData, toSection: .trips)
         }
         
         dataSource?.apply(snapshot, animatingDifferences: true)
+        
+        // Update recommendations for empty state cells after applying snapshot
+        if tripData.isEmpty && !recommendations.isEmpty {
+            DispatchQueue.main.async { [weak self] in
+                guard let self = self else { return }
+                // Find and update the empty state cell with recommendations
+                if let cell = self.collectionView.cellForItem(at: IndexPath(item: 0, section: 0)) as? MyTripNoTripYet {
+                    cell.configureRecommendations(self.recommendations)
+                }
+            }
+        }
     }
 }
 
@@ -147,44 +169,41 @@ extension MyTripView: UICollectionViewDelegate {
     }
     
     func collectionView(_ collectionView: UICollectionView, contextMenuConfigurationForItemAt indexPath: IndexPath, point: CGPoint) -> UIContextMenuConfiguration? {
+        // Only show context menu for trip cards, not empty state
+        guard indexPath.section == Section.trips.rawValue else { return nil }
+        
         return UIContextMenuConfiguration(identifier: nil, previewProvider: nil) { [weak self] _ in
             let deleteAction = UIAction(
-                title: "Delete",
-                image: UIImage(systemName: "trash") ?? UIImage(),
+                title: "Delete Trip",
+                image: UIImage(systemName: "trash"),
                 attributes: .destructive
             ) { _ in
-                self?.showDeleteConfirmation(for: indexPath.item)
+                self?.delegate?.notifyTripListCardDidDelete(at: indexPath.item)
             }
             
             return UIMenu(title: "", children: [deleteAction])
         }
-    }
-    
-    private func showDeleteConfirmation(for index: Int) {
-        guard let parentViewController = self.parentViewController else { return }
-        
-        let alert = UIAlertController(
-            title: "Delete Trip",
-            message: "Are you sure you want to delete this trip? This action cannot be undone.",
-            preferredStyle: .alert
-        )
-        
-        let deleteAction = UIAlertAction(title: "Delete", style: .destructive) { [weak self] _ in
-            self?.delegate?.notifyTripListCardDidDelete(at: index)
-        }
-        
-        let cancelAction = UIAlertAction(title: "Cancel", style: .cancel)
-        
-        alert.addAction(deleteAction)
-        alert.addAction(cancelAction)
-        
-        parentViewController.present(alert, animated: true)
     }
 }
 
 extension MyTripView: MyTripCollectionViewCellDelegate {
     func notifyTripListCardDidTap(at index: Int) {
         delegate?.notifyTripListCardDidTap(at: index)
+    }
+    
+    func notifyTripListCardDidDelete(at index: Int) {
+        delegate?.notifyTripListCardDidDelete(at: index)
+    }
+}
+
+extension MyTripView: MyTripNoTripYetDelegate {
+    func didTapRecommendationItem(_ recommendation: MyTripRecommendationDataModel) {
+        // TODO: Handle recommendation tap
+        print("Tapped recommendation: \(recommendation.title)")
+    }
+    
+    func didTapCreateTrip() {
+        delegate?.notifyCreateTripDidTap()
     }
 }
 
@@ -201,4 +220,3 @@ extension UIView {
         return nil
     }
 }
-

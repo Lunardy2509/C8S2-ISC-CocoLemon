@@ -1,14 +1,14 @@
 //
-//  HomeActivityCell.swift
+//  MyTripRecommendation.swift
 //  Coco
 //
-//  Created by Jackie Leonardy on 04/07/25.
+//  Created by Ferdinand Lunardy on 23/08/25.
 //
 
 import Foundation
 import UIKit
 
-final class HomeActivityCell: UICollectionViewCell {
+final class MyTripRecommendationCell: UICollectionViewCell {
     override init(frame: CGRect) {
         super.init(frame: frame)
         setupView()
@@ -18,7 +18,7 @@ final class HomeActivityCell: UICollectionViewCell {
         fatalError("init(coder:) has not been implemented")
     }
     
-    func configureCell(_ dataModel: HomeActivityCellDataModel) {
+    func configureCell(_ dataModel: MyTripRecommendationDataModel) {
         imageView.loadImage(from: dataModel.imageUrl)
         titleLabel.text = dataModel.title
         locationLabel.text = dataModel.location
@@ -71,7 +71,7 @@ final class HomeActivityCell: UICollectionViewCell {
     )
 }
 
-private extension HomeActivityCell {
+private extension MyTripRecommendationCell {
     func setupView() {
         let stackView: UIStackView = UIStackView(
             arrangedSubviews: [

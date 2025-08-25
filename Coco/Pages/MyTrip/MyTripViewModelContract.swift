@@ -9,6 +9,7 @@ import Foundation
 
 protocol MyTripViewModelAction: AnyObject {
     func configureView(datas: [MyTripListCardDataModel])
+    func configureRecommendations(recommendations: [MyTripRecommendationDataModel])
     func goToBookingDetail(with data: BookingDetails)
     func goToNotificationPage()
     func showDeleteConfirmation(for index: Int, completion: @escaping (Bool) -> Void)

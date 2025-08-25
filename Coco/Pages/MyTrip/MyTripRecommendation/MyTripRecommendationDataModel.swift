@@ -1,13 +1,13 @@
 //
-//  HomeActivityCellDataModel.swift
+//  MyTripRecommendationDataModel.swift
 //  Coco
 //
-//  Created by Jackie Leonardy on 04/07/25.
+//  Created by Ferdinand Lunardy on 23/08/25.
 //
 
 import Foundation
 
-struct HomeActivityCellDataModel: Hashable {
+struct MyTripRecommendationDataModel: Hashable {
     let id: Int
     let title: String
     let location: String
@@ -46,4 +46,4 @@ struct HomeActivityCellDataModel: Hashable {
     }
 }
 
-typealias HomeActivityCellSectionDataModel = (title: String?, dataModel: [HomeActivityCellDataModel])
+typealias MyTripRecommendationSectionDataModel = (title: String?, dataModel: [MyTripRecommendationDataModel])

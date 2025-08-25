@@ -29,20 +29,45 @@ final class NotificationViewController: UIViewController {
     private let notifications: [NotificationItem] = [
         NotificationItem(
             id: "1",
-            senderName: "Adhis Aurellia",
-            message: "invited you to join collaboration trip",
+            senderName: "Reminder",
+            message: "Due 19 May 2025! Don’t forget to remind your friend",
             tripName: "CoCoLemon goes to Bali",
-            avatarImageName: "person.circle.fill",
+            avatarImage: UIImageView(image: Contributor.remindFriend.image),
+            isUnread: false
+        ),
+        NotificationItem(
+            id: "2",
+            senderName: "Ferdinand Lunardy",
+            message: "Ferdinand Lunardy participate 2 activities on colaboration trip",
+            tripName: "CoCoLemon goes to Bali",
+            avatarImage: UIImageView(image: Contributor.ferdinand.image),
             isUnread: true
         ),
         NotificationItem(
-            id: "2", 
-            senderName: "Ferdinand Lunardy",
-            message: "invited you to join collaboration trip",
+            id: "3",
+            senderName: "Griselda Shavilla",
+            message: "Griselda Shavilla has joined colaboration trip",
             tripName: "CoCoLemon goes to Bali",
-            avatarImageName: "person.circle.fill",
+            avatarImage: UIImageView(image: Contributor.griselda.image),
+            isUnread: true
+        ),
+        NotificationItem(
+            id: "4",
+            senderName: "Ferdinand Lunardy",
+            message: "Ferdinand Lunardy has joined colaboration trip",
+            tripName: "CoCoLemon goes to Bali",
+            avatarImage: UIImageView(image: Contributor.ferdinand.image),
+            isUnread: true
+        ),
+        NotificationItem(
+            id: "5",
+            senderName: "Cynthia Shabrina",
+            message: "Cynthia Shabrina  has joined colaboration trip",
+            tripName: "CoCoLemon goes to Bali",
+            avatarImage: UIImageView(image: Contributor.cynthia.image),
             isUnread: true
         )
+
     ]
 }
 
@@ -63,7 +88,6 @@ private extension NotificationViewController {
     func setupNavigationBar() {
         title = "Notification"
         
-        // Use native back button with custom text
         let backButton = UIBarButtonItem()
         backButton.title = "My Trip"
         navigationController?.navigationBar.topItem?.backBarButtonItem = backButton
@@ -103,6 +127,6 @@ struct NotificationItem {
     let senderName: String
     let message: String
     let tripName: String
-    let avatarImageName: String
+    let avatarImage: UIImageView
     let isUnread: Bool
 }

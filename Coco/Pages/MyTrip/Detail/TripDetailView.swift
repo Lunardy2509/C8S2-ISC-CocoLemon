@@ -27,7 +27,6 @@ struct BookingDetailDataModel {
         let style: CocoStatusLabelStyle
     }
     
-    
     init(bookingDetail: BookingDetails) {
         var bookingStatus: String = bookingDetail.status
         var statusStyle: CocoStatusLabelStyle = .pending

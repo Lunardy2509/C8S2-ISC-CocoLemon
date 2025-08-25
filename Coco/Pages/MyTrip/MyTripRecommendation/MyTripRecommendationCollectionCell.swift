@@ -1,14 +1,13 @@
 //
-//  HomeActivityCell.swift
+//  MyTripRecommendationCollectionCell.swift
 //  Coco
 //
-//  Created by Jackie Leonardy on 04/07/25.
+//  Created by Ferdinand Lunardy on 24/08/25.
 //
 
-import Foundation
 import UIKit
 
-final class HomeActivityCell: UICollectionViewCell {
+final class MyTripRecommendationCollectionCell: UICollectionViewCell {
     override init(frame: CGRect) {
         super.init(frame: frame)
         setupView()
@@ -18,7 +17,7 @@ final class HomeActivityCell: UICollectionViewCell {
         fatalError("init(coder:) has not been implemented")
     }
     
-    func configureCell(_ dataModel: HomeActivityCellDataModel) {
+    func configure(with dataModel: MyTripRecommendationDataModel) {
         imageView.loadImage(from: dataModel.imageUrl)
         titleLabel.text = dataModel.title
         locationLabel.text = dataModel.location
@@ -51,9 +50,6 @@ final class HomeActivityCell: UICollectionViewCell {
     
     private lazy var imageView: UIImageView = createImageView()
     private lazy var locationView: UIView = createLocationView()
-    private lazy var titleView: UIView = createTitleView()
-    private lazy var priceView: UIView = createPriceView()
-    
     private lazy var titleLabel: UILabel = UILabel(
         font: .jakartaSans(forTextStyle: .title3, weight: .bold),
         textColor: Token.additionalColorsBlack,
@@ -69,16 +65,14 @@ final class HomeActivityCell: UICollectionViewCell {
         textColor: Token.additionalColorsBlack,
         numberOfLines: 1
     )
-}
-
-private extension HomeActivityCell {
-    func setupView() {
+    
+    private func setupView() {
         let stackView: UIStackView = UIStackView(
             arrangedSubviews: [
                 imageView,
                 locationView,
-                titleView,
-                priceView
+                titleLabel,
+                priceLabel
             ]
         )
         stackView.spacing = 8.0
@@ -88,23 +82,23 @@ private extension HomeActivityCell {
         
         stackView.setCustomSpacing(12.0, after: imageView)
         stackView.setCustomSpacing(8.0, after: locationView)
-        stackView.setCustomSpacing(4.0, after: titleView)
+        stackView.setCustomSpacing(4.0, after: titleLabel)
         
         contentView.addSubviewAndLayout(stackView)
     }
     
-    func createImageView() -> UIImageView {
+    private func createImageView() -> UIImageView {
         let imageView: UIImageView = UIImageView()
         imageView.contentMode = .scaleAspectFill
         imageView.layout {
-            $0.height(238.0)
+            $0.height(180.0)
         }
         imageView.layer.cornerRadius = 12.0
         imageView.clipsToBounds = true
         return imageView
     }
     
-    func createLocationView() -> UIView {
+    private func createLocationView() -> UIView {
         let containerView = UIView()
         let pinIcon = UIImageView(image: CocoIcon.icPinPointBlack.image)
         pinIcon.contentMode = .scaleAspectFit
@@ -121,34 +115,6 @@ private extension HomeActivityCell {
             $0.leading(to: pinIcon.trailingAnchor, constant: 4.0)
             $0.trailing(to: containerView.trailingAnchor)
             $0.centerY(to: containerView.centerYAnchor)
-        }
-        
-        return containerView
-    }
-    
-    func createTitleView() -> UIView {
-        let containerView = UIView()
-        containerView.addSubview(titleLabel)
-        
-        titleLabel.layout {
-            $0.leading(to: containerView.leadingAnchor)
-                .trailing(to: containerView.trailingAnchor)
-                .top(to: containerView.topAnchor)
-                .bottom(to: containerView.bottomAnchor)
-        }
-        
-        return containerView
-    }
-    
-    func createPriceView() -> UIView {
-        let containerView = UIView()
-        containerView.addSubview(priceLabel)
-        
-        priceLabel.layout {
-            $0.leading(to: containerView.leadingAnchor)
-                .trailing(to: containerView.trailingAnchor)
-                .top(to: containerView.topAnchor)
-                .bottom(to: containerView.bottomAnchor)
         }
         
         return containerView
