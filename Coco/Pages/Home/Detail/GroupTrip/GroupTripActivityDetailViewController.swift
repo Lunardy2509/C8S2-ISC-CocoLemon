@@ -162,7 +162,26 @@ extension GroupTripActivityDetailViewController: GroupTripActivityDetailViewDele
     }
     
     func notifySearchActivityTapped() {
-        viewModel.onRemoveActivityTapped()
+        // Show the same search tray as home page
+        let searchTrayView = HomeSearchSearchTray(
+            selectedQuery: "",
+            latestSearches: SearchHistoryManager.shared.getSearchHistory(),
+            searchDidApply: { [weak self] queryText in
+                self?.dismiss(animated: true) {
+                    self?.viewModel.onSearchDidApply(queryText)
+                }
+            },
+            onSearchHistoryRemove: { searchData in
+                SearchHistoryManager.shared.removeSearchHistory(searchData.name)
+            },
+            onSearchReset: { [weak self] in
+                self?.dismiss(animated: true)
+            }
+        )
+        
+        let hostingController = UIHostingController(rootView: searchTrayView)
+        let navController = UINavigationController(rootViewController: hostingController)
+        present(navController, animated: true)
     }
     
     func notifySearchActivitySelected(_ data: ActivityDetailDataModel) {
