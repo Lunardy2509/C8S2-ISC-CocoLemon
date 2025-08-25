@@ -7,7 +7,7 @@
 
 import Foundation
 import UIKit
-import SwiftUI 
+import SwiftUI
 
 final class GroupTripActivityDetailView: UIView {
     weak var delegate: GroupTripActivityDetailViewDelegate?
@@ -39,6 +39,7 @@ final class GroupTripActivityDetailView: UIView {
     }
     
     func configureView(_ data: ActivityDetailDataModel) {
+        print("GroupTripActivityDetailView.configureView called with: \(data.title)")
         // Store the data for later use when views are created
         pendingActivityData = data
         
@@ -49,8 +50,8 @@ final class GroupTripActivityDetailView: UIView {
             locationLabel.text = data.location
             
             // Load the first image if available and imageView exists
-            if let firstImage = data.imageUrlsString.first, 
-               let url = URL(string: firstImage),
+            if let firstImage = data.imageUrlsString.first,
+                let url = URL(string: firstImage),
                let imageView = activityImageView {
                 imageView.loadImage(from: url)
             }
@@ -67,15 +68,26 @@ final class GroupTripActivityDetailView: UIView {
                     priceLabel.text = "\(minPrice) - \(maxPrice)/Person"
                 }
             }
+        } else {
+            // If title view doesn't exist yet, we need to update the trip destination section
+            // This happens when we have search results and need to show the activity card
+            updateTripDestinationWithActivity(data)
         }
         
-        // Add sections to content stack view
-        contentStackView.addArrangedSubview(tripDestinationSection)
-        contentStackView.addArrangedSubview(scheduleSection)
-        contentStackView.addArrangedSubview(tripMembersSection)
+        // Add sections to content stack view only if not already added
+        if contentStackView.arrangedSubviews.isEmpty {
+            contentStackView.addArrangedSubview(tripDestinationSection)
+            contentStackView.addArrangedSubview(scheduleSection)
+            contentStackView.addArrangedSubview(tripMembersSection)
+        }
         
         if !data.availablePackages.content.isEmpty {
-            contentStackView.addArrangedSubview(packageSection)
+            if !contentStackView.arrangedSubviews.contains(packageSection) {
+                contentStackView.addArrangedSubview(packageSection)
+            }
+            
+            // Clear existing package views
+            packageContainer.arrangedSubviews.forEach { $0.removeFromSuperview() }
             
             if data.availablePackages.content.count == data.hiddenPackages.count {
                 packageButton.isHidden = true
@@ -108,9 +120,9 @@ final class GroupTripActivityDetailView: UIView {
         button.translatesAutoresizingMaskIntoConstraints = false
         button.layout {
             $0.top(to: createTripButtonContainer.topAnchor, constant: 16)
-            .leading(to: createTripButtonContainer.leadingAnchor, constant: 24)
-            .trailing(to: createTripButtonContainer.trailingAnchor, constant: -24)
-            .bottom(to: createTripButtonContainer.safeAreaLayoutGuide.bottomAnchor, constant: -8)
+                .leading(to: createTripButtonContainer.leadingAnchor, constant: 24)
+                .trailing(to: createTripButtonContainer.trailingAnchor, constant: -24)
+                .bottom(to: createTripButtonContainer.safeAreaLayoutGuide.bottomAnchor, constant: -8)
         }
     }
     
@@ -172,7 +184,7 @@ extension GroupTripActivityDetailView {
         let contentView: UIView = UIView()
         
         let buttonContainer = createTripButtonContainer
-
+        
         addSubview(scrollView)
         addSubview(buttonContainer)
         
@@ -183,7 +195,7 @@ extension GroupTripActivityDetailView {
             scrollView.trailingAnchor.constraint(equalTo: self.trailingAnchor),
             scrollView.bottomAnchor.constraint(equalTo: buttonContainer.topAnchor)
         ])
-
+        
         buttonContainer.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
             buttonContainer.leadingAnchor.constraint(equalTo: self.leadingAnchor),
@@ -335,7 +347,7 @@ private extension GroupTripActivityDetailView {
         textStackView.addArrangedSubview(titleLabel)
         textStackView.addArrangedSubview(locationContainer)
         textStackView.addArrangedSubview(priceLabel)
-     
+        
         let removeButton = UIButton(type: .system)
         let xmarkImage = UIImage(systemName: "xmark")?.withConfiguration(
             UIImage.SymbolConfiguration(pointSize: 10, weight: .medium)
@@ -502,7 +514,7 @@ extension GroupTripActivityDetailView {
             textColor: Token.grayscale60,
             numberOfLines: 1
         )
-        placeholderLabel.text = "Search for a new activity..."
+        placeholderLabel.text = "Search..."
         
         // Add subviews
         searchBarContainer.addSubviews([searchIconView, placeholderLabel])
@@ -539,16 +551,33 @@ extension GroupTripActivityDetailView {
         updateTripDestinationSection(with: searchBarContainer)
     }
     
+    func updateTripDestinationWithActivity(_ data: ActivityDetailDataModel) {
+        print("Updating trip destination with activity: \(data.title)")
+        
+        // Create a new title view with the activity data
+        let newTitleView = createTitleView()
+        
+        // The createTitleView method already stores the references to titleLabel, locationLabel, etc.
+        // and configures them with pendingActivityData if available, so we're good here
+        
+        // Replace the current content in the trip destination section
+        updateTripDestinationSection(with: newTitleView)
+    }
+    
     private func updateTripDestinationSection(with newView: UIView) {
+        print("Updating trip destination section with new view")
         // Find the trip destination section and update it
         if let sectionView = contentStackView.arrangedSubviews.first {
+            print("Found section view, replacing content")
             // The content view to replace is the last subview in the section
             if let existingContentView = sectionView.subviews.last {
+                print("Removing existing content view")
                 existingContentView.removeFromSuperview()
             }
             
-            // Add the new view (search bar)
+            // Add the new view (activity card or search bar)
             sectionView.addSubview(newView)
+            print("Added new view to section")
             
             // Re-apply constraints relative to the title label
             if let titleLabel = sectionView.subviews.first {
@@ -558,7 +587,10 @@ extension GroupTripActivityDetailView {
                         .trailing(to: sectionView.trailingAnchor)
                         .bottom(to: sectionView.bottomAnchor)
                 }
+                print("Applied constraints to new view")
             }
+        } else {
+            print("Could not find section view in contentStackView")
         }
     }
 }
