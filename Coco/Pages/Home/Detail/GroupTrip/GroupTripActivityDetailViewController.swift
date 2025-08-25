@@ -13,7 +13,7 @@ final class GroupTripActivityDetailViewController: UIViewController {
     init(viewModel: GroupTripActivityDetailViewModelProtocol) {
         self.viewModel = viewModel
         super.init(nibName: nil, bundle: nil)
-        self.viewModel.actionDelegate = self
+        self.viewModel.actionDelegate = self  // This should work now
     }
     
     required init?(coder: NSCoder) {
@@ -120,6 +120,28 @@ extension GroupTripActivityDetailViewController: GroupTripActivityDetailViewMode
         let popup: CocoPopupViewController = CocoPopupViewController(child: calendarVC)
         present(popup, animated: true)
     }
+    
+    func showSearchActivityTray() {
+        // Fix: Remove the incorrect searchQuery parameter
+        let searchVC = ActivitySelectionViewController(activities: [], delegate: self)
+        let navController = UINavigationController(rootViewController: searchVC)
+        present(navController, animated: true)
+    }
+    
+    func showSearchBar() {
+        thisView.showSearchBar()
+    }
+    
+    func showSearchResults(_ activities: [Activity]) {
+        let searchResults = activities.map { ActivityDetailDataModel($0) }
+        showActivitySelectionModal(with: searchResults)
+    }
+    
+    private func showActivitySelectionModal(with activities: [ActivityDetailDataModel]) {
+        let searchVC = ActivitySelectionViewController(activities: activities, delegate: self)
+        let navController = UINavigationController(rootViewController: searchVC)
+        present(navController, animated: true)
+    }
 }
 
 extension GroupTripActivityDetailViewController: GroupTripActivityDetailViewDelegate {
@@ -133,6 +155,34 @@ extension GroupTripActivityDetailViewController: GroupTripActivityDetailViewDele
     
     func notifyAddFriendButtonDidTap() {
         showInviteFriendPopup()
+    }
+    
+    func notifyRemoveActivityButtonDidTap() {
+        viewModel.onRemoveActivityTapped()
+    }
+    
+    func notifySearchActivityTapped() {
+        viewModel.onRemoveActivityTapped()
+    }
+    
+    func notifySearchActivitySelected(_ data: ActivityDetailDataModel) {
+        viewModel.onSearchActivitySelected(data)
+        dismiss(animated: true)
+    }
+    
+    func notifySearchBarTapped(with query: String) {
+        // Show the same search tray as home page
+        let searchTrayView = HomeSearchSearchTray(
+            selectedQuery: query,
+            latestSearches: SearchHistoryManager.shared.getSearchHistory(),
+            searchDidApply: { [weak self] queryText in
+                self?.viewModel.onSearchDidApply(queryText)
+            }
+        )
+        
+        let hostingController = UIHostingController(rootView: searchTrayView)
+        let navController = UINavigationController(rootViewController: hostingController)
+        present(navController, animated: true)
     }
 }
 
