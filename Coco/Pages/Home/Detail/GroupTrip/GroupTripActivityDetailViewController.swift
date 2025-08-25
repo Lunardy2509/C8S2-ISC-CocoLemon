@@ -43,13 +43,17 @@ final class GroupTripActivityDetailViewController: UIViewController {
         thisView.addCreateTripButton(button: createTripButtonVC.view)
         
         // Add the schedule input view
-        let scheduleInputVC = UIHostingController(rootView: GroupTripFormInputView(
-            tripNameViewModel: viewModel.tripNameInputViewModel,
-            calendarViewModel: viewModel.calendarInputViewModel,
-            dueDateViewModel: viewModel.dueDateInputViewModel
-        ))
-        addChild(scheduleInputVC)
-        thisView.addScheduleInputView(with: scheduleInputVC.view)
+        if let groupViewModel = viewModel as? GroupTripActivityDetailViewModel {
+            let scheduleInputVC = UIHostingController(rootView: GroupTripFormInputView(
+                tripNameViewModel: viewModel.tripNameInputViewModel,
+                calendarViewModel: viewModel.calendarInputViewModel,
+                dueDateViewModel: viewModel.dueDateInputViewModel,
+                GroupViewModel: groupViewModel
+            ))
+            addChild(scheduleInputVC)
+            thisView.addScheduleInputView(with: scheduleInputVC.view)
+            scheduleInputVC.didMove(toParent: self)
+        }
     }
     
     private func setupNavigationBar() {
@@ -81,15 +85,18 @@ final class GroupTripActivityDetailViewController: UIViewController {
     private var calendarType: CalendarType?
     
     private func setupScheduleInputView() {
-        let inputView = GroupTripFormInputView(
-            tripNameViewModel: viewModel.tripNameInputViewModel,
-            calendarViewModel: viewModel.calendarInputViewModel,
-            dueDateViewModel: viewModel.dueDateInputViewModel
-        )
-        let hostingVC = UIHostingController(rootView: inputView)
-        addChild(hostingVC)
-        thisView.addScheduleInputView(with: hostingVC.view)
-        hostingVC.didMove(toParent: self)
+        if let groupViewModel = viewModel as? GroupTripActivityDetailViewModel {
+            let inputView = GroupTripFormInputView(
+                tripNameViewModel: viewModel.tripNameInputViewModel,
+                calendarViewModel: viewModel.calendarInputViewModel,
+                dueDateViewModel: viewModel.dueDateInputViewModel,
+                GroupViewModel: groupViewModel
+            )
+            let hostingVC = UIHostingController(rootView: inputView)
+            addChild(hostingVC)
+            thisView.addScheduleInputView(with: hostingVC.view)
+            hostingVC.didMove(toParent: self)
+        }
     }
 }
 
@@ -122,9 +129,24 @@ extension GroupTripActivityDetailViewController: GroupTripActivityDetailViewMode
     }
     
     func showSearchActivityTray() {
-        // Fix: Remove the incorrect searchQuery parameter
-        let searchVC = ActivitySelectionViewController(activities: [], delegate: self)
-        let navController = UINavigationController(rootViewController: searchVC)
+        let searchTrayView = HomeSearchSearchTray(
+            selectedQuery: "",
+            latestSearches: SearchHistoryManager.shared.getSearchHistory(),
+            searchDidApply: { [weak self] queryText in
+                self?.dismiss(animated: true) {
+                    self?.viewModel.onSearchDidApply(queryText)
+                }
+            },
+            onSearchHistoryRemove: { searchData in
+                SearchHistoryManager.shared.removeSearchHistory(searchData.name)
+            },
+            onSearchReset: { [weak self] in
+                self?.dismiss(animated: true)
+            }
+        )
+        
+        let hostingController = UIHostingController(rootView: searchTrayView)
+        let navController = UINavigationController(rootViewController: hostingController)
         present(navController, animated: true)
     }
     
@@ -133,14 +155,11 @@ extension GroupTripActivityDetailViewController: GroupTripActivityDetailViewMode
     }
     
     func showSearchResults(_ activities: [Activity]) {
-        let searchResults = activities.map { ActivityDetailDataModel($0) }
-        showActivitySelectionModal(with: searchResults)
-    }
-    
-    private func showActivitySelectionModal(with activities: [ActivityDetailDataModel]) {
-        let searchVC = ActivitySelectionViewController(activities: activities, delegate: self)
-        let navController = UINavigationController(rootViewController: searchVC)
-        present(navController, animated: true)
+        // This method is now only called for empty results
+        // since onSearchDidApply handles the success case directly
+        if activities.isEmpty {
+            print("No search results found")
+        }
     }
 }
 
@@ -183,12 +202,7 @@ extension GroupTripActivityDetailViewController: GroupTripActivityDetailViewDele
         let navController = UINavigationController(rootViewController: hostingController)
         present(navController, animated: true)
     }
-    
-    func notifySearchActivitySelected(_ data: ActivityDetailDataModel) {
-        viewModel.onSearchActivitySelected(data)
-        dismiss(animated: true)
-    }
-    
+
     func notifySearchBarTapped(with query: String) {
         // Show the same search tray as home page
         let searchTrayView = HomeSearchSearchTray(
