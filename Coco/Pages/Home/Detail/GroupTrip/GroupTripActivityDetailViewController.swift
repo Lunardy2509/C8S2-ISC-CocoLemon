@@ -30,12 +30,11 @@ final class GroupTripActivityDetailViewController: UIViewController {
         thisView.delegate = self
         viewModel.onViewDidLoad()
         
-        // Add the create trip button
         let createTripButtonVC = CocoButtonHostingController(
             action: { [weak self] in
                 self?.viewModel.onCreateTripTapped()
             },
-            text: "Create Trip",
+            text: "Create Plan",
             style: .large,
             type: .primary,
             isStretch: true
