@@ -81,8 +81,11 @@ class TripMemberCell: UICollectionViewCell {
         if let imageURL = member.profileImageURL {
             profileImageView.loadImage(from: URL(string: imageURL))
         } else {
-            // Generate dummy profile images based on name
-            profileImageView.image = generateDummyProfile(for: member.name)
+            if member.name.lowercased() == "adhis" {
+                profileImageView.image = UIImage(named: "adhis")
+            } else {
+                profileImageView.image = generateDummyProfile(for: member.name)
+            }
         }
         
         waitingOverlay.isHidden = !member.isWaiting
