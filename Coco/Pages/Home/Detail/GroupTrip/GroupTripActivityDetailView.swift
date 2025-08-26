@@ -12,9 +12,7 @@ import SwiftUI
 final class GroupTripActivityDetailView: UIView {
     weak var delegate: GroupTripActivityDetailViewDelegate?
     
-    var tripMembers: [TripMember] = [
-        TripMember(name: "Adhis", email: "adhis@example.com", profileImageURL: nil, isWaiting: false)
-    ]
+    var tripMembers: [TripMember] = []
     
     internal var selectedPackageIds: Set<Int> = []
     private var selectedPackageId: Int?
@@ -479,13 +477,9 @@ private extension GroupTripActivityDetailView {
     }
 }
 
-// Change this method from private to internal so the view controller can access it
 extension GroupTripActivityDetailView {
-    // Move addTripMember from private extension to public extension
-    func addTripMember(name: String, email: String) {
-        let newMember = TripMember(name: name, email: email, profileImageURL: nil, isWaiting: true)
-        tripMembers.append(newMember)
-        
+    func updateTripMembers(members: [TripMember]) {
+        self.tripMembers = members
         if let collectionView = tripMembersContainer.subviews.first as? UICollectionView {
             collectionView.reloadData()
         }
