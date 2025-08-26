@@ -8,7 +8,6 @@
 import SwiftUI
 import Foundation
 
-
 struct CocoCheckBoxStyle {
     var checkedColor: Color = .green
     var uncheckedColor: Color = .gray
