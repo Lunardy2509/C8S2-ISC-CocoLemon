@@ -142,10 +142,17 @@ final class GroupFormViewModel: ObservableObject {
                 
                 print("✅ GroupFormViewModel: Booking created successfully, posting notification")
                 // Post notification that a new trip was created
-                NotificationCenter.default.post(name: .newTripCreated, object: nil)
+                NotificationCenter.default.post(name: .newTripCreated, object: response.bookingDetails)
                 
-                // Create GroupTripPlanDataModel and navigate to plan view
-                let tripMembers = teamMembers.map { TripMember(from: $0) }
+                let tripMembers = teamMembers.map { teamMember in
+                    TripMember(
+                        name: teamMember.name,
+                        email: teamMember.email,
+                        profileImageURL: nil,
+                        isWaiting: teamMember.isWaiting
+                    )
+                }
+                
                 let planData = GroupTripPlanDataModel(
                     tripName: tripName,
                     activityData: destination.toActivityDetailDataModel(),
@@ -158,39 +165,18 @@ final class GroupFormViewModel: ObservableObject {
                 navigationDelegate?.notifyGroupTripPlanCreated(data: planData)
                 
             } catch {
-                // Handle error - could show an alert or error message
                 print("Failed to create booking: \(error)")
-                // For now, still navigate but create a local booking details
-                let dateFormatter = DateFormatter()
-                dateFormatter.dateFormat = "yyyy-MM-dd"
-                
-                let bookingDestination = BookingDestination(
-                    id: destination.id,
-                    name: destination.location,
-                    imageUrl: destination.imageUrl?.absoluteString,
-                    description: destination.description
-                )
-                
-                let bookingDetails = BookingDetails(
-                    status: "Pending",
-                    bookingId: Int.random(in: 1000...9999),
-                    startTime: "09:00",
-                    destination: bookingDestination,
-                    totalPrice: calculateTotalPrice(),
-                    packageName: selectedPackage.name,
-                    participants: teamMembers.count + 1,
-                    activityDate: dateFormatter.string(from: dateVisit),
-                    activityTitle: destination.title,
-                    bookingCreatedAt: dateFormatter.string(from: Date()),
-                    address: "\(destination.location) Meeting Point"
-                )
-                
                 print("⚠️ GroupFormViewModel: API failed, creating local booking data and posting notification")
-                // Post notification that a new trip was created (even with local data)
-                NotificationCenter.default.post(name: .newTripCreated, object: nil)
                 
-                // Create GroupTripPlanDataModel and navigate to plan view (even with local data)
-                let tripMembers = teamMembers.map { TripMember(from: $0) }
+                let tripMembers = teamMembers.map { teamMember in
+                    TripMember(
+                        name: teamMember.name,
+                        email: teamMember.email,
+                        profileImageURL: nil,
+                        isWaiting: teamMember.isWaiting
+                    )
+                }
+                
                 let planData = GroupTripPlanDataModel(
                     tripName: tripName,
                     activityData: destination.toActivityDetailDataModel(),
@@ -199,7 +185,6 @@ final class GroupFormViewModel: ObservableObject {
                     dateVisit: dateVisit,
                     dueDate: deadline
                 )
-                
                 navigationDelegate?.notifyGroupTripPlanCreated(data: planData)
             }
         }

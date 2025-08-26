@@ -45,6 +45,48 @@ struct BookingDetails: JSONDecodable {
         case bookingCreatedAt = "booking_created_at"
         case address
     }
+    
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        
+        if let statusString = try? container.decode(String.self, forKey: .status) {
+            self.status = statusString
+        } else {
+            let statusValue = try container.decode(AnyCodable.self, forKey: .status)
+            self.status = String(describing: statusValue.value)
+        }
+        
+        self.bookingId = try container.decode(Int.self, forKey: .bookingId)
+        self.startTime = try container.decode(String.self, forKey: .startTime)
+        self.destination = try container.decode(BookingDestination.self, forKey: .destination)
+        self.totalPrice = try container.decode(Double.self, forKey: .totalPrice)
+        self.packageName = try container.decode(String.self, forKey: .packageName)
+        self.participants = try container.decode(Int.self, forKey: .participants)
+        self.activityDate = try container.decode(String.self, forKey: .activityDate)
+        self.activityTitle = try container.decode(String.self, forKey: .activityTitle)
+        self.bookingCreatedAt = try container.decode(String.self, forKey: .bookingCreatedAt)
+        self.address = try container.decode(String.self, forKey: .address)
+    }
+}
+
+struct AnyCodable: Decodable {
+    let value: Any
+    
+    init(from decoder: Decoder) throws {
+        let container = try decoder.singleValueContainer()
+        
+        if let intValue = try? container.decode(Int.self) {
+            value = intValue
+        } else if let doubleValue = try? container.decode(Double.self) {
+            value = doubleValue
+        } else if let stringValue = try? container.decode(String.self) {
+            value = stringValue
+        } else if let boolValue = try? container.decode(Bool.self) {
+            value = boolValue
+        } else {
+            value = "unknown"
+        }
+    }
 }
 
 struct BookingDestination: JSONDecodable {

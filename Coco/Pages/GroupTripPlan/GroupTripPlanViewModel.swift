@@ -35,7 +35,38 @@ final class GroupTripPlanViewModel: GroupTripPlanViewModelProtocol {
     }
     
     func onBookNowTapped() {
-        navigationDelegate?.notifyGroupTripPlanBookNowTapped()
+        let selectedPackagesWithVotes = data.selectedPackages.filter { $0.totalVotes > 0 }
+        
+        let totalPrice = selectedPackagesWithVotes.reduce(0.0) { total, package in
+            let priceString = package.price.replacingOccurrences(of: "[^0-9]", with: "", options: .regularExpression)
+            return total + (Double(priceString) ?? 0.0)
+        }
+        
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy-MM-dd"
+        
+        let localBookingDetails = LocalBookingDetails(
+            id: UUID().uuidString,
+            userId: UserDefaults.standard.string(forKey: "user-id") ?? "",
+            activityTitle: data.activity.title,
+            packageName: selectedPackagesWithVotes.map { $0.name }.joined(separator: ", "),
+            activityDate: dateFormatter.string(from: Date()),
+            participants: data.tripMembers.count,
+            totalPrice: totalPrice,
+            status: "Pending", 
+            destination: BookingDestination(
+                id: 1,
+                name: data.activity.location,
+                imageUrl: data.activity.imageUrl,
+                description: data.activity.title
+            ),
+            address: data.activity.location,
+            selectedPackages: selectedPackagesWithVotes,
+            tripMembers: data.tripMembers,
+            dueDateForm: data.tripDetails.dueDateForm
+        )
+        
+        navigationDelegate?.notifyGroupTripPlanBookNowTapped(localBookingDetails: localBookingDetails)
     }
     
     func onPackageVoteToggled(packageId: Int) {

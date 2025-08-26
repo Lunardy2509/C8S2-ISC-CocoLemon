@@ -15,7 +15,7 @@ protocol GroupFormNavigationDelegate: AnyObject {
     
     /// Navigates to trip detail page with booking details
     /// - Parameter bookingDetails: The booking details data model
-    func notifyGroupFormNavigateToTripDetail(_ bookingDetails: BookingDetails)
+    func notifyGroupFormNavigateToTripDetail(_ bookingDetails: LocalBookingDetails)
     
     /// Shows the group trip plan after creation
     /// - Parameter planData: The group trip plan data model

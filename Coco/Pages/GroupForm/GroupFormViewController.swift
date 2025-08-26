@@ -149,24 +149,41 @@ extension GroupFormViewController: GroupFormNavigationDelegate {
         navigationController?.pushViewController(activityDetailVC, animated: true)
     }
     
-    func notifyGroupFormNavigateToTripDetail(_ bookingDetails: BookingDetails) {
-        let tripDetailVM = TripDetailViewModel(data: bookingDetails)
+    func notifyGroupFormNavigateToTripDetail(_ bookingDetails: LocalBookingDetails) {
+        let tripDetailVM = TripDetailViewModel(localData: bookingDetails) 
         let tripDetailVC = TripDetailViewController(viewModel: tripDetailVM)
         navigationController?.pushViewController(tripDetailVC, animated: true)
     }
     
     func notifyGroupTripPlanCreated(data: GroupTripPlanDataModel) {
-        // Fallback implementation when no external delegate is provided
-        // Navigate to GroupTripPlan view with the created data
         let viewModel = GroupTripPlanViewModel(data: data)
         let groupTripPlanVC = GroupTripPlanViewController(viewModel: viewModel)
         navigationController?.pushViewController(groupTripPlanVC, animated: true)
     }
     
     func notifyGroupFormCreatePlan() {
-        // Navigate back after creating plan
         navigationController?.popViewController(animated: true)
     }
+    
+//    func goToBookingDetail(with data: BookingDetails) {
+//        let coordinator = MyTripCoordinator(
+//            input: .init(
+//                navigationController: navigationController!,
+//                flow: .bookingDetail(data: data)
+//            )
+//        )
+//        coordinator.start()
+//    }
+//    
+//    func goToBookingDetail(with data: LocalBookingDetails) {
+//        let coordinator = MyTripCoordinator(
+//            input: .init(
+//                navigationController: navigationController!,
+//                flow: .localBookingDetail(data: data)
+//            )
+//        )
+//        coordinator.start()
+//    }
 }
 
 // MARK: - CocoCalendarViewControllerDelegate
@@ -174,7 +191,6 @@ extension GroupFormViewController: CocoCalendarViewControllerDelegate {
     func notifyCalendarDidChooseDate(date: Date?, calendar: CocoCalendarViewController) {
         guard let date = date, let viewModel = viewModel else { return }
         
-        // Determine which calendar was opened based on the current state
         if viewModel.showDateVisitCalendar {
             viewModel.onDateVisitCalendarDidChoose(date: date)
         } else if viewModel.showDeadlineCalendar {

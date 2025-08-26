@@ -10,15 +10,26 @@ import Foundation
 final class TripDetailViewModel {
     weak var actionDelegate: TripDetailViewModelAction?
     
+    private let regularBookingData: BookingDetails?
+    private let localBookingData: LocalBookingDetails?
+    
     init(data: BookingDetails) {
-        self.data = data
+        self.regularBookingData = data
+        self.localBookingData = nil
     }
     
-    private let data: BookingDetails
+    init(localData: LocalBookingDetails) {
+        self.regularBookingData = nil
+        self.localBookingData = localData
+    }
 }
 
 extension TripDetailViewModel: TripDetailViewModelProtocol {
     func onViewDidLoad() {
-        actionDelegate?.configureView(dataModel: BookingDetailDataModel(bookingDetail: data))
+        if let regularData = regularBookingData {
+            actionDelegate?.configureView(dataModel: BookingDetailDataModel(bookingDetail: regularData))
+        } else if let localData = localBookingData {
+            actionDelegate?.configureView(dataModel: BookingDetailDataModel(localBookingDetail: localData))
+        }
     }
 }
