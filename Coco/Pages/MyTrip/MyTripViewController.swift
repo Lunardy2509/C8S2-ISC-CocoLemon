@@ -188,6 +188,12 @@ private extension MyTripViewController {
         viewModel.onNotificationButtonTapped()
     }
     
+    func goToCreateTrip() {
+        let groupFormVC = GroupFormViewController()
+             groupFormVC.hidesBottomBarWhenPushed = true
+             navigationController?.pushViewController(groupFormVC, animated: true)
+    }
+    
     func setupNotifications() {
         NotificationCenter.default.addObserver(
             self,

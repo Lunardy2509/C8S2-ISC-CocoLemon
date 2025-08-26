@@ -12,6 +12,6 @@ struct NotificationItem {
     let senderName: String
     let message: String
     let tripName: String
-    let avatarImage: UIImageView
+    let avatarIcon: Icon
     let isUnread: Bool
 }

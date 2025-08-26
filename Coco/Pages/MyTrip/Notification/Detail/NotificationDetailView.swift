@@ -133,7 +133,7 @@ final class NotificationDetailView: UIView {
     
     // MARK: - Public Methods
     func configure(with notification: NotificationItem) {
-        avatarImageView.image = notification.avatarImage.image
+        avatarImageView.image = notification.avatarIcon.image
         senderLabel.text = notification.senderName
         messageLabel.text = notification.message
         tripNameLabel.text = notification.tripName

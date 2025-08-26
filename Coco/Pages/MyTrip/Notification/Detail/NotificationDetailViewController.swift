@@ -84,13 +84,13 @@ private extension NotificationDetailViewController {
         // Show loading state
         showLoadingAlert()
         
-        // Simulate API call
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in
-            self?.dismissLoadingAlert()
-            self?.showSuccessAlert(title: "Accepted!", message: "You have successfully joined the trip.") {
-                self?.navigationController?.popViewController(animated: true)
-            }
-        }
+//        // Simulate API call
+//        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in
+//            self?.dismissLoadingAlert()
+//            self?.showSuccessAlert(title: "Accepted!", message: "You have successfully joined the trip.") {
+//                self?.navigationController?.popViewController(animated: true)
+//            }
+//        }
     }
     
     func handleDeclineAction() {
