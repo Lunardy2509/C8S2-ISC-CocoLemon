@@ -205,8 +205,18 @@ final class GroupFormViewModel: ObservableObject {
                 // Post notification that a new trip was created
                 NotificationCenter.default.post(name: .newTripCreated, object: nil)
                 
-                // Notify that plan creation is complete - this will navigate to MyTrip tab
-                navigationDelegate?.notifyGroupFormCreatePlan()
+                // Create GroupTripPlanDataModel and navigate to plan view
+                let tripMembers = teamMembers.map { TripMember(from: $0) }
+                let planData = GroupTripPlanDataModel(
+                    tripName: tripName,
+                    activityData: destination.toActivityDetailDataModel(),
+                    tripMembers: tripMembers,
+                    selectedPackageIds: selectedPackageIds,
+                    dateVisit: dateVisit,
+                    dueDate: deadline
+                )
+                
+                navigationDelegate?.notifyGroupTripPlanCreated(data: planData)
                 
             } catch {
                 // Handle error - could show an alert or error message

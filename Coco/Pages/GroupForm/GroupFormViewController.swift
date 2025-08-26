@@ -16,11 +16,23 @@ final class GroupFormViewController: UIViewController {
     private var viewModel: GroupFormViewModel?
     private var cancellables = Set<AnyCancellable>()
     private var preSelectedActivity: ActivityDetailDataModel?
+    private weak var externalNavigationDelegate: GroupFormNavigationDelegate?
     
     // MARK: - Initializers
     convenience init(preSelectedActivity: ActivityDetailDataModel) {
         self.init()
         self.preSelectedActivity = preSelectedActivity
+    }
+    
+    convenience init(navigationDelegate: GroupFormNavigationDelegate) {
+        self.init()
+        self.externalNavigationDelegate = navigationDelegate
+    }
+    
+    convenience init(preSelectedActivity: ActivityDetailDataModel, navigationDelegate: GroupFormNavigationDelegate) {
+        self.init()
+        self.preSelectedActivity = preSelectedActivity
+        self.externalNavigationDelegate = navigationDelegate
     }
     
     // MARK: - Lifecycle
@@ -54,8 +66,12 @@ final class GroupFormViewController: UIViewController {
         
         self.viewModel = newViewModel
         
-        // Set up navigation delegate
-        newViewModel.navigationDelegate = self
+        // Set up navigation delegate - prefer external delegate over self
+        if let externalDelegate = externalNavigationDelegate {
+            newViewModel.navigationDelegate = externalDelegate
+        } else {
+            newViewModel.navigationDelegate = self
+        }
         
         let contentView = GroupFormView(viewModel: newViewModel)
         
@@ -137,6 +153,14 @@ extension GroupFormViewController: GroupFormNavigationDelegate {
         let tripDetailVM = TripDetailViewModel(data: bookingDetails)
         let tripDetailVC = TripDetailViewController(viewModel: tripDetailVM)
         navigationController?.pushViewController(tripDetailVC, animated: true)
+    }
+    
+    func notifyGroupTripPlanCreated(data: GroupTripPlanDataModel) {
+        // Fallback implementation when no external delegate is provided
+        // Navigate to GroupTripPlan view with the created data
+        let viewModel = GroupTripPlanViewModel(data: data)
+        let groupTripPlanVC = GroupTripPlanViewController(viewModel: viewModel)
+        navigationController?.pushViewController(groupTripPlanVC, animated: true)
     }
     
     func notifyGroupFormCreatePlan() {

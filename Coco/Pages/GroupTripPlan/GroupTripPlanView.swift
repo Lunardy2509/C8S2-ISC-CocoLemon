@@ -7,6 +7,7 @@
 
 import Foundation
 import UIKit
+import ObjectiveC
 
 protocol GroupTripPlanViewDelegate: AnyObject {
     func notifyBookNowTapped()
@@ -382,14 +383,18 @@ private extension GroupTripPlanView {
         collectionView.showsHorizontalScrollIndicator = false
         collectionView.register(TripMemberCell.self, forCellWithReuseIdentifier: "TripMemberCell")
         
+        // Create a simple data source for the collection view
+        let dataSource = TripMembersDataSource(members: members)
+        collectionView.dataSource = dataSource
+        
         tripMembersContainer.addSubview(collectionView)
         collectionView.layout {
             $0.edges(to: tripMembersContainer)
                 .height(90)
         }
         
-        // Configure collection view with members data
-        // You'll need to implement the data source methods
+        // Store the data source to prevent deallocation
+        objc_setAssociatedObject(collectionView, "dataSource", dataSource, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
     }
     
     func setupAvailablePackages(_ packages: [ActivityDetailDataModel.Package]) {
@@ -463,5 +468,30 @@ private extension GroupTripPlanView {
         }
         
         return cardContainer
+    }
+}
+
+// MARK: - TripMembersDataSource
+private class TripMembersDataSource: NSObject, UICollectionViewDataSource {
+    private let members: [TripMember]
+    
+    init(members: [TripMember]) {
+        self.members = members
+        super.init()
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        return members.count
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "TripMemberCell", for: indexPath) as? TripMemberCell else {
+            return UICollectionViewCell()
+        }
+        
+        let member = members[indexPath.item]
+        cell.configure(with: member)
+        
+        return cell
     }
 }
