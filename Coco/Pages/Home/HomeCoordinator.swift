@@ -188,4 +188,30 @@ extension HomeCoordinator: GroupFormNavigationDelegate {
         tabBarController.selectedIndex = 1 // MyTrip tab
         navigationController?.popToRootViewController(animated: true)
     }
+    
+    func notifyGroupTripCreateTripTapped(planData: GroupTripPlanDataModel) {
+        let viewModel = GroupTripPlanViewModel(data: planData)
+        viewModel.navigationDelegate = self
+        let viewController = GroupTripPlanViewController(viewModel: viewModel)
+        start(viewController: viewController)
+    }
+    
+    func notifyGroupTripPlanCreated(data: GroupTripPlanDataModel) {
+        let viewModel = GroupTripPlanViewModel(data: data)
+        viewModel.navigationDelegate = self
+        let viewController = GroupTripPlanViewController(viewModel: viewModel)
+        start(viewController: viewController)
+    }
+}
+
+extension HomeCoordinator: GroupTripPlanNavigationDelegate {
+    func notifyGroupTripPlanEditTapped() {
+        navigationController?.popViewController(animated: true)
+    }
+    
+    func notifyGroupTripPlanBookNowTapped() {
+        // Handle booking flow - this could navigate to a booking confirmation
+        // or checkout page depending on your app's flow
+        print("Book Now tapped - implement booking flow")
+    }
 }
