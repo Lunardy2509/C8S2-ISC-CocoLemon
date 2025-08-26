@@ -322,7 +322,7 @@ private extension ActivityDetailView {
     }
     
     func createTitleView() -> UIView {
-        let pinPointImage: UIImageView = UIImageView(image: CocoIcon.icPinPointBlue.image)
+        let pinPointImage: UIImageView = UIImageView(image: CocoIcon.icPinPointBlack.image)
         pinPointImage.layout {
             $0.size(20.0)
         }

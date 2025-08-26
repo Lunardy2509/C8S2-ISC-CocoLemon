@@ -119,8 +119,8 @@ extension GroupFormRecommendationDataModel {
             )
         }
         
-        // Create mock Activity object to initialize ActivityDetailDataModel
-        let mockActivity = Activity(
+        // Create Package Activity object to initialize ActivityDetailDataModel
+        let packageActivity = Activity(
             id: id,
             title: title,
             images: imageUrl != nil ? [
@@ -167,6 +167,6 @@ extension GroupFormRecommendationDataModel {
             durationMinutes: durationMinutes
         )
         
-        return ActivityDetailDataModel(mockActivity)
+        return ActivityDetailDataModel(packageActivity)
     }
 }

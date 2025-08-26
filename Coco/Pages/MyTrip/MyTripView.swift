@@ -12,6 +12,7 @@ protocol MyTripViewDelegate: AnyObject {
     func notifyTripListCardDidTap(at index: Int)
     func notifyTripListCardDidDelete(at index: Int)
     func notifyCreateTripDidTap()
+    func notifyDestinationSelected(_ destination: TopDestinationCardDataModel)
 }
 
 final class MyTripView: UIView {
@@ -27,23 +28,42 @@ final class MyTripView: UIView {
     }
     
     func configureView(datas: [MyTripListCardDataModel]) {
+        print("📋 MyTripView: configureView called with \(datas.count) items")
+        self.tripData = datas
         if datas.isEmpty {
+            print("📋 MyTripView: Showing empty state")
             showEmptyState()
         } else {
-            showList(datas: datas)
+            print("📋 MyTripView: Showing list with \(datas.count) items")
+            showList()
         }
     }
     
-    private lazy var contentStackView: UIStackView = createStackView()
+    func updateData(_ data: [MyTripListCardDataModel]) {
+        self.tripData = data
+        collectionView.reloadData()
+        
+        if data.isEmpty {
+            showEmptyState()
+        } else {
+            showList()
+        }
+    }
+
+    private var tripData: [MyTripListCardDataModel] = []
+    private lazy var collectionView: UICollectionView = createCollectionView()
     private lazy var emptyStateView: EmptyStateView = {
         let view = EmptyStateView(
             image: UIImage(named: "emptyStateLogo"),
-            caption: "No trips yet, let’s create your first one!",
-            buttonTitle: "Create Trip"
-        ) {
-            [weak self] in
-                    self?.delegate?.notifyCreateTripDidTap()
-        }
+            caption: "No trips yet, let's create your first one!",
+            primaryButtonTitle: "Create Trip",
+            action: { [weak self] in
+                self?.delegate?.notifyCreateTripDidTap()
+            },
+            onDestinationSelected: { [weak self] destination in
+                self?.delegate?.notifyDestinationSelected(destination)
+            }
+        )
         view.isHidden = true
         return view
     }()
@@ -53,47 +73,95 @@ private extension MyTripView {
     func setupView() {
         backgroundColor = Token.additionalColorsWhite
         
-        let scrollView = UIScrollView()
-        scrollView.showsVerticalScrollIndicator = false
-        
-        scrollView.addSubviewAndLayout(contentStackView)
-        contentStackView.layout {
-            $0.widthAnchor(to: scrollView.widthAnchor)
-        }
-        
-        addSubviewAndLayout(scrollView, insets: UIEdgeInsets(edges: 21.0))
+        addSubviewAndLayout(collectionView, insets: UIEdgeInsets(edges: 21.0))
         addSubviewAndLayout(emptyStateView, insets: .zero)
     }
     
-    func showList(datas: [MyTripListCardDataModel]) {
-        emptyStateView.isHidden = true
-        contentStackView.isHidden = false
+    func createCollectionView() -> UICollectionView {
+        let layout = UICollectionViewFlowLayout()
+        layout.scrollDirection = .vertical
+        layout.minimumLineSpacing = 16.0
+        layout.minimumInteritemSpacing = 0
         
-        contentStackView.arrangedSubviews.forEach { $0.removeFromSuperview() }
-        datas.enumerated().forEach { (index, data) in
-            let view = MyTripListCardView()
-            view.delegate = self
-            view.configureView(dataModel: data, index: index)
-            contentStackView.addArrangedSubview(view)
-        }
+        let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
+        collectionView.backgroundColor = .clear
+        collectionView.showsVerticalScrollIndicator = false
+        collectionView.delegate = self
+        collectionView.dataSource = self
+        collectionView.register(MyTripCollectionViewCell.self, forCellWithReuseIdentifier: "MyTripCollectionViewCell")
+        
+        return collectionView
     }
     
-    func createStackView() -> UIStackView {
-        let stackView: UIStackView = UIStackView()
-        stackView.axis = .vertical
-        stackView.spacing = 16.0
-        
-        return stackView
+    func showList() {
+        print("📋 MyTripView: showList() - hiding empty state, showing collection view")
+        emptyStateView.isHidden = true
+        collectionView.isHidden = false
+        collectionView.reloadData()
     }
+    
     func showEmptyState() {
-        contentStackView.isHidden = true
+        print("📋 MyTripView: showEmptyState() - hiding collection view, showing empty state")
+        collectionView.isHidden = true
         emptyStateView.isHidden = false
     }
 }
 
-// MARK: - MyTripListCardViewDelegate
-extension MyTripView: MyTripListCardViewDelegate {
+// MARK: - UICollectionViewDataSource
+extension MyTripView: UICollectionViewDataSource {
+    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        print("📊 Collection view numberOfItems: \(tripData.count)")
+        return tripData.count
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        print("🔧 Collection view creating cell for index: \(indexPath.item)")
+        guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "MyTripCollectionViewCell", for: indexPath) as? MyTripCollectionViewCell else {
+            print("❌ Failed to dequeue MyTripCollectionViewCell")
+            return UICollectionViewCell()
+        }
+        
+        let data = tripData[indexPath.item]
+        print("📝 Configuring cell with trip: \(data.title)")
+        cell.configure(with: data, index: indexPath.item)
+        cell.delegate = self
+        
+        // Add long press gesture for delete functionality
+        let longPressGesture = UILongPressGestureRecognizer(target: self, action: #selector(handleLongPress(_:)))
+        cell.addGestureRecognizer(longPressGesture)
+        
+        return cell
+    }
+    
+    @objc private func handleLongPress(_ gesture: UILongPressGestureRecognizer) {
+        guard gesture.state == .began else { return }
+        
+        let point = gesture.location(in: collectionView)
+        if let indexPath = collectionView.indexPathForItem(at: point) {
+            delegate?.notifyTripListCardDidDelete(at: indexPath.item)
+        }
+    }
+}
+
+// MARK: - UICollectionViewDelegateFlowLayout
+extension MyTripView: UICollectionViewDelegateFlowLayout {
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
+        let width = collectionView.frame.width
+        // Calculate height based on your cell's content
+        // This should match the height needed for your MyTripCollectionViewCell
+        let height: CGFloat = 200 // Increased height to ensure visibility
+        print("📏 Collection view item size: \(width) x \(height)")
+        return CGSize(width: width, height: height)
+    }
+}
+
+// MARK: - MyTripCollectionViewCellDelegate
+extension MyTripView: MyTripCollectionViewCellDelegate {
     func notifyTripListCardDidTap(at index: Int) {
         delegate?.notifyTripListCardDidTap(at: index)
+    }
+    
+    func notifyTripListCardDidDelete(at index: Int) {
+        delegate?.notifyTripListCardDidDelete(at: index)
     }
 }

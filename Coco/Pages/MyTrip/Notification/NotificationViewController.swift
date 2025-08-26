@@ -34,7 +34,7 @@ final class NotificationViewController: UIViewController {
             senderName: "Reminder",
             message: "Invited You to join colaboration trip",
             tripName: "CoCoLemon goes to Bali",
-            avatarImage: UIImageView(image: CocoIcon.icuserIcon.image),
+            avatarIcon: Contributor.remindFriend,
             isUnread: false
         ),
         NotificationItem(
@@ -42,7 +42,31 @@ final class NotificationViewController: UIViewController {
             senderName: "Ferdinand Lunardy",
             message: "Invited You to join colaboration trip",
             tripName: "CoCoLemon goes to Bali",
-            avatarImage: UIImageView(image: CocoIcon.icuserIcon.image),
+            avatarIcon: Contributor.ferdinand,
+            isUnread: true
+        ),
+        NotificationItem(
+            id: "3",
+            senderName: "Griselda Shavilla",
+            message: "Griselda Shavilla has joined colaboration trip",
+            tripName: "CoCoLemon goes to Bali",
+            avatarIcon: Contributor.griselda,
+            isUnread: true
+        ),
+        NotificationItem(
+            id: "4",
+            senderName: "Ferdinand Lunardy",
+            message: "Ferdinand Lunardy has joined colaboration trip",
+            tripName: "CoCoLemon goes to Bali",
+            avatarIcon: Contributor.ferdinand,
+            isUnread: true
+        ),
+        NotificationItem(
+            id: "5",
+            senderName: "Cynthia Shabrina",
+            message: "Cynthia Shabrina  has joined colaboration trip",
+            tripName: "CoCoLemon goes to Bali",
+            avatarIcon: Contributor.cynthia,
             isUnread: true
         )
 

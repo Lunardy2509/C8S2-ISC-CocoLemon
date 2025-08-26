@@ -36,8 +36,8 @@ extension CocoStatusLabelStyle {
     )
     
     static let pending: Self = Self(
-        textColor: Token.additionalColorsOrange,
-        backgroundColor: UIColor.from("#FFF2ED")
+        textColor: UIColor.from("#7B61FF"),
+        backgroundColor: UIColor.from("#F4F0FF")
     )
     
     static let refund: Self = Self(

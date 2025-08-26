@@ -12,9 +12,16 @@ import Combine
 final class GroupFormViewController: UIViewController {
     
     // MARK: - Properties
-    private var hostingController: UIHostingController<GroupFormView>!
-    private var viewModel: GroupFormViewModel!
+    private var hostingController: UIHostingController<GroupFormView>?
+    private var viewModel: GroupFormViewModel?
     private var cancellables = Set<AnyCancellable>()
+    private var preSelectedActivity: ActivityDetailDataModel?
+    
+    // MARK: - Initializers
+    convenience init(preSelectedActivity: ActivityDetailDataModel) {
+        self.init()
+        self.preSelectedActivity = preSelectedActivity
+    }
     
     // MARK: - Lifecycle
     override func viewDidLoad() {
@@ -36,28 +43,32 @@ final class GroupFormViewController: UIViewController {
     }
     
     private func setupHostingController() {
-        viewModel = GroupFormViewModel()
+        let newViewModel: GroupFormViewModel
         
-        // Set up navigation callback
-        viewModel.onNavigateToActivityDetail = { [weak self] activityDetailData in
-            self?.navigateToActivityDetail(activityDetailData)
+        // Use pre-selected activity if available
+        if let preSelectedActivity = preSelectedActivity {
+            newViewModel = GroupFormViewModel(selectedActivity: preSelectedActivity)
+        } else {
+            newViewModel = GroupFormViewModel()
         }
         
-        let contentView = GroupFormView(
-            viewModel: viewModel,
-            onCreatePlan: { [weak self] in
-                self?.handleCreatePlan()
-            }
-        )
+        self.viewModel = newViewModel
         
-        hostingController = UIHostingController(rootView: contentView)
-        hostingController.view.backgroundColor = .systemBackground
+        // Set up navigation delegate
+        newViewModel.navigationDelegate = self
+        
+        let contentView = GroupFormView(viewModel: newViewModel)
+        
+        let newHostingController = UIHostingController(rootView: contentView)
+        self.hostingController = newHostingController
+        newHostingController.view.backgroundColor = .systemBackground
     }
     
     private func setupView() {
         view.backgroundColor = .systemBackground
         
         // Add hosting controller as child
+        guard let hostingController = hostingController else { return }
         addChild(hostingController)
         view.addSubview(hostingController.view)
         hostingController.didMove(toParent: self)
@@ -73,6 +84,8 @@ final class GroupFormViewController: UIViewController {
     }
     
     private func setupBindings() {
+        guard let viewModel = viewModel else { return }
+        
         // Monitor date visit calendar presentation
         viewModel.$showDateVisitCalendar
             .sink { [weak self] shouldShow in
@@ -110,23 +123,32 @@ final class GroupFormViewController: UIViewController {
     @objc private func backButtonTapped() {
         navigationController?.popViewController(animated: true)
     }
-    
-    private func handleCreatePlan() {
-        // Navigate back after creating plan
-        navigationController?.popViewController(animated: true)
-    }
-    
-    private func navigateToActivityDetail(_ activityDetailData: ActivityDetailDataModel) {
-        let activityDetailVM = ActivityDetailViewModel(data: activityDetailData)
+}
+
+// MARK: - GroupFormNavigationDelegate
+extension GroupFormViewController: GroupFormNavigationDelegate {
+    func notifyGroupFormNavigateToActivityDetail(_ activityDetail: ActivityDetailDataModel) {
+        let activityDetailVM = ActivityDetailViewModel(data: activityDetail)
         let activityDetailVC = ActivityDetailViewController(viewModel: activityDetailVM)
         navigationController?.pushViewController(activityDetailVC, animated: true)
+    }
+    
+    func notifyGroupFormNavigateToTripDetail(_ bookingDetails: BookingDetails) {
+        let tripDetailVM = TripDetailViewModel(data: bookingDetails)
+        let tripDetailVC = TripDetailViewController(viewModel: tripDetailVM)
+        navigationController?.pushViewController(tripDetailVC, animated: true)
+    }
+    
+    func notifyGroupFormCreatePlan() {
+        // Navigate back after creating plan
+        navigationController?.popViewController(animated: true)
     }
 }
 
 // MARK: - CocoCalendarViewControllerDelegate
 extension GroupFormViewController: CocoCalendarViewControllerDelegate {
     func notifyCalendarDidChooseDate(date: Date?, calendar: CocoCalendarViewController) {
-        guard let date = date else { return }
+        guard let date = date, let viewModel = viewModel else { return }
         
         // Determine which calendar was opened based on the current state
         if viewModel.showDateVisitCalendar {

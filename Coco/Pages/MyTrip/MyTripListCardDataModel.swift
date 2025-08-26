@@ -27,25 +27,45 @@ struct MyTripListCardDataModel: Hashable {
         var bookingStatus: String = bookingDetail.status
         var statusStyle: CocoStatusLabelStyle = .pending
         
-        let formatter: DateFormatter = DateFormatter()
-        formatter.dateFormat = "YYYY-MM-dd"
-        
-        if let targetDate: Date = formatter.date(from: bookingDetail.activityDate) {
-            let today: Date = Date()
+        // If status is already "Pending", keep it as is (for newly created plans)
+        if bookingDetail.status.lowercased() == "pending" {
+            bookingStatus = "Pending"
+            statusStyle = .pending
+        } else {
+            // For other statuses, apply date-based logic
+            let formatter: DateFormatter = DateFormatter()
+            formatter.dateFormat = "YYYY-MM-dd"
             
-            if targetDate < today {
-                bookingStatus = "Completed"
-                statusStyle = .success
-            }
-            else if targetDate > today {
-                bookingStatus = "Upcoming"
-                statusStyle = .refund
+            if let targetDate: Date = formatter.date(from: bookingDetail.activityDate) {
+                let today: Date = Date()
+                
+                if targetDate < today {
+                    bookingStatus = "Completed"
+                    statusStyle = .success
+                }
+                else if targetDate > today {
+                    bookingStatus = "Upcoming"
+                    statusStyle = .refund
+                }
             }
         }
         
         statusLabel = StatusLabel(text: bookingStatus, style: statusStyle)
         imageUrl = bookingDetail.destination.imageUrl ?? ""
-        dateText = bookingDetail.activityDate
+        
+        // Format the date to display in a user-friendly format like "Tues, 15 March 2025"
+        let inputFormatter = DateFormatter()
+        inputFormatter.dateFormat = "yyyy-MM-dd"
+        
+        if let date = inputFormatter.date(from: bookingDetail.activityDate) {
+            let outputFormatter = DateFormatter()
+            outputFormatter.dateFormat = "E, d MMMM yyyy"
+            outputFormatter.locale = Locale(identifier: "en_US")
+            dateText = outputFormatter.string(from: date)
+        } else {
+            dateText = bookingDetail.activityDate
+        }
+        
         title = bookingDetail.activityTitle
         location = bookingDetail.destination.name
         totalPax = bookingDetail.participants
