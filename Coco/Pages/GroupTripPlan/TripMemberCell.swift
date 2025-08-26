@@ -2,12 +2,12 @@
 //  TripMemberCell.swift
 //  Coco
 //
-//  Created by GitHub Copilot on 26/08/25.
+//  Created by Ferdinand Lunardy on 26/08/25.
 //
 
 import UIKit
 
-class TripMemberCell: UICollectionViewCell {
+final class TripMemberCell: UICollectionViewCell {
     
     private lazy var profileImageView: UIImageView = {
         let imageView = UIImageView()

@@ -2,10 +2,11 @@
 //  GroupFormViewModel+Search.swift
 //  Coco
 //
-//  Created by GitHub Copilot on 26/08/25.
+//  Created by Ferdinand Lunardy on 26/08/25.
 //
 
 import Foundation
+import SwiftUI
 
 // MARK: - Search Functionality
 extension GroupFormViewModel {
@@ -63,10 +64,23 @@ extension GroupFormViewModel {
         searchActivities(query: destination.title)
     }
     
+    func selectSearchResult(_ searchResult: HomeActivityCellDataModel) {
+        // Convert HomeActivityCellDataModel to GroupFormRecommendationDataModel
+        // Try to find the full activity details from the searchResults that match this search result
+        if let activity = recommendations.first(where: { $0.id == searchResult.id }) {
+            selectDestination(activity)
+        } else {
+            // Fallback: create a basic destination from the search result
+            searchActivities(query: searchResult.title)
+        }
+        showSearchResultsSheet = false
+    }
+    
     func searchActivities(query: String) {
         isLoading = true
+        currentSearchQuery = query
         
-        // Search for activities using the API
+        // First fetch all activities to enable local filtering for location parts
         activityFetcher.fetchActivity(
             request: ActivitySearchRequest(pSearchText: "")
         ) { [weak self] (result: Result<ActivityModelArray, NetworkServiceError>) in
@@ -77,25 +91,55 @@ extension GroupFormViewModel {
                 
                 switch result {
                 case .success(let response):
-                    let activities = response.values
+                    let allActivities = response.values
                     
-                    if let firstActivity = activities.first {
-                        // Create destination from search result
-                        let destination = GroupFormRecommendationDataModel(activity: firstActivity)
-                        self.selectDestination(destination)
+                    // Filter activities based on search text including destination names
+                    let filteredActivities = allActivities.filter { activity in
+                        if query.isEmpty {
+                            return true
+                        }
+                        
+                        let searchTextLowercased = query.lowercased()
+                        let activityTitleMatch = activity.title.lowercased().contains(searchTextLowercased)
+                        let destinationNameMatch = activity.destination.name.lowercased().contains(searchTextLowercased)
+                        
+                        // Also check if search matches the extracted location part (after comma)
+                        let extractedLocation = self.extractLocationFromDestination(activity.destination.name)
+                        let locationPartMatch = extractedLocation.lowercased().contains(searchTextLowercased)
+                        
+                        return activityTitleMatch || destinationNameMatch || locationPartMatch
+                    }
+                    
+                    if !filteredActivities.isEmpty {
+                        // Convert activities to search results for display
+                        self.searchResults = filteredActivities.map { HomeActivityCellDataModel(activity: $0) }
+                        self.showSearchResultsSheet = true
+                        
+                        // Store activities as recommendations for later use
+                        self.recommendations = filteredActivities.map { GroupFormRecommendationDataModel(activity: $0) }
                     } else {
-                        // No results found, create a mock destination for demo purposes
-                        let mockDestination = self.createMockDestinationFromSearch(query: query)
-                        self.selectDestination(mockDestination)
+                        // No results found, show empty state popup instead of sheet
+                        self.searchResults = []
+                        self.showEmptyStatePopup = true
                     }
                     
                 case .failure:
-                    // Fallback to mock destination
-                    let mockDestination = self.createMockDestinationFromSearch(query: query)
-                    self.selectDestination(mockDestination)
+                    // Show empty state popup on failure
+                    self.searchResults = []
+                    self.showEmptyStatePopup = true
                 }
             }
         }
+    }
+    
+    /// Extracts location from destination name by taking the part after the comma
+    /// E.g., "Raja Ampat, West Papua" -> "West Papua"
+    private func extractLocationFromDestination(_ destinationName: String) -> String {
+        let components = destinationName.components(separatedBy: ",")
+        if components.count > 1 {
+            return components[1].trimmingCharacters(in: .whitespaces)
+        }
+        return destinationName.trimmingCharacters(in: .whitespaces)
     }
     
     func filterRecommendations(by query: String) {
@@ -110,6 +154,8 @@ extension GroupFormViewModel {
             recommendations = filtered
         }
     }
+    
+
     
     func loadRecommendations() {
         isLoading = true

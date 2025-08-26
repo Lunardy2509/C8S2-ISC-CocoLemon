@@ -32,6 +32,10 @@ final class GroupFormViewModel: ObservableObject {
     @Published var showSearchSheet: Bool = false
     @Published var searchHistory: [HomeSearchSearchLocationData] = []
     @Published var showInviteFriendPopup: Bool = false
+    @Published var showSearchResultsSheet: Bool = false
+    @Published var showEmptyStatePopup: Bool = false
+    @Published var searchResults: [HomeActivityCellDataModel] = []
+    @Published var currentSearchQuery: String = ""
     
     // Available contributors for adding to team
     let availableContributors: [TripMemberData] = [

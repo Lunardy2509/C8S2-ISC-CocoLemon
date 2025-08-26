@@ -7,7 +7,7 @@ struct CocoCheckBox: View {
     var body: some View {
         Button(action: {
             viewModel.toggle()
-        }) {
+        }, label: {
             HStack {
                 Image(systemName: viewModel.isChecked ? "checkmark.circle.fill" : "circle")
                     .resizable()
@@ -19,7 +19,7 @@ struct CocoCheckBox: View {
                 
                 Spacer()
             }
-        }
+        })
         .buttonStyle(PlainButtonStyle())
     }
 }
@@ -35,4 +35,3 @@ final class CocoCheckBoxHostingController: UIHostingController<CocoCheckBox> {
     }
 
 }
-

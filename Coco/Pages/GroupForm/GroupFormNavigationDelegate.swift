@@ -2,7 +2,7 @@
 //  GroupFormNavigationDelegate.swift
 //  Coco
 //
-//  Created by GitHub Copilot on 26/08/25.
+//  Created by Ferdinand Lunardy on 26/08/25.
 //
 
 import Foundation
