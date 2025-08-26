@@ -144,11 +144,26 @@ final class GroupTripActivityDetailViewModel: ObservableObject, GroupTripActivit
     }
     
     func onCreateTripTapped() {
-        navigationDelegate?.notifyGroupTripCreateTripTapped()
+        let planData = GroupTripPlanDataModel(
+            tripName: tripName.isEmpty ? "My Trip" : tripName,
+            activityData: currentData,
+            tripMembers: tripMembers,
+            selectedPackageIds: selectedPackageIds,
+            dateVisit: chosenDateInput ?? dateVisit,
+            dueDate: chosenDueDateInput ?? deadline
+        )
+        
+        navigationDelegate?.notifyGroupTripCreateTripTapped(planData: planData)
     }
     
     func getSelectedPackageIds() -> Set<Int> {
         return selectedPackageIds
+    }
+    
+    func addTripMember(name: String, email: String) {
+        let newMember = TripMember(name: name, email: email, profileImageURL: nil, isWaiting: true)
+        tripMembers.append(newMember)
+        actionDelegate?.updateTripMembers(members: tripMembers)
     }
     
     func onCalendarDidChoose(date: Date, for type: CalendarType) {

@@ -13,7 +13,7 @@ final class GroupTripActivityDetailViewController: UIViewController {
     init(viewModel: GroupTripActivityDetailViewModelProtocol) {
         self.viewModel = viewModel
         super.init(nibName: nil, bundle: nil)
-        self.viewModel.actionDelegate = self  // This should work now
+        self.viewModel.actionDelegate = self  
     }
     
     required init?(coder: NSCoder) {
@@ -161,6 +161,10 @@ extension GroupTripActivityDetailViewController: GroupTripActivityDetailViewMode
             print("No search results found")
         }
     }
+    
+    func updateTripMembers(members: [TripMember]) {
+        thisView.updateTripMembers(members: members)
+    }
 }
 
 extension GroupTripActivityDetailViewController: GroupTripActivityDetailViewDelegate {
@@ -249,7 +253,7 @@ private extension GroupTripActivityDetailViewController {
         let name = email.components(separatedBy: "@").first ?? "New Member"
 
         dismiss(animated: true) { [weak self] in
-            self?.thisView.addTripMember(name: name, email: email)
+            self?.viewModel.addTripMember(name: name, email: email)
         }
     }
 }
