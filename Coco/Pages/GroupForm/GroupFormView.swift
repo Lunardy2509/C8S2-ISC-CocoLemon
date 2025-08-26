@@ -57,6 +57,31 @@ struct GroupFormView: View {
                 }
             )
         }
+        .sheet(isPresented: $viewModel.showSearchResultsSheet) {
+            SearchResultsSheet(
+                searchResults: viewModel.searchResults,
+                searchQuery: viewModel.currentSearchQuery,
+                onResultSelected: { searchResult in
+                    viewModel.selectSearchResult(searchResult)
+                },
+                onDismiss: {
+                    viewModel.showSearchResultsSheet = false
+                }
+            )
+        }
+        .overlay(
+            // Empty Search State Popup
+            Group {
+                if viewModel.showEmptyStatePopup {
+                    EmptySearchPopupView(
+                        searchQuery: viewModel.currentSearchQuery,
+                        onDismiss: {
+                            viewModel.showEmptyStatePopup = false
+                        }
+                    )
+                }
+            }
+        )
         .overlay(
             // Invite Friend Popup
             Group {
@@ -224,7 +249,7 @@ private extension GroupFormView {
     // MARK: - Team Members Section
     var teamMembersSection: some View {
         VStack(alignment: .leading, spacing: 16) {
-            Text("Group Member")
+            Text("Trip Member")
                 .font(.jakartaSans(forTextStyle: .headline, weight: .semibold))
                 .foregroundColor(Token.additionalColorsBlack.toColor())
             

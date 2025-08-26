@@ -34,7 +34,7 @@ extension AppCoordinator: Coordinator {
         self.navigationController = navigationController
     }
     
-    func childDidFinish(_ coordinator : BaseCoordinatorProtocol){
+    func childDidFinish(_ coordinator: BaseCoordinatorProtocol){
         // Call this if a coordinator is done.
         for (index, child) in children.enumerated() {
             if child === coordinator {
