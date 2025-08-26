@@ -110,6 +110,67 @@ final class GroupFormViewModel: ObservableObject {
         loadRecommendations()
     }
     
+    // Helper method to convert ActivityDetailDataModel to GroupFormRecommendationDataModel
+    private func convertActivityDetailToRecommendation(_ activity: ActivityDetailDataModel) -> GroupFormRecommendationDataModel {
+        return GroupFormRecommendationDataModel(activity: convertToActivity(activity))
+    }
+    
+    // Helper method to convert ActivityDetailDataModel to Activity
+    private func convertToActivity(_ activityDetail: ActivityDetailDataModel) -> Activity {
+        // Extract packages from ActivityDetailDataModel
+        let packages = activityDetail.availablePackages.content.map { package in
+            ActivityPackage(
+                id: package.id,
+                name: package.name,
+                endTime: "17:00", // Default values since we don't have them in ActivityDetailDataModel.Package
+                startTime: "09:00",
+                activityId: Int.random(in: 1000...9999),
+                description: package.description,
+                maxParticipants: 8,
+                minParticipants: 2,
+                pricePerPerson: Double(package.price.replacingOccurrences(of: "[^0-9]", with: "", options: .regularExpression)) ?? 0,
+                host: ActivityPackage.Host(
+                    bio: "Professional guide with extensive local knowledge",
+                    name: activityDetail.providerDetail.content.name,
+                    profileImageUrl: activityDetail.providerDetail.content.imageUrlString
+                ),
+                imageUrl: package.imageUrlString
+            )
+        }
+        
+        // Create images from the image URLs
+        let images = activityDetail.imageUrlsString.enumerated().map { index, url in
+            ActivityImage(
+                id: index + 1,
+                imageUrl: url,
+                imageType: index == 0 ? .thumbnail : .gallery,
+                activityId: Int.random(in: 1000...9999)
+            )
+        }
+        
+        return Activity(
+            id: Int.random(in: 1000...9999),
+            title: activityDetail.title,
+            images: images,
+            pricing: packages.first?.pricePerPerson ?? 0,
+            category: ActivityCategory(id: 1, name: "Adventure", description: ""),
+            packages: packages,
+            cancelable: activityDetail.tnc,
+            createdAt: "2025-08-25T00:00:00Z",
+            accessories: activityDetail.tripFacilities.content.map { name in
+                Accessory(id: Int.random(in: 1...100), name: name)
+            },
+            description: activityDetail.detailInfomation.content,
+            destination: Destination(
+                id: 1,
+                name: activityDetail.location,
+                imageUrl: activityDetail.imageUrlsString.first,
+                description: "Beautiful destination"
+            ),
+            durationMinutes: 480 // Default 8 hours
+        )
+    }
+    
     func createPlan() {
         // Validate required data
         guard let destination = selectedDestination,
@@ -238,26 +299,264 @@ final class GroupFormViewModel: ObservableObject {
             availablePackages = []
         }
     }
-}
-
-// MARK: - Calendar Management
-extension GroupFormViewModel {
-    func presentDateVisitCalendar() {
-        self.showDateVisitCalendar = true
+    
+    private func loadRecommendations() {
+        isLoading = true
+        
+        // Fetch activities from API - similar to HomeViewModel approach
+        activityFetcher.fetchActivity(
+            request: ActivitySearchRequest(pSearchText: "")
+        ) { [weak self] result in
+            guard let self = self else { return }
+            
+            Task { @MainActor in
+                self.isLoading = false
+                
+                switch result {
+                case .success(let response):
+                    let activities = response.values
+                    
+                    // Convert to GroupFormRecommendationDataModel
+                    self.recommendations = activities.map { GroupFormRecommendationDataModel(activity: $0) }
+                    
+                    // Load team members
+                    self.loadTeamMembers()
+                    
+                case .failure(let error):
+                    print("Failed to load recommendations: \(error)")
+                    // Fallback to empty recommendations
+                    self.recommendations = []
+                    self.loadTeamMembers()
+                }
+            }
+        }
     }
     
-    func presentDeadlineCalendar() {
-        self.showDeadlineCalendar = true
+    private func loadTeamMembers() {
+        // Load team members with Adhis as the group planner (cannot be removed)
+        teamMembers = [
+            TeamMemberModel(
+                name: "Adhis",
+                email: "adhis@example.com",
+                isWaiting: false // Adhis is the group planner, not waiting
+            )
+        ]
     }
     
-    func onDateVisitCalendarDidChoose(date: Date) {
-        dateVisit = date
-        self.showDateVisitCalendar = false
+    private func searchActivities(query: String) {
+        isLoading = true
+        
+        // Search for activities using the API
+        activityFetcher.fetchActivity(
+            request: ActivitySearchRequest(pSearchText: query)
+        ) { [weak self] result in
+            guard let self = self else { return }
+            
+            Task { @MainActor in
+                self.isLoading = false
+                
+                switch result {
+                case .success(let response):
+                    let activities = response.values
+                    
+                    if let firstActivity = activities.first {
+                        // Create destination from search result
+                        let destination = GroupFormRecommendationDataModel(activity: firstActivity)
+                        self.selectDestination(destination)
+                    } else {
+                        // No results found, create a mock destination for demo purposes
+                        let mockDestination = self.createMockDestinationFromSearch(query: query)
+                        self.selectDestination(mockDestination)
+                    }
+                    
+                case .failure:
+                    // Fallback to mock destination
+                    let mockDestination = self.createMockDestinationFromSearch(query: query)
+                    self.selectDestination(mockDestination)
+                }
+            }
+        }
     }
     
-    func onDeadlineCalendarDidChoose(date: Date) {
-        deadline = date
-        self.showDeadlineCalendar = false
+    private func createMockDestinationFromSearch(query: String) -> GroupFormRecommendationDataModel {
+        // Create a mock destination based on search query
+        let mockActivity = Activity(
+            id: Int.random(in: 1000...9999),
+            title: "\(query) Adventure Experience",
+            images: [
+                ActivityImage(
+                    id: 1,
+                    imageUrl: "https://picsum.photos/238/180?random=\(Int.random(in: 10...99))",
+                    imageType: .thumbnail,
+                    activityId: 1
+                )
+            ],
+            pricing: Double.random(in: 500000...2000000),
+            category: ActivityCategory(id: 1, name: "Adventure", description: ""),
+            packages: [
+                ActivityPackage(
+                    id: 1,
+                    name: "Standard Package",
+                    endTime: "17:00",
+                    startTime: "09:00",
+                    activityId: 1,
+                    description: "Standard adventure experience",
+                    maxParticipants: 8,
+                    minParticipants: 2,
+                    pricePerPerson: Double.random(in: 500000...1000000),
+                    host: ActivityPackage.Host(
+                        bio: "Professional guide with extensive local knowledge",
+                        name: "Local Guide",
+                        profileImageUrl: "https://picsum.photos/50/50?random=guide"
+                    ),
+                    imageUrl: "https://picsum.photos/150/100?random=package"
+                ),
+                ActivityPackage(
+                    id: 2,
+                    name: "Premium Package",
+                    endTime: "18:00",
+                    startTime: "08:00",
+                    activityId: 1,
+                    description: "Premium adventure with extra services",
+                    maxParticipants: 6,
+                    minParticipants: 2,
+                    pricePerPerson: Double.random(in: 1000000...2000000),
+                    host: ActivityPackage.Host(
+                        bio: "Professional guide with extensive local knowledge",
+                        name: "Local Guide",
+                        profileImageUrl: "https://picsum.photos/50/50?random=guide"
+                    ),
+                    imageUrl: "https://picsum.photos/150/100?random=package2"
+                )
+            ],
+            cancelable: "Free cancellation up to 24 hours before trip",
+            createdAt: "2025-08-25T00:00:00Z",
+            accessories: [
+                Accessory(id: 1, name: "Professional Equipment"),
+                Accessory(id: 2, name: "Safety Gear"),
+                Accessory(id: 3, name: "Refreshments")
+            ],
+            description: "Discover the beauty and adventure of \(query) with our guided experience.",
+            destination: Destination(
+                id: 1,
+                name: query,
+                imageUrl: "https://picsum.photos/238/180?random=\(Int.random(in: 10...99))",
+                description: "Beautiful destination"
+            ),
+            durationMinutes: Int.random(in: 240...600)
+        )
+        
+        return GroupFormRecommendationDataModel(activity: mockActivity)
+    }
+    
+    // MARK: - Team Management
+    func addTeamMember(name: String, email: String, isWaiting: Bool = true) {
+        let newMember = TeamMemberModel(
+            name: name,
+            email: email,
+            isWaiting: isWaiting // New members are waiting by default
+        )
+        teamMembers.append(newMember)
+    }
+    
+    func addTeamMember(_ memberData: TripMemberData, isWaiting: Bool = true) {
+        addTeamMember(name: memberData.name, email: memberData.email, isWaiting: isWaiting)
+    }
+    
+    func removeTeamMember(email: String) {
+        // Prevent removing Adhis (group planner)
+        guard email.lowercased() != "adhis@example.com" else { return }
+        teamMembers.removeAll { $0.email == email }
+    }
+    
+    func canRemoveMember(email: String) -> Bool {
+        // Adhis cannot be removed as she's the group planner
+        return email.lowercased() != "adhis@example.com"
+    }
+    
+    func toggleMemberWaitingStatus(email: String) {
+        // Don't allow changing Adhis's waiting status as she's the group planner
+        guard email.lowercased() != "adhis@example.com" else { return }
+        
+        if let index = teamMembers.firstIndex(where: { $0.email == email }) {
+            let member = teamMembers[index]
+            teamMembers[index] = TeamMemberModel(
+                name: member.name,
+                email: member.email,
+                isWaiting: !member.isWaiting
+            )
+        }
+    }
+    
+    func presentAddFriendOptions() {
+        showInviteFriendPopup = true
+    }
+    
+    func sendInvite(email: String) {
+        // Check if this email corresponds to a known contributor
+        if let contributor = availableContributors.first(where: { $0.email.lowercased() == email.lowercased() }) {
+            // Add the known contributor in waiting state
+            addTeamMember(contributor, isWaiting: true)
+        } else {
+            // Add a new member with the provided email in waiting state
+            let name = extractNameFromEmail(email)
+            addTeamMember(name: name, email: email, isWaiting: true)
+        }
+        
+        showInviteFriendPopup = false
+    }
+    
+    func dismissInviteFriendPopup() {
+        showInviteFriendPopup = false
+    }
+    
+    private func extractNameFromEmail(_ email: String) -> String {
+        // Extract name from email (part before @)
+        let components = email.components(separatedBy: "@")
+        return components.first?.capitalized ?? "Friend"
+    }
+    
+    func getAvailableContributors() -> [TripMemberData] {
+        return availableContributors.filter { contributor in
+            !teamMembers.contains { $0.name.lowercased() == contributor.name.lowercased() }
+        }
+    }
+    
+    // Convenience methods for adding specific contributors (all in waiting state except Adhis)
+    func addAdhis(isWaiting: Bool = false) {
+        if let adhis = availableContributors.first(where: { $0.name == "Adhis" }) {
+            addTeamMember(adhis, isWaiting: isWaiting) // Adhis is not waiting as she's the planner
+        }
+    }
+    
+    func addCynthia(isWaiting: Bool = true) {
+        if let cynthia = availableContributors.first(where: { $0.name == "Cynthia" }) {
+            addTeamMember(cynthia, isWaiting: isWaiting)
+        }
+    }
+    
+    func addAhmad(isWaiting: Bool = true) {
+        if let ahmad = availableContributors.first(where: { $0.name == "Ahmad" }) {
+            addTeamMember(ahmad, isWaiting: isWaiting)
+        }
+    }
+    
+    func addTeuku(isWaiting: Bool = true) {
+        if let teuku = availableContributors.first(where: { $0.name == "Teuku" }) {
+            addTeamMember(teuku, isWaiting: isWaiting)
+        }
+    }
+    
+    func addGriselda(isWaiting: Bool = true) {
+        if let griselda = availableContributors.first(where: { $0.name == "Griselda" }) {
+            addTeamMember(griselda, isWaiting: isWaiting)
+        }
+    }
+    
+    func addFerdinand(isWaiting: Bool = true) {
+        if let ferdinand = availableContributors.first(where: { $0.name == "Ferdinand" }) {
+            addTeamMember(ferdinand, isWaiting: isWaiting)
+        }
     }
 }
 
