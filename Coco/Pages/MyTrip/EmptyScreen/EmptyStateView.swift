@@ -27,6 +27,7 @@ final class EmptyStateView: UIView {
     }()
     
     private var cocoButtonHostingController: CocoButtonHostingController?
+    
     private var buttonAction: (() -> Void)?
     
     init(

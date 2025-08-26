@@ -33,7 +33,7 @@ final class MyTripView: UIView {
             showList(datas: datas)
         }
     }
-
+    
     private lazy var contentStackView: UIStackView = createStackView()
     private lazy var emptyStateView: EmptyStateView = {
         let view = EmptyStateView(
@@ -41,8 +41,7 @@ final class MyTripView: UIView {
             caption: "No trips yet, let’s create your first one!",
             buttonTitle: "Create Trip"
         ) {
-            
-            // delegate
+            print("Button OKe")
         }
         view.isHidden = true
         return view
