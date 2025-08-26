@@ -81,4 +81,8 @@ extension GroupTripPlanViewController: GroupTripPlanViewDelegate {
     func notifyBookNowTapped() {
         viewModel.onBookNowTapped()
     }
+    
+    func notifyPackageVoteToggled(packageId: Int) {
+        viewModel.onPackageVoteToggled(packageId: packageId)
+    }
 }

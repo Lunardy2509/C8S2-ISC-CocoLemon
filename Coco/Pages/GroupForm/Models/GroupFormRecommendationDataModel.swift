@@ -115,7 +115,9 @@ extension GroupFormRecommendationDataModel {
                 name: package.name,
                 description: "Min.\(package.minParticipants) - Max.\(package.maxParticipants)",
                 price: package.pricePerPerson.toRupiah(),
-                id: package.id
+                id: package.id,
+                minParticipants: package.minParticipants,
+                maxParticipants: package.maxParticipants
             )
         }
         

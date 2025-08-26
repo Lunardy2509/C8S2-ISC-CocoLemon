@@ -25,4 +25,5 @@ protocol GroupTripPlanViewModelProtocol: AnyObject {
     func onViewDidLoad()
     func onEditTapped()
     func onBookNowTapped()
+    func onPackageVoteToggled(packageId: Int) 
 }

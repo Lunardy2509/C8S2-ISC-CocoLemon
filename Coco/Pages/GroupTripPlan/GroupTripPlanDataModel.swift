@@ -12,7 +12,7 @@ struct GroupTripPlanDataModel {
     let activity: ActivityInfo
     let tripDetails: TripDetails
     let tripMembers: [TripMember]
-    let selectedPackages: [ActivityDetailDataModel.Package]
+    let selectedPackages: [VotablePackage]
     
     struct ActivityInfo {
         let imageUrl: String
@@ -30,6 +30,32 @@ struct GroupTripPlanDataModel {
         struct StatusInfo {
             let text: String
             let style: CocoStatusLabelStyle
+        }
+    }
+    
+    struct VotablePackage {
+        let id: Int
+        let name: String
+        let description: String
+        let price: String
+        let imageUrlString: String
+        let minParticipants: String
+        let maxParticipants: String
+        let voters: [TripMember]
+        let totalVotes: Int
+        let isSelected: Bool
+        
+        init(package: ActivityDetailDataModel.Package, voters: [TripMember] = [], isSelected: Bool = false) {
+            self.id = package.id
+            self.name = package.name
+            self.description = package.description
+            self.price = package.price
+            self.imageUrlString = package.imageUrlString
+            self.minParticipants = "\(package.minParticipants)"
+            self.maxParticipants = "\(package.maxParticipants)"
+            self.voters = voters
+            self.totalVotes = voters.count
+            self.isSelected = isSelected
         }
     }
 }
@@ -72,7 +98,6 @@ extension GroupTripPlanDataModel {
             priceRange: priceRange
         )
         
-        // Create trip details
         let formatter = DateFormatter()
         formatter.dateFormat = "EEE, dd MMM yyyy"
         
@@ -85,9 +110,10 @@ extension GroupTripPlanDataModel {
         
         self.tripMembers = tripMembers
         
-        // Filter selected packages
         self.selectedPackages = activityData.availablePackages.content.filter { package in
             selectedPackageIds.contains(package.id)
+        }.map { package in
+            VotablePackage(package: package, voters: [], isSelected: false)
         }
     }
 }

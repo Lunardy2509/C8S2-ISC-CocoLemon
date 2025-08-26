@@ -8,13 +8,16 @@
 import Foundation
 import UIKit
 import ObjectiveC
+import SwiftUI
 
 protocol GroupTripPlanViewDelegate: AnyObject {
     func notifyBookNowTapped()
+    func notifyPackageVoteToggled(packageId: Int) // Add this method
 }
 
 final class GroupTripPlanView: UIView {
     weak var delegate: GroupTripPlanViewDelegate?
+    private var currentData: GroupTripPlanDataModel?
     
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -26,6 +29,8 @@ final class GroupTripPlanView: UIView {
     }
     
     func configureView(_ data: GroupTripPlanDataModel) {
+        self.currentData = data
+        
         // Configure activity section
         activityImageView.loadImage(from: URL(string: data.activity.imageUrl))
         activityTitleLabel.text = data.activity.title
@@ -42,8 +47,8 @@ final class GroupTripPlanView: UIView {
         // Configure trip members
         setupTripMembers(data.tripMembers)
         
-        // Configure packages
-        setupAvailablePackages(data.selectedPackages)
+        // Configure packages with voting
+        setupVotablePackages(data.selectedPackages)
     }
     
     func addBookNowButton(button: UIView) {
@@ -66,15 +71,15 @@ final class GroupTripPlanView: UIView {
     private lazy var activityTitleLabel: UILabel = UILabel(
         font: .jakartaSans(forTextStyle: .title3, weight: .bold),
         textColor: Token.additionalColorsBlack,
-        numberOfLines: 2
+        numberOfLines: 1
     )
     private lazy var activityLocationLabel: UILabel = UILabel(
-        font: .jakartaSans(forTextStyle: .footnote, weight: .medium),
+        font: .jakartaSans(forTextStyle: .caption1, weight: .medium),
         textColor: Token.grayscale90,
         numberOfLines: 1
     )
     private lazy var activityPriceLabel: UILabel = UILabel(
-        font: .jakartaSans(forTextStyle: .footnote, weight: .semibold),
+        font: .jakartaSans(forTextStyle: .caption1, weight: .bold),
         textColor: Token.additionalColorsBlack,
         numberOfLines: 1
     )
@@ -397,77 +402,22 @@ private extension GroupTripPlanView {
         objc_setAssociatedObject(collectionView, "dataSource", dataSource, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
     }
     
-    func setupAvailablePackages(_ packages: [ActivityDetailDataModel.Package]) {
+    func setupVotablePackages(_ packages: [GroupTripPlanDataModel.VotablePackage]) {
         packagesContainer.arrangedSubviews.forEach { $0.removeFromSuperview() }
         
         for package in packages {
-            let packageView = createPackageView(data: package)
-            packagesContainer.addArrangedSubview(packageView)
+            let hostingController = UIHostingController(
+                rootView: VotablePackageCardView(
+                    package: package,
+                    totalMembers: currentData?.tripMembers.count ?? 0
+                ) { [weak self] in
+                    self?.delegate?.notifyPackageVoteToggled(packageId: package.id)
+                }
+            )
+            
+            hostingController.view.backgroundColor = .clear
+            packagesContainer.addArrangedSubview(hostingController.view)
         }
-    }
-    
-    func createPackageView(data: ActivityDetailDataModel.Package) -> UIView {
-        let containerStackView = createStackView(spacing: 12.0, axis: .horizontal)
-        let contentStackView = createStackView(spacing: 8.0)
-        
-        let imageView = UIImageView()
-        imageView.contentMode = .scaleAspectFill
-        imageView.layout { $0.size(92.0) }
-        imageView.layer.cornerRadius = 14.0
-        imageView.clipsToBounds = true
-        imageView.loadImage(from: URL(string: data.imageUrlString))
-        
-        let nameLabel = UILabel(
-            font: .jakartaSans(forTextStyle: .subheadline, weight: .bold),
-            textColor: Token.additionalColorsBlack,
-            numberOfLines: 2
-        )
-        nameLabel.text = data.name
-        
-        let descriptionLabel = UILabel(
-            font: .jakartaSans(forTextStyle: .footnote, weight: .medium),
-            textColor: Token.grayscale90,
-            numberOfLines: 2
-        )
-        descriptionLabel.text = ""
-        
-        let priceLabel = UILabel(
-            font: .jakartaSans(forTextStyle: .footnote, weight: .semibold),
-            textColor: Token.additionalColorsBlack,
-            numberOfLines: 1
-        )
-        priceLabel.text = data.price
-        
-        let minMaxLabel = UILabel(
-            font: .jakartaSans(forTextStyle: .caption2, weight: .medium),
-            textColor: Token.grayscale70,
-            numberOfLines: 1
-        )
-        minMaxLabel.text = data.description
-        
-        contentStackView.addArrangedSubview(nameLabel)
-        contentStackView.addArrangedSubview(descriptionLabel)
-        contentStackView.addArrangedSubview(priceLabel)
-        contentStackView.addArrangedSubview(minMaxLabel)
-        
-        containerStackView.addArrangedSubview(imageView)
-        containerStackView.addArrangedSubview(contentStackView)
-        
-        let cardContainer = UIView()
-        cardContainer.backgroundColor = Token.additionalColorsWhite
-        cardContainer.layer.cornerRadius = 16.0
-        cardContainer.layer.borderWidth = 1.0
-        cardContainer.layer.borderColor = Token.additionalColorsLine.cgColor
-        
-        cardContainer.addSubview(containerStackView)
-        containerStackView.layout {
-            $0.top(to: cardContainer.topAnchor, constant: 12.0)
-                .leading(to: cardContainer.leadingAnchor, constant: 12.0)
-                .trailing(to: cardContainer.trailingAnchor, constant: -12.0)
-                .bottom(to: cardContainer.bottomAnchor, constant: -12.0)
-        }
-        
-        return cardContainer
     }
 }
 
