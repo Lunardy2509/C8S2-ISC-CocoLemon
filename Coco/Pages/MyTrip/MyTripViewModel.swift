@@ -46,9 +46,7 @@ extension MyTripViewModel: MyTripViewModelProtocol {
     func onViewWillAppear() {
         refreshView() 
         
-        print("🔍 MyTripViewModel: onViewWillAppear called, fetching trip data...")
         let userId = UserDefaults.standard.value(forKey: "user-id") as? String ?? ""
-        print("👤 MyTripViewModel: Using user ID: '\(userId)'")
         
         Task { @MainActor in
             do {
@@ -57,10 +55,8 @@ extension MyTripViewModel: MyTripViewModelProtocol {
                 ).values
                 
                 responses = response
-                print("📊 MyTripViewModel: Fetched \(response.count) trip(s)")
                 refreshView()
             } catch {
-                print("❌ MyTripViewModel: Error fetching trips: \(error)")
                 refreshView()
             }
         }

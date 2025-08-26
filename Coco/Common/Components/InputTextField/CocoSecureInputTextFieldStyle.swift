@@ -54,4 +54,3 @@ struct CocoSecureInputTextFieldStyle: TextFieldStyle {
         .clipShape(Capsule(style: .continuous))
     }
 }
-

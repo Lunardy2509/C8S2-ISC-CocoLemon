@@ -8,8 +8,7 @@
 import Foundation
 import SwiftUI
 
-struct TeamMember: Identifiable, Equatable, Hashable {
-    let id: Int
+struct TeamMemberModel: Hashable {
     let name: String
     let email: String
     let isWaiting: Bool
@@ -33,23 +32,9 @@ struct TeamMember: Identifiable, Equatable, Hashable {
         }
     }
     
-    var swiftUIImage: Image? {
-        guard let icon = image else { return nil }
-        return Image(uiImage: icon.image)
-    }
-    
-    init(id: Int, name: String, email: String, isWaiting: Bool = false) {
-        self.id = id
+    init(name: String, email: String, isWaiting: Bool = false) {
         self.name = name
         self.email = email
-        self.isWaiting = isWaiting
-    }
-    
-    // Convenience initializer for compatibility
-    init(id: Int, name: String, contributorIcon: Icon, isWaiting: Bool = false) {
-        self.id = id
-        self.name = name
-        self.email = "\(name.lowercased())@example.com"
         self.isWaiting = isWaiting
     }
 }

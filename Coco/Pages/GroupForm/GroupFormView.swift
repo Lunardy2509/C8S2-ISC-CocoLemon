@@ -105,6 +105,13 @@ struct GroupFormView: View {
                 }
             }
         )
+        .alert("Warning", isPresented: $viewModel.showWarningAlert) {
+            Button("OK") {
+                viewModel.dismissWarningAlert()
+            }
+        } message: {
+            Text(viewModel.warningMessage)
+        }
     }
 }
 
@@ -129,8 +136,8 @@ private extension GroupFormView {
                 
                 // Show TopDestinationSection when no destination is selected
                 TopDestinationSection(
-                    onDestinationTap: { destination in
-                        viewModel.selectTopDestination(destination)
+                    onDestinationTap: { destination, topDestinationViewModel in
+                        viewModel.selectTopDestination(destination, from: topDestinationViewModel)
                     },
                     onAddDestinationTap: {
                         viewModel.showSearchSheet = true
@@ -330,14 +337,14 @@ private extension GroupFormView {
         )
         .stretch()
         .padding(.horizontal, 24)
-        .padding(.bottom, 34)
-        .background(
-            LinearGradient(
-                colors: [Color.clear, Token.additionalColorsWhite.toColor()],
-                startPoint: .top,
-                endPoint: .bottom
-            )
-            .frame(height: 120)
+        .background(Token.additionalColorsWhite.toColor()
+            .frame(height: 125)
+        )
+        .shadow(
+            color: Token.grayscale10.toColor(),
+            radius: 4,
+            x: 0,
+            y: -2
         )
     }
 }

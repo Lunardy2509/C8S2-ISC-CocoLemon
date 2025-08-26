@@ -37,6 +37,10 @@ final class GroupFormViewModel: ObservableObject {
     @Published var searchResults: [HomeActivityCellDataModel] = []
     @Published var currentSearchQuery: String = ""
     
+    // Warning/Alert Properties
+    @Published var showWarningAlert: Bool = false
+    @Published var warningMessage: String = ""
+    
     // Available contributors for adding to team
     let availableContributors: [TripMemberData] = [
         TripMemberData(name: "Adhis", email: "adhis@example.com", icon: Contributor.adhis),

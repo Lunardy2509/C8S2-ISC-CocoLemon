@@ -48,7 +48,6 @@ final class NotificationTableViewCell: UITableViewCell {
         let label = UILabel()
         label.font = .jakartaSans(forTextStyle: .body, weight: .semibold)
         label.textColor = UIColor(Token.additionalColorsBlack.toColor())
-        label.numberOfLines = 1
         return label
     }()
     
@@ -56,7 +55,6 @@ final class NotificationTableViewCell: UITableViewCell {
         let label = UILabel()
         label.font = .jakartaSans(forTextStyle: .footnote, weight: .regular)
         label.textColor = UIColor(Token.grayscale70.toColor())
-        label.numberOfLines = 1
         return label
     }()
     
@@ -64,7 +62,6 @@ final class NotificationTableViewCell: UITableViewCell {
         let label = UILabel()
         label.font = .jakartaSans(forTextStyle: .footnote, weight: .medium)
         label.textColor = UIColor(Token.mainColorPrimary.toColor())
-        label.numberOfLines = 1
         return label
     }()
     
@@ -82,7 +79,12 @@ private extension NotificationTableViewCell {
         backgroundColor = .systemBackground
         selectionStyle = .none
         
-        let messageStackView = UIStackView(arrangedSubviews: [senderNameLabel, messageLabel])
+        let senderStackView = UIStackView(arrangedSubviews: [senderNameLabel])
+        senderStackView.axis = .horizontal
+        senderStackView.spacing = 4
+        senderStackView.alignment = .center
+        
+        let messageStackView = UIStackView(arrangedSubviews: [messageLabel])
         messageStackView.axis = .horizontal
         messageStackView.spacing = 4
         messageStackView.alignment = .center
@@ -92,7 +94,7 @@ private extension NotificationTableViewCell {
         tripStackView.spacing = 4
         tripStackView.alignment = .center
         
-        let contentStackView = UIStackView(arrangedSubviews: [messageStackView, tripStackView])
+        let contentStackView = UIStackView(arrangedSubviews: [senderStackView, messageStackView, tripStackView])
         contentStackView.axis = .vertical
         contentStackView.spacing = 4
         contentStackView.alignment = .leading

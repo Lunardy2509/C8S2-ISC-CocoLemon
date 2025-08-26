@@ -58,6 +58,22 @@ extension GroupFormViewModel {
         loadRecommendations() // Reset to load fresh recommendations from API
     }
     
+    func selectTopDestination(_ destination: TopDestinationCardDataModel, from topDestinationViewModel: TopDestinationViewModel) {
+        // Try to find a matching activity from the TopDestinationViewModel's activities
+        if let matchingActivity = topDestinationViewModel.activity.first(where: { activity in
+            activity.title.lowercased() == destination.title.lowercased() ||
+            activity.location.lowercased().contains(destination.location.lowercased()) ||
+            destination.location.lowercased().contains(activity.location.lowercased())
+        }) {
+            // Directly select the matching activity without opening search sheet
+            selectDestination(matchingActivity)
+        } else {
+            // Fallback: search for the activity by title
+            searchActivities(query: destination.title)
+        }
+    }
+    
+    // Keep the old method for backward compatibility
     func selectTopDestination(_ destination: TopDestinationCardDataModel) {
         // Convert TopDestinationCardDataModel to GroupFormRecommendationDataModel
         // First, try to find the full activity details
@@ -179,8 +195,7 @@ extension GroupFormViewModel {
                     // Load team members
                     self.loadTeamMembers()
                     
-                case .failure(let error):
-                    print("Failed to load recommendations: \(error)")
+                case .failure:
                     // Fallback to empty recommendations
                     self.recommendations = []
                     self.loadTeamMembers()
