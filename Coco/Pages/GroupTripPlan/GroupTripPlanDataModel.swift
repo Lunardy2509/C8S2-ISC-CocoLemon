@@ -45,20 +45,24 @@ extension GroupTripPlanDataModel {
     ) {
         self.tripName = tripName
         
-        // Create activity info
         let priceRange: String
         if !activityData.availablePackages.content.isEmpty {
-            let prices = activityData.availablePackages.content.map { $0.price }
-            let minPrice = prices.min() ?? ""
-            let maxPrice = prices.max() ?? ""
+            let numericPrices: [Double] = activityData.availablePackages.content.compactMap { package in
+                let priceString = package.price.replacingOccurrences(of: "[^0-9]", with: "", options: .regularExpression)
+                return Double(priceString)
+            }
             
-            if minPrice == maxPrice {
-                priceRange = "\(minPrice)/Person"
+            if let minPrice = numericPrices.min(), let maxPrice = numericPrices.max() {
+                if minPrice == maxPrice {
+                    priceRange = "\(minPrice.toRupiah())/Person"
+                } else {
+                    priceRange = "\(minPrice.toRupiah()) - \(maxPrice.toRupiah())/Person"
+                }
             } else {
-                priceRange = "\(minPrice) - \(maxPrice)/Person"
+                priceRange = "Price not available"
             }
         } else {
-            priceRange = ""
+            priceRange = "Price not available"
         }
         
         self.activity = ActivityInfo(
