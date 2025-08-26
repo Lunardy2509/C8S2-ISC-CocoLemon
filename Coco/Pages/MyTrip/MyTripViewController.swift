@@ -21,7 +21,6 @@ final class MyTripViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        title = "My Trip"
         setupNavigationBar()
         thisView.delegate = self
     }
@@ -33,10 +32,12 @@ final class MyTripViewController: UIViewController {
     
     override func loadView() {
         view = thisView
+        
     }
     
     private let viewModel: MyTripViewModelProtocol
     private let thisView: MyTripView = MyTripView()
+    
 }
 
 
@@ -104,14 +105,18 @@ extension MyTripViewController: MyTripViewDelegate {
     
     func notifyCreateTripDidTap() {
         // Navigate to GroupForm using standard UIKit navigation
-        let groupFormVC = GroupFormViewController()
-        groupFormVC.hidesBottomBarWhenPushed = true
-        navigationController?.pushViewController(groupFormVC, animated: true)
+       goToCreateTrip()
     }
 }
 
 private extension MyTripViewController {
     func setupNavigationBar() {
+        let titleLabel = UILabel()
+                titleLabel.text = "My Trip"
+                titleLabel.font = UIFont.boldSystemFont(ofSize: 20)
+                titleLabel.textColor = .black
+                navigationItem.leftBarButtonItem = UIBarButtonItem(customView: titleLabel)
+        
         // Add plus button
         let plusButton = UIBarButtonItem(
             image: UIImage(systemName: "plus") ?? UIImage(),
@@ -119,6 +124,7 @@ private extension MyTripViewController {
             target: self,
             action: #selector(plusButtonTapped)
         )
+        plusButton.tintColor = .black
         
         // Add notification button  
         let notificationButton = UIBarButtonItem(
@@ -127,120 +133,67 @@ private extension MyTripViewController {
             target: self,
             action: #selector(notificationButtonTapped),
         )
-        
-        navigationItem.rightBarButtonItems = [notificationButton, plusButton]
-    }
-    
-    @objc private func plusButtonTapped() {
-        // Navigate to GroupForm using standard UIKit navigation
-        let groupFormVC = GroupFormViewController()
-        groupFormVC.hidesBottomBarWhenPushed = true
-        navigationController?.pushViewController(groupFormVC, animated: true)
-    }
-    
-    @objc private func notificationButtonTapped() {
-        viewModel.onNotificationButtonTapped()
-    }
-    
-    func createMyTripNoTripYetRegistration() -> MyTripNoTripYetRegistration {
-        .init { cell, _, itemIdentifier in
-            // No need Configuration
-        }
-    }
-    
-    typealias MyTripNoTripYetRegistration = UICollectionView.CellRegistration<MyTripNoTripYet,MyTripNoTripYetDataModel>
-}
-
-private extension MyTripViewController {
-    func setupNavigationBar() {
-        let titleLabel = UILabel()
-                titleLabel.text = "My Trip"
-                titleLabel.font = UIFont.boldSystemFont(ofSize: 20)
-                titleLabel.textColor = .black
-                navigationItem.leftBarButtonItem = UIBarButtonItem(customView: titleLabel)
-        
-        // Add plus button
-        let plusButton = UIBarButtonItem(
-            image: UIImage(systemName: "plus") ?? UIImage(),
-            style: .plain,
-            target: self,
-            action: #selector(plusButtonTapped)
-        )
-       plusButton.tintColor = .black
-        // Add notification button
-        let notificationButton = UIBarButtonItem(
-            image: UIImage(systemName: "bell") ?? UIImage(),
-            style: .plain,
-            target: self,
-            action: #selector(notificationButtonTapped),
-        )
         notificationButton.tintColor = .black
         navigationItem.rightBarButtonItems = [notificationButton, plusButton]
     }
     
     @objc private func plusButtonTapped() {
         // Navigate to GroupForm using standard UIKit navigation
-//        let groupFormVC = GroupFormViewController()
-//        groupFormVC.hidesBottomBarWhenPushed = true
-//        navigationController?.pushViewController(groupFormVC, animated: true)
+        goToCreateTrip()
     }
     
     @objc private func notificationButtonTapped() {
         viewModel.onNotificationButtonTapped()
     }
     
-//    func createMyTripNoTripYetRegistration() -> MyTripNoTripYetRegistration {
-//        .init { cell, _, itemIdentifier in
-//            // No need Configuration
-//        }
-//    }
+    func goToCreateTrip() {
+          let groupFormVC = GroupFormViewController()
+          groupFormVC.hidesBottomBarWhenPushed = true
+          navigationController?.pushViewController(groupFormVC, animated: true)
+      }
     
-   
 }
 
-private extension MyTripViewController {
-    func setupNavigationBar() {
-        let titleLabel = UILabel()
-                titleLabel.text = "My Trip"
-                titleLabel.font = UIFont.boldSystemFont(ofSize: 20)
-                titleLabel.textColor = .black
-                navigationItem.leftBarButtonItem = UIBarButtonItem(customView: titleLabel)
+//
+//private extension MyTripViewController {
+//    func setupNavigationBar() {
         
-        // Add plus button
-        let plusButton = UIBarButtonItem(
-            image: UIImage(systemName: "plus") ?? UIImage(),
-            style: .plain,
-            target: self,
-            action: #selector(plusButtonTapped)
-        )
-       plusButton.tintColor = .black
-        // Add notification button
-        let notificationButton = UIBarButtonItem(
-            image: UIImage(systemName: "bell") ?? UIImage(),
-            style: .plain,
-            target: self,
-            action: #selector(notificationButtonTapped),
-        )
-        notificationButton.tintColor = .black
-        navigationItem.rightBarButtonItems = [notificationButton, plusButton]
-    }
-    
-    @objc private func plusButtonTapped() {
-        // Navigate to GroupForm using standard UIKit navigation
-//        let groupFormVC = GroupFormViewController()
-//        groupFormVC.hidesBottomBarWhenPushed = true
-//        navigationController?.pushViewController(groupFormVC, animated: true)
-    }
-    
-    @objc private func notificationButtonTapped() {
-        viewModel.onNotificationButtonTapped()
-    }
-    
-//    func createMyTripNoTripYetRegistration() -> MyTripNoTripYetRegistration {
-//        .init { cell, _, itemIdentifier in
-//            // No need Configuration
-//        }
+        
+//        // Add plus button
+//        let plusButton = UIBarButtonItem(
+//            image: UIImage(systemName: "plus") ?? UIImage(),
+//            style: .plain,
+//            target: self,
+//            action: #selector(plusButtonTapped)
+//        )
+//       plusButton.tintColor = .black
+//        // Add notification button
+//        let notificationButton = UIBarButtonItem(
+//            image: UIImage(systemName: "bell") ?? UIImage(),
+//            style: .plain,
+//            target: self,
+//            action: #selector(notificationButtonTapped),
+//        )
+//        notificationButton.tintColor = .black
+//        navigationItem.rightBarButtonItems = [notificationButton, plusButton]
 //    }
-    
-   
-}
+//    
+//    @objc private func plusButtonTapped() {
+//        // Navigate to GroupForm using standard UIKit navigation
+////        let groupFormVC = GroupFormViewController()
+////        groupFormVC.hidesBottomBarWhenPushed = true
+////        navigationController?.pushViewController(groupFormVC, animated: true)
+//    }
+//    
+//    @objc private func notificationButtonTapped() {
+//        viewModel.onNotificationButtonTapped()
+//    }
+//    
+////    func createMyTripNoTripYetRegistration() -> MyTripNoTripYetRegistration {
+////        .init { cell, _, itemIdentifier in
+////            // No need Configuration
+////        }
+////    }
+//    
+//   
+//}

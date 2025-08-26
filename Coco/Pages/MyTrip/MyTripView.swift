@@ -41,7 +41,8 @@ final class MyTripView: UIView {
             caption: "No trips yet, let’s create your first one!",
             buttonTitle: "Create Trip"
         ) {
-            print("Button OKe")
+            [weak self] in
+                    self?.delegate?.notifyCreateTripDidTap()
         }
         view.isHidden = true
         return view
