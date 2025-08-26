@@ -161,21 +161,28 @@ extension HomeCoordinator: SoloTripActivityDetailNavigationDelegate {
 // MARK: - GroupFormNavigationDelegate
 extension HomeCoordinator: GroupFormNavigationDelegate {
     func notifyGroupFormNavigateToActivityDetail(_ activityDetail: ActivityDetailDataModel) {
-        // Handle navigation back to activity detail if needed
         navigationController?.popViewController(animated: true)
     }
     
-    func notifyGroupFormNavigateToTripDetail(_ bookingDetails: BookingDetails) {
-        // Navigate to TripDetailView using MyTripCoordinator
+    func notifyGroupFormNavigateToTripDetail(_ bookingDetails: LocalBookingDetails) {
+        print("⚠️ WARNING: GroupForm is navigating directly to TripDetail - this should go through GroupTripPlan")
         guard let navigationController = self.navigationController else { return }
         let tripCoordinator = MyTripCoordinator(
             input: MyTripCoordinator.Input(
                 navigationController: navigationController,
-                flow: .bookingDetail(data: bookingDetails)
+                flow: .localBookingDetail(data: bookingDetails)
             )
         )
         tripCoordinator.parentCoordinator = self.parentCoordinator
         tripCoordinator.start()
+    }
+    
+    func notifyGroupTripPlanCreated(data: GroupTripPlanDataModel) {
+        print("🎯 HomeCoordinator: Creating GroupTripPlan with navigation delegate") 
+        let viewModel = GroupTripPlanViewModel(data: data)
+        viewModel.navigationDelegate = self  
+        let viewController = GroupTripPlanViewController(viewModel: viewModel)
+        start(viewController: viewController)
     }
     
     func notifyGroupFormCreatePlan() {
@@ -189,15 +196,9 @@ extension HomeCoordinator: GroupFormNavigationDelegate {
     }
     
     func notifyGroupTripCreateTripTapped(planData: GroupTripPlanDataModel) {
+        print("🎯 HomeCoordinator: Creating GroupTripPlan from create trip") 
         let viewModel = GroupTripPlanViewModel(data: planData)
-        viewModel.navigationDelegate = self
-        let viewController = GroupTripPlanViewController(viewModel: viewModel)
-        start(viewController: viewController)
-    }
-    
-    func notifyGroupTripPlanCreated(data: GroupTripPlanDataModel) {
-        let viewModel = GroupTripPlanViewModel(data: data)
-        viewModel.navigationDelegate = self
+        viewModel.navigationDelegate = self  
         let viewController = GroupTripPlanViewController(viewModel: viewModel)
         start(viewController: viewController)
     }
@@ -205,12 +206,29 @@ extension HomeCoordinator: GroupFormNavigationDelegate {
 
 extension HomeCoordinator: GroupTripPlanNavigationDelegate {
     func notifyGroupTripPlanEditTapped() {
-        navigationController?.popViewController(animated: true)
+        print("✏️ Edit tapped") 
     }
     
-    func notifyGroupTripPlanBookNowTapped() {
-        // Handle booking flow - this could navigate to a booking confirmation
-        // or checkout page depending on your app's flow
-        print("Book Now tapped - implement booking flow")
+    func notifyGroupTripPlanBookNowTapped(localBookingDetails: LocalBookingDetails) {
+        print("🎯 HomeCoordinator: Book Now tapped received!") 
+        print("📋 LocalBookingDetails: \(localBookingDetails.activityTitle)") 
+        
+        NotificationCenter.default.post(
+            name: .newLocalTripCreated, 
+            object: localBookingDetails
+        )
+        print("📡 Notification posted: .newLocalTripCreated") 
+        
+        guard let navigationController = self.navigationController else { 
+            print("❌ Could not get navigationController")
+            return 
+        }
+        
+        let bookingDetailViewModel = TripDetailViewModel(localData: localBookingDetails)
+        let bookingDetailViewController = TripDetailViewController(viewModel: bookingDetailViewModel)
+        
+        navigationController.pushViewController(bookingDetailViewController, animated: true)
+        
+        print("📱 Navigated to TripDetail page")
     }
 }

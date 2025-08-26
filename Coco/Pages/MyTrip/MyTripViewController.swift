@@ -61,6 +61,18 @@ extension MyTripViewController: MyTripViewModelAction {
         coordinator.parentCoordinator = AppCoordinator.shared
         coordinator.start()
     }
+
+    func goToLocalBookingDetail(with data: LocalBookingDetails) {
+        guard let navigationController else { return }
+        let coordinator: MyTripCoordinator = MyTripCoordinator(
+            input: .init(
+                navigationController: navigationController,
+                flow: .localBookingDetail(data: data) 
+            )
+        )
+        coordinator.parentCoordinator = AppCoordinator.shared
+        coordinator.start()
+    }
     
     func goToNotificationPage() {
         let notificationVC = NotificationViewController()
@@ -185,19 +197,27 @@ private extension MyTripViewController {
     func setupNotifications() {
         NotificationCenter.default.addObserver(
             self,
-            selector: #selector(handleNewTripCreated),
+            selector: #selector(handleNewTripCreated(_:)),
             name: .newTripCreated,
+            object: nil
+        )
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(handleNewLocalTripCreated(_:)),
+            name: .newLocalTripCreated,
             object: nil
         )
     }
     
-    @objc private func handleNewTripCreated() {
-        print("🎯 MyTripViewController: Received newTripCreated notification")
-        // Refresh the trip data when a new trip is created
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
-            // Add a small delay to ensure the server has processed the booking
-            print("🔄 MyTripViewController: Refreshing trip data...")
-            self?.viewModel.onViewWillAppear()
+    @objc private func handleNewTripCreated(_ notification: Notification) {
+        if let bookingDetails = notification.object as? BookingDetails {
+            viewModel.addBooking(bookingDetails) 
+        }
+    }
+    
+    @objc private func handleNewLocalTripCreated(_ notification: Notification) {
+        if let localBookingDetails = notification.object as? LocalBookingDetails {
+            viewModel.addLocalBooking(localBookingDetails) 
         }
     }
 }

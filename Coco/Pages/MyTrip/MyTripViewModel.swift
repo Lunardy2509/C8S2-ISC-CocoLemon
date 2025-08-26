@@ -10,6 +10,11 @@ import Foundation
 final class MyTripViewModel {
     weak var actionDelegate: (any MyTripViewModelAction)?
     
+    private let fetcher: MyTripBookingListFetcherProtocol
+    private let activityFetcher: MyTripActivityFetcherProtocol
+    private var responses: [BookingDetails] = []
+    private var localBookings: [LocalBookingDetails] = [] 
+    
     init(
         fetcher: MyTripBookingListFetcherProtocol = MyTripBookingListFetcher(),
         activityFetcher: MyTripActivityFetcherProtocol = MyTripActivityFetcher()
@@ -18,79 +23,79 @@ final class MyTripViewModel {
         self.activityFetcher = activityFetcher
     }
     
-    private let fetcher: MyTripBookingListFetcherProtocol
-    private let activityFetcher: MyTripActivityFetcherProtocol
-    private var responses: [BookingDetails] = []
-    
-    // Method to add a new booking
     func addBooking(_ booking: BookingDetails) {
         responses.append(booking)
-        actionDelegate?.configureView(datas: responses.map({ listData in
-            MyTripListCardDataModel(bookingDetail: listData)
-        }))
+        refreshView()
+    }
+    
+    func addLocalBooking(_ localBooking: LocalBookingDetails) {
+        localBookings.append(localBooking)
+        refreshView()
+    }
+    
+    private func refreshView() {
+        let regularCards = responses.map { MyTripListCardDataModel(bookingDetail: $0) }
+        let localCards = localBookings.map { MyTripListCardDataModel(localBookingDetail: $0) }
+        
+        let allCards = regularCards + localCards
+        actionDelegate?.configureView(datas: allCards)
     }
 }
 
 extension MyTripViewModel: MyTripViewModelProtocol {
     func onViewWillAppear() {
+        refreshView() 
+        
         print("🔍 MyTripViewModel: onViewWillAppear called, fetching trip data...")
         let userId = UserDefaults.standard.value(forKey: "user-id") as? String ?? ""
         print("👤 MyTripViewModel: Using user ID: '\(userId)'")
-        actionDelegate?.configureView(datas: [])
-        responses = []
         
         Task { @MainActor in
-            let response: [BookingDetails] = try await fetcher.fetchTripBookingList(
-                request: TripBookingListSpec(userId: userId)
-            ).values
-            
-            responses = response
-            print("📊 MyTripViewModel: Fetched \(response.count) trip(s)")
-            
-            if response.isEmpty {
-                actionDelegate?.configureView(datas: [])
+            do {
+                let response: [BookingDetails] = try await fetcher.fetchTripBookingList(
+                    request: TripBookingListSpec(userId: userId)
+                ).values
+                
+                responses = response
+                print("📊 MyTripViewModel: Fetched \(response.count) trip(s)")
+                refreshView()
+            } catch {
+                print("❌ MyTripViewModel: Error fetching trips: \(error)")
+                refreshView()
             }
-            
-            actionDelegate?.configureView(datas: response.map({ listData in
-                MyTripListCardDataModel(bookingDetail: listData)
-            }))
         }
     }
     
     func onTripListDidTap(at index: Int) {
-        guard index < responses.count else { return }
-        actionDelegate?.goToBookingDetail(with: responses[index])
+        let allCards = responses.map { MyTripListCardDataModel(bookingDetail: $0) } + 
+                      localBookings.map { MyTripListCardDataModel(localBookingDetail: $0) }
+        
+        guard index < allCards.count else { return }
+        
+        if index < responses.count {
+            let booking = responses[index]
+            actionDelegate?.goToBookingDetail(with: booking)
+        } else {
+            let localIndex = index - responses.count
+            if localIndex < localBookings.count {
+                let localBooking = localBookings[localIndex]
+                actionDelegate?.goToLocalBookingDetail(with: localBooking)
+            }
+        }
     }
     
     func onTripDidDelete(at index: Int) {
-        guard index < responses.count else { return }
+        let totalRegularBookings = responses.count
         
-        let bookingToDelete = responses[index]
-        
-        // Remove from local array first for immediate UI update
-        responses.remove(at: index)
-        
-        // Update UI
-        actionDelegate?.configureView(datas: responses.map({ listData in
-            MyTripListCardDataModel(bookingDetail: listData)
-        }))
-        
-        Task { @MainActor in
-            do {
-                let deleteRequest = DeleteBookingSpec(
-                    bookingId: bookingToDelete.bookingId,
-                    userId: UserDefaults.standard.value(forKey: "user-id") as? String ?? ""
-                )
-                
-                let _ = try await fetcher.deleteBooking(request: deleteRequest)
-            } catch {
-                // If API call fails, restore the item
-                responses.insert(bookingToDelete, at: index)
-                actionDelegate?.configureView(datas: responses.map({ listData in
-                    MyTripListCardDataModel(bookingDetail: listData)
-                }))
+        if index < totalRegularBookings {
+            responses.remove(at: index)
+        } else {
+            let localIndex = index - totalRegularBookings
+            if localIndex < localBookings.count {
+                localBookings.remove(at: localIndex)
             }
         }
+        refreshView()
     }
     
     func onNotificationButtonTapped() {

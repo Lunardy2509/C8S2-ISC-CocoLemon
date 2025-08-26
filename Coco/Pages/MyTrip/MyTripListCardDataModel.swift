@@ -72,6 +72,44 @@ struct MyTripListCardDataModel: Hashable {
         price = "\(bookingDetail.totalPrice.toRupiah())"
     }
     
+    init(localBookingDetail: LocalBookingDetails) {
+        self.id = localBookingDetail.id
+        
+        var bookingStatus: String = localBookingDetail.status
+        var statusStyle: CocoStatusLabelStyle = .pending
+        
+        switch localBookingDetail.status.lowercased() {
+        case "upcoming":
+            bookingStatus = "Upcoming"
+            statusStyle = .success
+        case "completed":
+            bookingStatus = "Completed"
+            statusStyle = .success
+        default:
+            bookingStatus = "Pending"
+            statusStyle = .pending
+        }
+        
+        statusLabel = StatusLabel(text: bookingStatus, style: statusStyle)
+        imageUrl = localBookingDetail.destination.imageUrl ?? ""
+        
+        let inputFormatter = DateFormatter()
+        inputFormatter.dateFormat = "yyyy-MM-dd"
+        
+        if let date = inputFormatter.date(from: localBookingDetail.activityDate) {
+            let outputFormatter = DateFormatter()
+            outputFormatter.dateFormat = "E, d MMMM yyyy"
+            dateText = outputFormatter.string(from: date)
+        } else {
+            dateText = localBookingDetail.activityDate
+        }
+        
+        title = localBookingDetail.activityTitle
+        location = localBookingDetail.destination.name
+        totalPax = localBookingDetail.participants
+        price = localBookingDetail.totalPrice.toRupiah()
+    }
+    
     // Hashable conformance
     func hash(into hasher: inout Hasher) {
         hasher.combine(id)
