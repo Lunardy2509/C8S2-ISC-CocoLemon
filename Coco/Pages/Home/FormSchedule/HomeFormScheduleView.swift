@@ -106,7 +106,7 @@ private extension HomeFormScheduleView {
     }
     
     func createActivityDetailView() -> UIView {
-        let imageView: UIImageView = UIImageView(image: CocoIcon.icPinPointBlue.image)
+        let imageView: UIImageView = UIImageView(image: CocoIcon.icPinPointBlack.image)
         imageView.layout {
             $0.size(20.0)
         }

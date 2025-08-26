@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import SwiftUI
 
 final class EmptyStateView: UIView {
     
@@ -28,6 +29,8 @@ final class EmptyStateView: UIView {
     
     private var cocoButtonHostingController: CocoButtonHostingController?
     private var buttonAction: (() -> Void)?
+    private var topDestinationHostingController: UIHostingController<TopDestinationSection>?
+    private var onDestinationSelected: ((TopDestinationCardDataModel) -> Void)?
     
     init(
         image: UIImage?,
@@ -35,10 +38,12 @@ final class EmptyStateView: UIView {
         buttonTitle: String,
         buttonStyle: CocoButtonStyle = .large,
         buttonType: CocoButtonType = .primary,
-        action: @escaping () -> Void
+        action: @escaping () -> Void,
+        onDestinationSelected: ((TopDestinationCardDataModel) -> Void)? = nil
     ) {
         super.init(frame: .zero)
         self.buttonAction = action
+        self.onDestinationSelected = onDestinationSelected
         
         setupCocoButton(
             title: buttonTitle,
@@ -46,6 +51,10 @@ final class EmptyStateView: UIView {
             type: buttonType,
             action: action
         )
+        
+        if let onDestinationSelected = onDestinationSelected {
+            setupTopDestinationSection(onDestinationSelected: onDestinationSelected)
+        }
         
         setupView()
         configureContent(image: image, caption: caption)
@@ -70,14 +79,31 @@ final class EmptyStateView: UIView {
         )
     }
     
+    private func setupTopDestinationSection(onDestinationSelected: @escaping (TopDestinationCardDataModel) -> Void) {
+        let topDestinationSection = TopDestinationSection(
+            onDestinationTap: onDestinationSelected,
+            onAddDestinationTap: { /* This won't be used in empty state */ }
+        )
+        
+        topDestinationHostingController = UIHostingController(rootView: topDestinationSection)
+        topDestinationHostingController?.view.backgroundColor = .clear
+    }
+    
     private func setupView() {
         guard let cocoButtonHostingController = cocoButtonHostingController else { return }
         
-        let stackView = UIStackView(arrangedSubviews: [
+        var arrangedSubviews: [UIView] = [
             imageView,
             captionLabel,
             cocoButtonHostingController.view
-        ])
+        ]
+        
+        // Add TopDestination section if available
+        if let topDestinationHostingController = topDestinationHostingController {
+            arrangedSubviews.append(topDestinationHostingController.view)
+        }
+        
+        let stackView = UIStackView(arrangedSubviews: arrangedSubviews)
         
         stackView.axis = .vertical
         stackView.spacing = 16
@@ -86,7 +112,7 @@ final class EmptyStateView: UIView {
         
         addSubview(stackView)
         
-        NSLayoutConstraint.activate([
+        var constraints = [
             // Stack view constraints
             stackView.centerXAnchor.constraint(equalTo: centerXAnchor),
             stackView.centerYAnchor.constraint(equalTo: centerYAnchor),
@@ -100,7 +126,18 @@ final class EmptyStateView: UIView {
             // Caption label constraints for better text wrapping
             captionLabel.leadingAnchor.constraint(equalTo: stackView.leadingAnchor),
             captionLabel.trailingAnchor.constraint(equalTo: stackView.trailingAnchor)
-        ])
+        ]
+        
+        // Add TopDestination section constraints if available
+        if let topDestinationView = topDestinationHostingController?.view {
+            constraints.append(contentsOf: [
+                topDestinationView.leadingAnchor.constraint(equalTo: stackView.leadingAnchor),
+                topDestinationView.trailingAnchor.constraint(equalTo: stackView.trailingAnchor),
+                topDestinationView.heightAnchor.constraint(equalToConstant: 200) // Adjust height as needed
+            ])
+        }
+        
+        NSLayoutConstraint.activate(constraints)
     }
     
     private func configureContent(image: UIImage?, caption: String) {
@@ -172,7 +209,27 @@ extension EmptyStateView {
             buttonTitle: primaryButtonTitle,
             buttonStyle: .large,
             buttonType: .primary,
-            action: action
+            action: action,
+            onDestinationSelected: nil
+        )
+    }
+    
+    // Convenience initializer with destination recommendations
+    convenience init(
+        image: UIImage?,
+        caption: String,
+        primaryButtonTitle: String,
+        action: @escaping () -> Void,
+        onDestinationSelected: @escaping (TopDestinationCardDataModel) -> Void
+    ) {
+        self.init(
+            image: image,
+            caption: caption,
+            buttonTitle: primaryButtonTitle,
+            buttonStyle: .large,
+            buttonType: .primary,
+            action: action,
+            onDestinationSelected: onDestinationSelected
         )
     }
     
@@ -188,7 +245,8 @@ extension EmptyStateView {
             buttonTitle: secondaryButtonTitle,
             buttonStyle: .large,
             buttonType: .secondary,
-            action: action
+            action: action,
+            onDestinationSelected: nil
         )
     }
     
@@ -204,7 +262,8 @@ extension EmptyStateView {
             buttonTitle: outlineButtonTitle,
             buttonStyle: .small,
             buttonType: .primary,
-            action: action
+            action: action,
+            onDestinationSelected: nil
         )
     }
 }

@@ -22,13 +22,12 @@ struct TripStylePopUpView: View {
                     .font(.jakartaSans(forTextStyle: .title3, weight: .semibold))
                     .foregroundStyle(Token.additionalColorsBlack.toColor())
                     .multilineTextAlignment(.center)
-                
                 Text("We can help you create a collaboration group trip")
                     .font(.jakartaSans(forTextStyle: .subheadline, weight: .regular))
                     .foregroundStyle(Token.grayscale70.toColor())
                     .multilineTextAlignment(.center)
             }
-            
+                
             VStack(spacing: 16.0) {
                 CocoButton(
                     action: { didSelectStyle(.group) },

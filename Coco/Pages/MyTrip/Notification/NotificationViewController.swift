@@ -32,7 +32,7 @@ final class NotificationViewController: UIViewController {
             senderName: "Reminder",
             message: "Due 19 May 2025! Don’t forget to remind your friend",
             tripName: "CoCoLemon goes to Bali",
-            avatarImage: UIImageView(image: Contributor.remindFriend.image),
+            avatarIcon: Contributor.remindFriend,
             isUnread: false
         ),
         NotificationItem(
@@ -40,7 +40,7 @@ final class NotificationViewController: UIViewController {
             senderName: "Ferdinand Lunardy",
             message: "Ferdinand Lunardy participate 2 activities on colaboration trip",
             tripName: "CoCoLemon goes to Bali",
-            avatarImage: UIImageView(image: Contributor.ferdinand.image),
+            avatarIcon: Contributor.ferdinand,
             isUnread: true
         ),
         NotificationItem(
@@ -48,7 +48,7 @@ final class NotificationViewController: UIViewController {
             senderName: "Griselda Shavilla",
             message: "Griselda Shavilla has joined colaboration trip",
             tripName: "CoCoLemon goes to Bali",
-            avatarImage: UIImageView(image: Contributor.griselda.image),
+            avatarIcon: Contributor.griselda,
             isUnread: true
         ),
         NotificationItem(
@@ -56,7 +56,7 @@ final class NotificationViewController: UIViewController {
             senderName: "Ferdinand Lunardy",
             message: "Ferdinand Lunardy has joined colaboration trip",
             tripName: "CoCoLemon goes to Bali",
-            avatarImage: UIImageView(image: Contributor.ferdinand.image),
+            avatarIcon: Contributor.ferdinand,
             isUnread: true
         ),
         NotificationItem(
@@ -64,7 +64,7 @@ final class NotificationViewController: UIViewController {
             senderName: "Cynthia Shabrina",
             message: "Cynthia Shabrina  has joined colaboration trip",
             tripName: "CoCoLemon goes to Bali",
-            avatarImage: UIImageView(image: Contributor.cynthia.image),
+            avatarIcon: Contributor.cynthia,
             isUnread: true
         )
 
@@ -127,6 +127,6 @@ struct NotificationItem {
     let senderName: String
     let message: String
     let tripName: String
-    let avatarImage: UIImageView
+    let avatarIcon: Icon
     let isUnread: Bool
 }

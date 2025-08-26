@@ -30,19 +30,25 @@ struct BookingDetailDataModel {
         var bookingStatus: String = bookingDetail.status
         var statusStyle: CocoStatusLabelStyle = .pending
         
-        let formatter: DateFormatter = DateFormatter()
-        formatter.dateFormat = "YYYY-MM-dd"
-        
-        if let targetDate: Date = formatter.date(from: bookingDetail.activityDate) {
-            let today: Date = Date()
+        // If status is already "Pending", keep it as is (for newly created plans)
+        if bookingDetail.status.lowercased() == "pending" {
+            bookingStatus = "Pending"
+            statusStyle = .pending
+        } else {
+            // For other statuses, apply date-based logic
+            let formatter: DateFormatter = DateFormatter()
+            formatter.dateFormat = "YYYY-MM-dd"
             
-            if targetDate < today {
-                bookingStatus = "Completed"
-                statusStyle = .success
-            }
-            else if targetDate > today {
-                bookingStatus = "Upcoming"
-                statusStyle = .refund
+            if let targetDate: Date = formatter.date(from: bookingDetail.activityDate) {
+                let today: Date = Date()
+                
+                if targetDate < today {
+                    bookingStatus = "Completed"
+                    statusStyle = .success
+                } else if targetDate > today {
+                    bookingStatus = "Upcoming"
+                    statusStyle = .refund
+                }
             }
         }
         
@@ -54,7 +60,19 @@ struct BookingDetailDataModel {
         paxNumber = bookingDetail.participants
         price = bookingDetail.totalPrice
         address = bookingDetail.address
-        bookingDateText = bookingDetail.activityDate
+        
+        // Format the date to display in a user-friendly format like "Tues, 15 March 2025"
+        let inputFormatter = DateFormatter()
+        inputFormatter.dateFormat = "yyyy-MM-dd"
+        
+        if let date = inputFormatter.date(from: bookingDetail.activityDate) {
+            let outputFormatter = DateFormatter()
+            outputFormatter.dateFormat = "E, d MMMM yyyy"
+            outputFormatter.locale = Locale(identifier: "en_US")
+            bookingDateText = outputFormatter.string(from: date)
+        } else {
+            bookingDateText = bookingDetail.activityDate
+        }
     }
 }
 
@@ -181,7 +199,6 @@ private extension TripDetailView {
                 .bottom(to: dateStatusSection.bottomAnchor)
         }
         
-        
         contentStackView.addArrangedSubview(activityDetailView)
         contentStackView.addArrangedSubview(dateStatusSection)
         contentStackView.addArrangedSubview(paxNumberSection)
@@ -194,7 +211,7 @@ private extension TripDetailView {
     }
     
     func createActivityDetailView() -> UIView {
-        let imageView: UIImageView = UIImageView(image: CocoIcon.icPinPointBlue.image)
+        let imageView: UIImageView = UIImageView(image: CocoIcon.icPinPointBlack.image)
         imageView.layout {
             $0.size(20.0)
         }
@@ -302,7 +319,6 @@ private extension TripDetailView {
                 .bottom(to: contentView.bottomAnchor)
         }
         
-        
         return contentView
     }
     
@@ -335,7 +351,7 @@ private extension TripDetailView {
         }
         
         rhs.layout {
-            $0.leading(to: lhs.trailingAnchor, relation: .greaterThanOrEqual,  constant: 4.0)
+            $0.leading(to: lhs.trailingAnchor, relation: .greaterThanOrEqual, constant: 4.0)
                 .trailing(to: containerView.trailingAnchor)
                 .centerY(to: containerView.centerYAnchor)
         }

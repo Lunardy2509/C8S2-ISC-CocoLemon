@@ -101,28 +101,42 @@ extension HomeCoordinator: ActivityDetailNavigationDelegate {
             return
         }
 
-        let tripStyleVC = TripStyleViewController { [weak self] style in
-            guard let self = self else { return }
-            
-            // The style selection triggers navigation, so we can pop the current
-            // controller before pushing the new one.
-            self.navigationController?.popViewController(animated: false)
+        let tripStyleVC = TripStyleViewController(
+            didSelectStyle: { [weak self] style in
+                guard let self = self else { return }
+                
+                // The style selection triggers navigation, so we can pop the current
+                // controller before pushing the new one.
+                self.navigationController?.popViewController(animated: false)
 
-            switch style {
-            case .solo:
-                let soloViewModel = SoloTripActivityDetailViewModel(data: data)
-                soloViewModel.navigationDelegate = self
-                let soloVC = SoloTripActivityDetailViewController(viewModel: soloViewModel)
-                self.start(viewController: soloVC)
-            case .group:
-                let groupViewModel = GroupTripActivityDetailViewModel(data: data)
-                groupViewModel.navigationDelegate = self
-                let groupVC = GroupTripActivityDetailViewController(viewModel: groupViewModel)
-                self.start(viewController: groupVC)
-            }
-        }
-        
+                switch style {
+                case .solo:
+                    let soloViewModel = SoloTripActivityDetailViewModel(data: data)
+                    soloViewModel.navigationDelegate = self
+                    let soloVC = SoloTripActivityDetailViewController(viewModel: soloViewModel)
+                    self.start(viewController: soloVC)
+                case .group:
+                    // Navigate directly to GroupFormView for group trips
+                    self.navigateToGroupForm(with: data)
+                }
+            },
+            activityData: data
+        )
         start(viewController: tripStyleVC)
+    }
+    
+    private func navigateToGroupForm(with data: ActivityDetailDataModel) {
+        Task { @MainActor in
+            let groupFormViewModel = GroupFormViewModel(selectedActivity: data)
+            groupFormViewModel.navigationDelegate = self
+            
+            let groupFormVC = UIHostingController(rootView: GroupFormView(viewModel: groupFormViewModel))
+            
+            // Set navigation title
+            groupFormVC.navigationItem.title = "Group Form"
+            
+            self.start(viewController: groupFormVC)
+        }
     }
 }
 
@@ -144,30 +158,33 @@ extension HomeCoordinator: SoloTripActivityDetailNavigationDelegate {
     }
 }
 
-extension HomeCoordinator: GroupTripActivityDetailNavigationDelegate {
-    func notifyGroupTripCreateTripTapped(planData: GroupTripPlanDataModel) {
-        let viewModel = GroupTripPlanViewModel(data: planData)
-        viewModel.navigationDelegate = self
-        let viewController = GroupTripPlanViewController(viewModel: viewModel)
-        start(viewController: viewController)
-    }
-    
-    func notifyGroupTripPlanCreated(data: GroupTripPlanDataModel) {
-        let viewModel = GroupTripPlanViewModel(data: data)
-        viewModel.navigationDelegate = self
-        let viewController = GroupTripPlanViewController(viewModel: viewModel)
-        start(viewController: viewController)
-    }
-}
-
-extension HomeCoordinator: GroupTripPlanNavigationDelegate {
-    func notifyGroupTripPlanEditTapped() {
+// MARK: - GroupFormNavigationDelegate
+extension HomeCoordinator: GroupFormNavigationDelegate {
+    func notifyGroupFormNavigateToActivityDetail(_ activityDetail: ActivityDetailDataModel) {
+        // Handle navigation back to activity detail if needed
         navigationController?.popViewController(animated: true)
     }
     
-    func notifyGroupTripPlanBookNowTapped() {
-        // Handle booking flow - this could navigate to a booking confirmation
-        // or checkout page depending on your app's flow
-        print("Book Now tapped - implement booking flow")
+    func notifyGroupFormNavigateToTripDetail(_ bookingDetails: BookingDetails) {
+        // Navigate to TripDetailView using MyTripCoordinator
+        guard let navigationController = self.navigationController else { return }
+        let tripCoordinator = MyTripCoordinator(
+            input: MyTripCoordinator.Input(
+                navigationController: navigationController,
+                flow: .bookingDetail(data: bookingDetails)
+            )
+        )
+        tripCoordinator.parentCoordinator = self.parentCoordinator
+        tripCoordinator.start()
+    }
+    
+    func notifyGroupFormCreatePlan() {
+        // Navigate to MyTrip tab after creating plan
+        guard let tabBarController: BaseTabBarViewController = parentCoordinator?.navigationController?.tabBarController as? BaseTabBarViewController
+        else {
+            return
+        }
+        tabBarController.selectedIndex = 1 // MyTrip tab
+        navigationController?.popToRootViewController(animated: true)
     }
 }

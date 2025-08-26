@@ -24,11 +24,16 @@ final class MyTripViewController: UIViewController {
         title = "My Trip"
         setupNavigationBar()
         thisView.delegate = self
+        setupNotifications()
     }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         viewModel.onViewWillAppear()
+    }
+    
+    deinit {
+        NotificationCenter.default.removeObserver(self)
     }
     
     override func loadView() {
@@ -41,11 +46,8 @@ final class MyTripViewController: UIViewController {
 
 extension MyTripViewController: MyTripViewModelAction {
     func configureView(datas: [MyTripListCardDataModel]) {
+        print("🎨 MyTripViewController: Configuring view with \(datas.count) trip(s)")
         thisView.configureView(datas: datas)
-    }
-    
-    func configureRecommendations(recommendations: [MyTripRecommendationDataModel]) {
-//        thisView.configureRecommendations(recommendations: recommendations)
     }
     
     func goToBookingDetail(with data: BookingDetails) {
@@ -106,6 +108,46 @@ extension MyTripViewController: MyTripViewDelegate {
         groupFormVC.hidesBottomBarWhenPushed = true
         navigationController?.pushViewController(groupFormVC, animated: true)
     }
+    
+    func notifyDestinationSelected(_ destination: TopDestinationCardDataModel) {
+        // Convert TopDestinationCardDataModel to ActivityDetailDataModel for GroupForm
+        // Since we don't have full activity details, we'll need to fetch them first
+        navigateToGroupFormWithDestination(destination)
+    }
+    
+    private func navigateToGroupFormWithDestination(_ destination: TopDestinationCardDataModel) {
+        // For now, navigate to GroupForm with a method to pre-select the destination
+        // We'll need to fetch the full activity details first
+        let activityFetcher = ActivityFetcher()
+        
+        // Search for activities in this destination
+        activityFetcher.fetchActivity(request: ActivitySearchRequest(pSearchText: destination.title)) { [weak self] result in
+            Task { @MainActor in
+                switch result {
+                case .success(let activityResponse):
+                    if let firstActivity = activityResponse.values.first {
+                        // Convert to ActivityDetailDataModel using the correct initializer
+                        let activityDetailData = ActivityDetailDataModel(firstActivity)
+                        
+                        // Create GroupFormViewController with pre-selected activity
+                        let groupFormVC = GroupFormViewController(preSelectedActivity: activityDetailData)
+                        groupFormVC.hidesBottomBarWhenPushed = true
+                        self?.navigationController?.pushViewController(groupFormVC, animated: true)
+                    } else {
+                        // Fallback: navigate to regular GroupForm
+                        let groupFormVC = GroupFormViewController()
+                        groupFormVC.hidesBottomBarWhenPushed = true
+                        self?.navigationController?.pushViewController(groupFormVC, animated: true)
+                    }
+                case .failure:
+                    // Fallback: navigate to regular GroupForm
+                    let groupFormVC = GroupFormViewController()
+                    groupFormVC.hidesBottomBarWhenPushed = true
+                    self?.navigationController?.pushViewController(groupFormVC, animated: true)
+                }
+            }
+        }
+    }
 }
 
 private extension MyTripViewController {
@@ -138,5 +180,24 @@ private extension MyTripViewController {
     
     @objc private func notificationButtonTapped() {
         viewModel.onNotificationButtonTapped()
+    }
+    
+    func setupNotifications() {
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(handleNewTripCreated),
+            name: .newTripCreated,
+            object: nil
+        )
+    }
+    
+    @objc private func handleNewTripCreated() {
+        print("🎯 MyTripViewController: Received newTripCreated notification")
+        // Refresh the trip data when a new trip is created
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
+            // Add a small delay to ensure the server has processed the booking
+            print("🔄 MyTripViewController: Refreshing trip data...")
+            self?.viewModel.onViewWillAppear()
+        }
     }
 }

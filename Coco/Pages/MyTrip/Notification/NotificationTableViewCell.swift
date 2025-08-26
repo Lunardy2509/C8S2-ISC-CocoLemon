@@ -20,7 +20,7 @@ final class NotificationTableViewCell: UITableViewCell {
     }
     
     func configure(with notification: NotificationItem) {
-        avatarImageView = notification.avatarImage
+        avatarImageView.image = notification.avatarIcon.image
         senderNameLabel.text = notification.senderName
         messageLabel.text = notification.message
         tripNameLabel.text = notification.tripName
@@ -29,17 +29,17 @@ final class NotificationTableViewCell: UITableViewCell {
     
     private lazy var avatarImageView: UIImageView = {
         let imageView = UIImageView()
-        imageView.contentMode = .scaleAspectFill
+        imageView.contentMode = .scaleAspectFit
         imageView.clipsToBounds = true
         imageView.layer.cornerRadius = 20
-        imageView.tintColor = Token.grayscale70
-        imageView.backgroundColor = Token.grayscale20
+        imageView.tintColor = UIColor(Token.grayscale70.toColor())
+        imageView.backgroundColor = UIColor(Token.grayscale20.toColor())
         return imageView
     }()
     
     private lazy var unreadIndicator: UIView = {
         let view = UIView()
-        view.backgroundColor = Token.mainColorPrimary
+        view.backgroundColor = UIColor(Token.mainColorPrimary.toColor())
         view.layer.cornerRadius = 4
         return view
     }()
@@ -47,7 +47,7 @@ final class NotificationTableViewCell: UITableViewCell {
     private lazy var senderNameLabel: UILabel = {
         let label = UILabel()
         label.font = .jakartaSans(forTextStyle: .body, weight: .semibold)
-        label.textColor = Token.additionalColorsBlack
+        label.textColor = UIColor(Token.additionalColorsBlack.toColor())
         label.numberOfLines = 1
         return label
     }()
@@ -55,7 +55,7 @@ final class NotificationTableViewCell: UITableViewCell {
     private lazy var messageLabel: UILabel = {
         let label = UILabel()
         label.font = .jakartaSans(forTextStyle: .footnote, weight: .regular)
-        label.textColor = Token.grayscale70
+        label.textColor = UIColor(Token.grayscale70.toColor())
         label.numberOfLines = 1
         return label
     }()
@@ -63,7 +63,7 @@ final class NotificationTableViewCell: UITableViewCell {
     private lazy var tripNameLabel: UILabel = {
         let label = UILabel()
         label.font = .jakartaSans(forTextStyle: .footnote, weight: .medium)
-        label.textColor = Token.mainColorPrimary
+        label.textColor = UIColor(Token.mainColorPrimary.toColor())
         label.numberOfLines = 1
         return label
     }()
@@ -72,7 +72,7 @@ final class NotificationTableViewCell: UITableViewCell {
         let imageView = UIImageView()
         imageView.image = UIImage(systemName: "calendar") ?? UIImage()
         imageView.contentMode = .scaleAspectFit
-        imageView.tintColor = Token.mainColorPrimary
+        imageView.tintColor = UIColor(Token.mainColorPrimary.toColor())
         return imageView
     }()
 }

@@ -61,14 +61,14 @@ struct PackageCard: View {
             // Arrow Icon
             Button(action: {
                 // Handle package selection
-            }) {
+            }, label: {
                 Image(systemName: "arrow.up.right")
                     .font(.system(size: 16, weight: .medium))
                     .foregroundColor(.white)
                     .frame(width: 32, height: 32)
                     .background(Color(red: 0.35, green: 0.72, blue: 0.93))
                     .clipShape(Circle())
-            }
+            })
         }
         .padding(.horizontal, 12)
         .padding(.vertical, 10)

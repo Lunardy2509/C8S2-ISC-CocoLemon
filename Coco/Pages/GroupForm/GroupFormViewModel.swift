@@ -23,19 +23,32 @@ final class GroupFormViewModel: ObservableObject {
         }
     }
     @Published var recommendations: [GroupFormRecommendationDataModel] = []
-    @Published var teamMembers: [TeamMember] = []
+    @Published var teamMembers: [TeamMemberModel] = []
     @Published var availablePackages: [TravelPackage] = []
+    @Published var selectedPackageIds: Set<Int> = []
     @Published var isLoading: Bool = false
     
     // Search Bar Properties
     @Published var showSearchSheet: Bool = false
     @Published var searchHistory: [HomeSearchSearchLocationData] = []
+    @Published var showInviteFriendPopup: Bool = false
     
-    // Navigation callback
-    var onNavigateToActivityDetail: ((ActivityDetailDataModel) -> Void)?
+    // Available contributors for adding to team
+    private let availableContributors: [TripMemberData] = [
+        TripMemberData(name: "Adhis", email: "adhis@example.com", icon: Contributor.adhis),
+        TripMemberData(name: "Ahmad", email: "ahmad@example.com", icon: Contributor.ahmad),
+        TripMemberData(name: "Teuku", email: "teuku@example.com", icon: Contributor.teuku),
+        TripMemberData(name: "Griselda", email: "griselda@example.com", icon: Contributor.griselda),
+        TripMemberData(name: "Ferdinand", email: "ferdinand@example.com", icon: Contributor.ferdinand),
+        TripMemberData(name: "Cynthia", email: "cynthia@example.com", icon: Contributor.cynthia)
+    ]
+    
+    // Navigation delegate
+    weak var navigationDelegate: GroupFormNavigationDelegate?
     
     // API Fetcher
     private let activityFetcher: ActivityFetcherProtocol
+    private let createBookingFetcher: CreateBookingFetcherProtocol
     
     // Date formatters
     private let dateFormatter: DateFormatter = {
@@ -73,19 +86,189 @@ final class GroupFormViewModel: ObservableObject {
         selectedDestination != nil
     }
     
-    init(activityFetcher: ActivityFetcherProtocol = ActivityFetcher()) {
+    init(activityFetcher: ActivityFetcherProtocol = ActivityFetcher(), createBookingFetcher: CreateBookingFetcherProtocol = CreateBookingFetcher()) {
         self.activityFetcher = activityFetcher
+        self.createBookingFetcher = createBookingFetcher
         loadTeamMembers()
         loadRecommendations()
     }
     
+    // Convenience initializer for when user comes from TripDetail with a selected activity
+    init(
+        selectedActivity: ActivityDetailDataModel,
+        activityFetcher: ActivityFetcherProtocol = ActivityFetcher(),
+        createBookingFetcher: CreateBookingFetcherProtocol = CreateBookingFetcher()
+    ) {
+        self.activityFetcher = activityFetcher
+        self.createBookingFetcher = createBookingFetcher
+        
+        // Convert ActivityDetailDataModel to GroupFormRecommendationDataModel
+        let convertedActivity = convertActivityDetailToRecommendation(selectedActivity)
+        self.selectedDestination = convertedActivity
+        
+        loadTeamMembers()
+        loadRecommendations()
+    }
+    
+    // Helper method to convert ActivityDetailDataModel to GroupFormRecommendationDataModel
+    private func convertActivityDetailToRecommendation(_ activity: ActivityDetailDataModel) -> GroupFormRecommendationDataModel {
+        return GroupFormRecommendationDataModel(activity: convertToActivity(activity))
+    }
+    
+    // Helper method to convert ActivityDetailDataModel to Activity
+    private func convertToActivity(_ activityDetail: ActivityDetailDataModel) -> Activity {
+        // Extract packages from ActivityDetailDataModel
+        let packages = activityDetail.availablePackages.content.map { package in
+            ActivityPackage(
+                id: package.id,
+                name: package.name,
+                endTime: "17:00", // Default values since we don't have them in ActivityDetailDataModel.Package
+                startTime: "09:00",
+                activityId: Int.random(in: 1000...9999),
+                description: package.description,
+                maxParticipants: 8,
+                minParticipants: 2,
+                pricePerPerson: Double(package.price.replacingOccurrences(of: "[^0-9]", with: "", options: .regularExpression)) ?? 0,
+                host: ActivityPackage.Host(
+                    bio: "Professional guide with extensive local knowledge",
+                    name: activityDetail.providerDetail.content.name,
+                    profileImageUrl: activityDetail.providerDetail.content.imageUrlString
+                ),
+                imageUrl: package.imageUrlString
+            )
+        }
+        
+        // Create images from the image URLs
+        let images = activityDetail.imageUrlsString.enumerated().map { index, url in
+            ActivityImage(
+                id: index + 1,
+                imageUrl: url,
+                imageType: index == 0 ? .thumbnail : .gallery,
+                activityId: Int.random(in: 1000...9999)
+            )
+        }
+        
+        return Activity(
+            id: Int.random(in: 1000...9999),
+            title: activityDetail.title,
+            images: images,
+            pricing: packages.first?.pricePerPerson ?? 0,
+            category: ActivityCategory(id: 1, name: "Adventure", description: ""),
+            packages: packages,
+            cancelable: activityDetail.tnc,
+            createdAt: "2025-08-25T00:00:00Z",
+            accessories: activityDetail.tripFacilities.content.map { name in
+                Accessory(id: Int.random(in: 1...100), name: name)
+            },
+            description: activityDetail.detailInfomation.content,
+            destination: Destination(
+                id: 1,
+                name: activityDetail.location,
+                imageUrl: activityDetail.imageUrlsString.first,
+                description: "Beautiful destination"
+            ),
+            durationMinutes: 480 // Default 8 hours
+        )
+    }
+    
     func createPlan() {
-        // Handle create plan action
-        print("Creating plan for: \(tripName)")
-        print("Destination: \(selectedDestination?.title ?? "None")")
-        print("Date: \(dateVisit)")
-        print("Deadline: \(deadline)")
-        print("Team members: \(teamMembers.count)")
+        // Validate required data
+        guard let destination = selectedDestination,
+              !tripName.isEmpty,
+              !selectedPackageIds.isEmpty else { return }
+        
+        print("🚀 GroupFormViewModel: Starting to create plan...")
+        // Get selected package details
+        guard let selectedPackage = availablePackages.first(where: { selectedPackageIds.contains($0.id) }) else { 
+            print("❌ No selected package found")
+            return 
+        }
+        
+        let userId = UserDefaults.standard.string(forKey: "user-id") ?? ""
+        print("👤 GroupFormViewModel: Using user ID: '\(userId)'")
+        print("📦 GroupFormViewModel: Selected package: \(selectedPackage.name)")
+        
+        Task { @MainActor in
+            do {
+                // Create booking request
+                let request = CreateBookingSpec(
+                    packageId: selectedPackage.id,
+                    bookingDate: dateVisit,
+                    participants: teamMembers.count + 1, // +1 for the user creating the plan
+                    userId: UserDefaults.standard.string(forKey: "user-id") ?? ""
+                )
+                
+                // Call the API to create booking
+                let response = try await createBookingFetcher.createBooking(request: request)
+                
+                print("✅ GroupFormViewModel: Booking created successfully, posting notification")
+                // Post notification that a new trip was created
+                NotificationCenter.default.post(name: .newTripCreated, object: nil)
+                
+                // Notify that plan creation is complete - this will navigate to MyTrip tab
+                navigationDelegate?.notifyGroupFormCreatePlan()
+                
+            } catch {
+                // Handle error - could show an alert or error message
+                print("Failed to create booking: \(error)")
+                // For now, still navigate but create a local booking details
+                let dateFormatter = DateFormatter()
+                dateFormatter.dateFormat = "yyyy-MM-dd"
+                
+                let bookingDestination = BookingDestination(
+                    id: destination.id,
+                    name: destination.location,
+                    imageUrl: destination.imageUrl?.absoluteString,
+                    description: destination.description
+                )
+                
+                let bookingDetails = BookingDetails(
+                    status: "Pending",
+                    bookingId: Int.random(in: 1000...9999),
+                    startTime: "09:00",
+                    destination: bookingDestination,
+                    totalPrice: calculateTotalPrice(),
+                    packageName: selectedPackage.name,
+                    participants: teamMembers.count + 1,
+                    activityDate: dateFormatter.string(from: dateVisit),
+                    activityTitle: destination.title,
+                    bookingCreatedAt: dateFormatter.string(from: Date()),
+                    address: "\(destination.location) Meeting Point"
+                )
+                
+                print("⚠️ GroupFormViewModel: API failed, creating local booking data and posting notification")
+                // Post notification that a new trip was created (even with local data)
+                NotificationCenter.default.post(name: .newTripCreated, object: nil)
+                
+                // Navigate to MyTrip tab to show the new booking
+                navigationDelegate?.notifyGroupFormCreatePlan()
+            }
+        }
+    }
+    
+    private func calculateTotalPrice() -> Double {
+        let selectedPackages = availablePackages.filter { selectedPackageIds.contains($0.id) }
+        let packageCost = selectedPackages.reduce(0.0) { total, package in
+            // Extract price from string format "Rp 1,200,000"
+            let priceString = package.price.replacingOccurrences(of: "[^0-9]", with: "", options: .regularExpression)
+            let packagePrice = Double(priceString) ?? 0
+            return total + packagePrice
+        }
+        
+        // Multiply by number of participants
+        return packageCost * Double(teamMembers.count)
+    }
+    
+    func togglePackageSelection(_ packageId: Int) {
+        if selectedPackageIds.contains(packageId) {
+            selectedPackageIds.remove(packageId)
+        } else {
+            selectedPackageIds.insert(packageId)
+        }
+    }
+    
+    func getSelectedPackageIds() -> Set<Int> {
+        return selectedPackageIds
     }
     
     func applySearch(query: String) {
@@ -123,7 +306,7 @@ final class GroupFormViewModel: ObservableObject {
     func navigateToDestinationDetail() {
         guard let destination = selectedDestination else { return }
         let activityDetail = destination.toActivityDetailDataModel()
-        onNavigateToActivityDetail?(activityDetail)
+        navigationDelegate?.notifyGroupFormNavigateToActivityDetail(activityDetail)
     }
     
     func removeSearchHistory(_ searchData: HomeSearchSearchLocationData) {
@@ -134,6 +317,12 @@ final class GroupFormViewModel: ObservableObject {
         searchText = ""
         searchBarViewModel.currentTypedText = ""
         loadRecommendations() // Reset to load fresh recommendations from API
+    }
+    
+    func selectTopDestination(_ destination: TopDestinationCardDataModel) {
+        // Convert TopDestinationCardDataModel to GroupFormRecommendationDataModel
+        // First, try to find the full activity details
+        searchActivities(query: destination.title)
     }
     
     func presentDateVisitCalendar() {
@@ -168,6 +357,9 @@ final class GroupFormViewModel: ObservableObject {
     }
     
     private func updateAvailablePackages() {
+        // Clear previous package selections when destination changes
+        selectedPackageIds.removeAll()
+        
         if let destination = selectedDestination {
             // Convert real API packages to TravelPackage format
             availablePackages = destination.packages.map { package in
@@ -219,22 +411,12 @@ final class GroupFormViewModel: ObservableObject {
     }
     
     private func loadTeamMembers() {
-        // Load team members (static data as they represent app contributors)
+        // Load team members with Adhis as the group planner (cannot be removed)
         teamMembers = [
-            TeamMember(
-                id: 1,
+            TeamMemberModel(
                 name: "Adhis",
-                image: Image(uiImage: Contributor.adhis.image)
-            ),
-            TeamMember(
-                id: 2,
-                name: "Cynthia",
-                image: Image(uiImage: Contributor.cynthia.image)
-            ),
-            TeamMember(
-                id: 3,
-                name: "Ferdinand",
-                image: Image(uiImage: Contributor.ferdinand.image)
+                email: "adhis@example.com",
+                isWaiting: false // Adhis is the group planner, not waiting
             )
         ]
     }
@@ -265,8 +447,7 @@ final class GroupFormViewModel: ObservableObject {
                         self.selectDestination(mockDestination)
                     }
                     
-                case .failure(let error):
-                    print("Search failed: \(error)")
+                case .failure:
                     // Fallback to mock destination
                     let mockDestination = self.createMockDestinationFromSearch(query: query)
                     self.selectDestination(mockDestination)
@@ -347,48 +528,121 @@ final class GroupFormViewModel: ObservableObject {
     }
     
     // MARK: - Team Management
-    func addTeamMember(name: String, contributorIcon: Icon) {
-        let newMember = TeamMember(
-            id: teamMembers.count + 1,
+    func addTeamMember(name: String, email: String, isWaiting: Bool = true) {
+        let newMember = TeamMemberModel(
             name: name,
-            image: Image(uiImage: contributorIcon.image)
+            email: email,
+            isWaiting: isWaiting // New members are waiting by default
         )
         teamMembers.append(newMember)
     }
     
-    func removeTeamMember(id: Int) {
-        teamMembers.removeAll { $0.id == id }
+    func addTeamMember(_ memberData: TripMemberData, isWaiting: Bool = true) {
+        addTeamMember(name: memberData.name, email: memberData.email, isWaiting: isWaiting)
     }
     
-    // Convenience methods for adding specific contributors
-    func addAdhis() {
-        addTeamMember(name: "Adhis", contributorIcon: Contributor.adhis)
+    func removeTeamMember(email: String) {
+        // Prevent removing Adhis (group planner)
+        guard email.lowercased() != "adhis@example.com" else { return }
+        teamMembers.removeAll { $0.email == email }
     }
     
-    func addCynthia() {
-        addTeamMember(name: "Cynthia", contributorIcon: Contributor.cynthia)
+    func canRemoveMember(email: String) -> Bool {
+        // Adhis cannot be removed as she's the group planner
+        return email.lowercased() != "adhis@example.com"
     }
     
-    func addAhmad() {
-        addTeamMember(name: "Ahmad", contributorIcon: Contributor.ahmad)
+    func toggleMemberWaitingStatus(email: String) {
+        // Don't allow changing Adhis's waiting status as she's the group planner
+        guard email.lowercased() != "adhis@example.com" else { return }
+        
+        if let index = teamMembers.firstIndex(where: { $0.email == email }) {
+            let member = teamMembers[index]
+            teamMembers[index] = TeamMemberModel(
+                name: member.name,
+                email: member.email,
+                isWaiting: !member.isWaiting
+            )
+        }
     }
     
-    func addTeuku() {
-        addTeamMember(name: "Teuku", contributorIcon: Contributor.teuku)
+    func presentAddFriendOptions() {
+        showInviteFriendPopup = true
     }
     
-    func addGriselda() {
-        addTeamMember(name: "Griselda", contributorIcon: Contributor.griselda)
+    func sendInvite(email: String) {
+        // Check if this email corresponds to a known contributor
+        if let contributor = availableContributors.first(where: { $0.email.lowercased() == email.lowercased() }) {
+            // Add the known contributor in waiting state
+            addTeamMember(contributor, isWaiting: true)
+        } else {
+            // Add a new member with the provided email in waiting state
+            let name = extractNameFromEmail(email)
+            addTeamMember(name: name, email: email, isWaiting: true)
+        }
+        
+        showInviteFriendPopup = false
     }
     
-    func addFerdinand() {
-        addTeamMember(name: "Ferdinand", contributorIcon: Contributor.ferdinand)
+    func dismissInviteFriendPopup() {
+        showInviteFriendPopup = false
+    }
+    
+    private func extractNameFromEmail(_ email: String) -> String {
+        // Extract name from email (part before @)
+        let components = email.components(separatedBy: "@")
+        return components.first?.capitalized ?? "Friend"
+    }
+    
+    func getAvailableContributors() -> [TripMemberData] {
+        return availableContributors.filter { contributor in
+            !teamMembers.contains { $0.name.lowercased() == contributor.name.lowercased() }
+        }
+    }
+    
+    // Convenience methods for adding specific contributors (all in waiting state except Adhis)
+    func addAdhis(isWaiting: Bool = false) {
+        if let adhis = availableContributors.first(where: { $0.name == "Adhis" }) {
+            addTeamMember(adhis, isWaiting: isWaiting) // Adhis is not waiting as she's the planner
+        }
+    }
+    
+    func addCynthia(isWaiting: Bool = true) {
+        if let cynthia = availableContributors.first(where: { $0.name == "Cynthia" }) {
+            addTeamMember(cynthia, isWaiting: isWaiting)
+        }
+    }
+    
+    func addAhmad(isWaiting: Bool = true) {
+        if let ahmad = availableContributors.first(where: { $0.name == "Ahmad" }) {
+            addTeamMember(ahmad, isWaiting: isWaiting)
+        }
+    }
+    
+    func addTeuku(isWaiting: Bool = true) {
+        if let teuku = availableContributors.first(where: { $0.name == "Teuku" }) {
+            addTeamMember(teuku, isWaiting: isWaiting)
+        }
+    }
+    
+    func addGriselda(isWaiting: Bool = true) {
+        if let griselda = availableContributors.first(where: { $0.name == "Griselda" }) {
+            addTeamMember(griselda, isWaiting: isWaiting)
+        }
+    }
+    
+    func addFerdinand(isWaiting: Bool = true) {
+        if let ferdinand = availableContributors.first(where: { $0.name == "Ferdinand" }) {
+            addTeamMember(ferdinand, isWaiting: isWaiting)
+        }
     }
 }
 
 // MARK: - HomeSearchBarViewModelDelegate
 extension GroupFormViewModel: HomeSearchBarViewModelDelegate {
-    func notifyHomeSearchBarDidTap(isTypeAble: Bool, viewModel: HomeSearchBarViewModel) {
-        showSearchSheet = true
+    nonisolated func notifyHomeSearchBarDidTap(isTypeAble: Bool, viewModel: HomeSearchBarViewModel) {
+        Task { @MainActor in
+            showSearchSheet = true
+        }
     }
 }

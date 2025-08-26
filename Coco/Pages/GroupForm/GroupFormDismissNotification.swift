@@ -9,4 +9,5 @@ import Foundation
 
 extension Notification.Name {
     static let groupFormShouldDismiss = Notification.Name("groupFormShouldDismiss")
+    static let newTripCreated = Notification.Name("newTripCreated")
 }
