@@ -8,7 +8,8 @@
 import Foundation
 
 protocol GroupTripActivityDetailNavigationDelegate: AnyObject {
-    func notifyGroupTripCreateTripTapped()
+    func notifyGroupTripCreateTripTapped(planData: GroupTripPlanDataModel)
+    func notifyGroupTripPlanCreated(data: GroupTripPlanDataModel)
 }
 
 enum CalendarType {
@@ -23,6 +24,7 @@ protocol GroupTripActivityDetailViewModelAction: AnyObject {
     func showSearchActivityTray()
     func showSearchBar()
     func showSearchResults(_ activities: [Activity])
+    func updateTripMembers(members: [TripMember])
 }
 
 protocol GroupTripActivityDetailViewModelProtocol: AnyObject {
@@ -42,4 +44,5 @@ protocol GroupTripActivityDetailViewModelProtocol: AnyObject {
     func onRemoveActivityTapped()
     func onSearchActivitySelected(_ newActivity: ActivityDetailDataModel)
     func onSearchDidApply(_ queryText: String)
+    func addTripMember(name: String, email: String)
 }
