@@ -8,7 +8,7 @@
 import Foundation
 
 protocol GroupTripPlanNavigationDelegate: AnyObject {
-    func notifyGroupTripPlanEditTapped()
+    func notifyGroupTripPlanEditTapped(data: GroupTripPlanDataModel)
     func notifyGroupTripPlanBookNowTapped(localBookingDetails: LocalBookingDetails) 
 }
 

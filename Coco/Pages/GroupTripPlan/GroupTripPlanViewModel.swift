@@ -31,7 +31,15 @@ final class GroupTripPlanViewModel: GroupTripPlanViewModelProtocol {
     }
     
     func onEditTapped() {
-        navigationDelegate?.notifyGroupTripPlanEditTapped()
+        print("DEBUG: onEditTapped called in GroupTripPlanViewModel")
+        print("DEBUG: navigationDelegate is \(navigationDelegate != nil ? "set" : "nil")")
+        
+        if let delegate = navigationDelegate {
+            print("DEBUG: Calling notifyGroupTripPlanEditTapped")
+            delegate.notifyGroupTripPlanEditTapped(data: data)
+        } else {
+            print("DEBUG: ❌ navigationDelegate is nil - cannot navigate")
+        }
     }
     
     func onBookNowTapped() {
@@ -112,7 +120,8 @@ final class GroupTripPlanViewModel: GroupTripPlanViewModelProtocol {
             activity: data.activity,
             tripDetails: data.tripDetails,
             tripMembers: data.tripMembers,
-            selectedPackages: updatedPackages
+            selectedPackages: updatedPackages,
+            activityDetailData: data.activityDetailData
         )
         
         actionDelegate?.configureView(data: data)

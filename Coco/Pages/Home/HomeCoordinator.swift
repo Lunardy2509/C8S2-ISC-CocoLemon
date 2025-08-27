@@ -204,8 +204,18 @@ extension HomeCoordinator: GroupFormNavigationDelegate {
 }
 
 extension HomeCoordinator: GroupTripPlanNavigationDelegate {
-    func notifyGroupTripPlanEditTapped() {
-        print("✏️ Edit tapped") 
+    func notifyGroupTripPlanEditTapped(data: GroupTripPlanDataModel) {
+        print("DEBUG: notifyGroupTripPlanEditTapped called in HomeCoordinator for trip: \(data.tripName)")
+
+        Task { @MainActor in
+            let groupFormViewModel = GroupFormViewModel(existingTripData: data)
+            groupFormViewModel.navigationDelegate = self
+
+            let groupFormVC = UIHostingController(rootView: GroupFormView(viewModel: groupFormViewModel))
+            groupFormVC.navigationItem.title = "Edit Trip"
+
+            self.start(viewController: groupFormVC)
+        }
     }
     
     func notifyGroupTripPlanBookNowTapped(localBookingDetails: LocalBookingDetails) {
@@ -231,3 +241,5 @@ extension HomeCoordinator: GroupTripPlanNavigationDelegate {
         print("📱 Navigated to TripDetail page")
     }
 }
+
+

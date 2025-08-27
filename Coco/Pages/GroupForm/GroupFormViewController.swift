@@ -157,6 +157,7 @@ extension GroupFormViewController: GroupFormNavigationDelegate {
     
     func notifyGroupTripPlanCreated(data: GroupTripPlanDataModel) {
         let viewModel = GroupTripPlanViewModel(data: data)
+        viewModel.navigationDelegate = self  
         let groupTripPlanVC = GroupTripPlanViewController(viewModel: viewModel)
         navigationController?.pushViewController(groupTripPlanVC, animated: true)
     }
@@ -164,26 +165,34 @@ extension GroupFormViewController: GroupFormNavigationDelegate {
     func notifyGroupFormCreatePlan() {
         navigationController?.popViewController(animated: true)
     }
+}
+
+// MARK: - GroupTripPlanNavigationDelegate
+extension GroupFormViewController: GroupTripPlanNavigationDelegate {
+    func notifyGroupTripPlanEditTapped(data: GroupTripPlanDataModel) {
+        // Navigate back to edit mode of GroupForm
+        Task { @MainActor in
+            let editViewModel = GroupFormViewModel(existingTripData: data)
+            editViewModel.navigationDelegate = externalNavigationDelegate ?? self
+            
+            let editGroupFormVC = UIHostingController(rootView: GroupFormView(viewModel: editViewModel))
+            editGroupFormVC.navigationItem.title = "Edit Trip"
+            
+            navigationController?.pushViewController(editGroupFormVC, animated: true)
+        }
+    }
     
-//    func goToBookingDetail(with data: BookingDetails) {
-//        let coordinator = MyTripCoordinator(
-//            input: .init(
-//                navigationController: navigationController!,
-//                flow: .bookingDetail(data: data)
-//            )
-//        )
-//        coordinator.start()
-//    }
-//    
-//    func goToBookingDetail(with data: LocalBookingDetails) {
-//        let coordinator = MyTripCoordinator(
-//            input: .init(
-//                navigationController: navigationController!,
-//                flow: .localBookingDetail(data: data)
-//            )
-//        )
-//        coordinator.start()
-//    }
+    func notifyGroupTripPlanBookNowTapped(localBookingDetails: LocalBookingDetails) {
+        // Handle book now if needed, or delegate to external navigation delegate
+        if let externalDelegate = externalNavigationDelegate as? GroupTripPlanNavigationDelegate {
+            externalDelegate.notifyGroupTripPlanBookNowTapped(localBookingDetails: localBookingDetails)
+        } else {
+            // Fallback: navigate to trip detail
+            let tripDetailVM = TripDetailViewModel(localData: localBookingDetails)
+            let tripDetailVC = TripDetailViewController(viewModel: tripDetailVM)
+            navigationController?.pushViewController(tripDetailVC, animated: true)
+        }
+    }
 }
 
 // MARK: - CocoCalendarViewControllerDelegate

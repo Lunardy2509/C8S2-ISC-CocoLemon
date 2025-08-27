@@ -40,6 +40,11 @@ final class GroupFormViewModel: ObservableObject {
     // Warning/Alert Properties
     @Published var showWarningAlert: Bool = false
     @Published var warningMessage: String = ""
+    @Published var isEditMode: Bool = false // New property
+
+    var createPlanButtonTitle: String { // New computed property
+        isEditMode ? "Save Plan" : "Create Plan"
+    }
     
     // Available contributors for adding to team
     let availableContributors: [TripMemberData] = [
@@ -115,6 +120,29 @@ final class GroupFormViewModel: ObservableObject {
         self.selectedDestination = convertedActivity
         
         loadTeamMembers()
+        loadRecommendations()
+    }
+
+    // New initializer for edit mode
+    init(
+        existingTripData: GroupTripPlanDataModel,
+        activityFetcher: ActivityFetcherProtocol = ActivityFetcher(),
+        createBookingFetcher: CreateBookingFetcherProtocol = CreateBookingFetcher()
+    ) {
+        self.activityFetcher = activityFetcher
+        self.createBookingFetcher = createBookingFetcher
+        self.isEditMode = true // Set to true for edit mode
+
+        // Populate properties from existingTripData
+        self.tripName = existingTripData.tripName
+        // Use the existing helper method to convert ActivityDetailDataModel
+        self.selectedDestination = convertActivityDetailToRecommendation(existingTripData.activityDetailData)
+        self.dateVisit = existingTripData.tripDetails.dateVisit.toDate(format: "EEE, dd MMM yyyy") ?? Date() // Convert string to Date
+        self.deadline = existingTripData.tripDetails.dueDateForm.toDate(format: "EEE, dd MMM yyyy") ?? Date() // Convert string to Date
+        self.teamMembers = existingTripData.tripMembers.map { TeamMemberModel(name: $0.name, email: $0.email, isWaiting: $0.isWaiting) }
+        self.selectedPackageIds = Set(existingTripData.selectedPackages.map { $0.id })
+
+        // Load recommendations (if needed, or ensure they are already populated by existing data)
         loadRecommendations()
     }
     
@@ -260,5 +288,14 @@ extension GroupFormViewModel: HomeSearchBarViewModelDelegate {
         Task { @MainActor in
             showSearchSheet = true
         }
+    }
+}
+
+// Helper extension for String to Date conversion
+extension String {
+    func toDate(format: String) -> Date? {
+        let formatter = DateFormatter()
+        formatter.dateFormat = format
+        return formatter.date(from: self)
     }
 }

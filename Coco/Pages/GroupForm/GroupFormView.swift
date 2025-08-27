@@ -331,7 +331,7 @@ private extension GroupFormView {
             action: {
                 viewModel.createPlan()
             },
-            text: "Create Plan",
+            text: viewModel.createPlanButtonTitle,
             style: .large,
             type: viewModel.canCreatePlan ? .primary : .disabled
         )

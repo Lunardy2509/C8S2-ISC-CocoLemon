@@ -13,6 +13,7 @@ struct GroupTripPlanDataModel {
     let tripDetails: TripDetails
     let tripMembers: [TripMember]
     let selectedPackages: [VotablePackage]
+    let activityDetailData: ActivityDetailDataModel
     
     struct ActivityInfo {
         let imageUrl: String
@@ -70,6 +71,7 @@ extension GroupTripPlanDataModel {
         dueDate: Date
     ) {
         self.tripName = tripName
+        self.activityDetailData = activityData
         
         let priceRange: String
         if !activityData.availablePackages.content.isEmpty {
