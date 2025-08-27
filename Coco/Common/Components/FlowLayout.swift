@@ -52,7 +52,7 @@ struct FlowLayout: Layout {
             }
             
             subview.place(
-                at: CGPoint(x:x, y:y),
+                at: CGPoint(x: x, y: y),
                 proposal: ProposedViewSize(size)
             )
             

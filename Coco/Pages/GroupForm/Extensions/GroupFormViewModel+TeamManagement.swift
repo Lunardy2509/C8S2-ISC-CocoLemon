@@ -10,6 +10,26 @@ import Foundation
 // MARK: - Team Management
 extension GroupFormViewModel {
     func addTeamMember(name: String, email: String, isWaiting: Bool = true) {
+        let normalizedEmail = email.lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
+        
+        // Check if trying to add Adhis (group planner)
+        if normalizedEmail == "adhis@example.com" {
+            warningMessage = "Adhis is already added as the group planner."
+            showWarningAlert = true
+            return
+        }
+        
+        // Check if member is already in the team
+        if teamMembers.contains(where: { $0.email.lowercased() == normalizedEmail }) {
+            if let existingMember = teamMembers.first(where: { $0.email.lowercased() == normalizedEmail }) {
+                warningMessage = "\(existingMember.name) is already added to this trip."
+            } else {
+                warningMessage = "This member is already added to this trip."
+            }
+            showWarningAlert = true
+            return
+        }
+        
         let newMember = TeamMemberModel(
             name: name,
             email: email,
@@ -52,8 +72,29 @@ extension GroupFormViewModel {
     }
     
     func sendInvite(email: String) {
+        let normalizedEmail = email.lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
+        
+        // Check if trying to add Adhis (group planner)
+        if normalizedEmail == "adhis@example.com" || normalizedEmail == "adhis" {
+            warningMessage = "Adhis is already added as the group planner."
+            showWarningAlert = true
+            return
+        }
+        
+        // Check if member is already in the team
+        if teamMembers.contains(where: { $0.email.lowercased() == normalizedEmail }) {
+            // Find the member's name for better error message
+            if let existingMember = teamMembers.first(where: { $0.email.lowercased() == normalizedEmail || $0.name.lowercased() == normalizedEmail }) {
+                warningMessage = "\(existingMember.name) is already added to this trip."
+            } else {
+                warningMessage = "This member is already added to this trip."
+            }
+            showWarningAlert = true
+            return
+        }
+        
         // Check if this email corresponds to a known contributor
-        if let contributor = availableContributors.first(where: { $0.email.lowercased() == email.lowercased() }) {
+        if let contributor = availableContributors.first(where: { $0.email.lowercased() == normalizedEmail }) {
             // Add the known contributor in waiting state
             addTeamMember(contributor, isWaiting: true)
         } else {
@@ -67,6 +108,11 @@ extension GroupFormViewModel {
     
     func dismissInviteFriendPopup() {
         showInviteFriendPopup = false
+    }
+    
+    func dismissWarningAlert() {
+        showWarningAlert = false
+        warningMessage = ""
     }
     
     private func extractNameFromEmail(_ email: String) -> String {
@@ -83,37 +129,67 @@ extension GroupFormViewModel {
     
     // Convenience methods for adding specific contributors (all in waiting state except Adhis)
     func addAdhis(isWaiting: Bool = false) {
-        if let adhis = availableContributors.first(where: { $0.name == "Adhis" }) {
-            addTeamMember(adhis, isWaiting: isWaiting) // Adhis is not waiting as she's the planner
-        }
+        // Adhis is already the group planner, show warning
+        warningMessage = "Adhis is already added as the group planner."
+        showWarningAlert = true
     }
     
     func addCynthia(isWaiting: Bool = true) {
         if let cynthia = availableContributors.first(where: { $0.name == "Cynthia" }) {
+            // Check if already added
+            if teamMembers.contains(where: { $0.email.lowercased() == cynthia.email.lowercased() }) {
+                warningMessage = "Cynthia is already added to this trip."
+                showWarningAlert = true
+                return
+            }
             addTeamMember(cynthia, isWaiting: isWaiting)
         }
     }
     
     func addAhmad(isWaiting: Bool = true) {
         if let ahmad = availableContributors.first(where: { $0.name == "Ahmad" }) {
+            // Check if already added
+            if teamMembers.contains(where: { $0.email.lowercased() == ahmad.email.lowercased() }) {
+                warningMessage = "Ahmad is already added to this trip."
+                showWarningAlert = true
+                return
+            }
             addTeamMember(ahmad, isWaiting: isWaiting)
         }
     }
     
     func addTeuku(isWaiting: Bool = true) {
         if let teuku = availableContributors.first(where: { $0.name == "Teuku" }) {
+            // Check if already added
+            if teamMembers.contains(where: { $0.email.lowercased() == teuku.email.lowercased() }) {
+                warningMessage = "Teuku is already added to this trip."
+                showWarningAlert = true
+                return
+            }
             addTeamMember(teuku, isWaiting: isWaiting)
         }
     }
     
     func addGriselda(isWaiting: Bool = true) {
         if let griselda = availableContributors.first(where: { $0.name == "Griselda" }) {
+            // Check if already added
+            if teamMembers.contains(where: { $0.email.lowercased() == griselda.email.lowercased() }) {
+                warningMessage = "Griselda is already added to this trip."
+                showWarningAlert = true
+                return
+            }
             addTeamMember(griselda, isWaiting: isWaiting)
         }
     }
     
     func addFerdinand(isWaiting: Bool = true) {
         if let ferdinand = availableContributors.first(where: { $0.name == "Ferdinand" }) {
+            // Check if already added
+            if teamMembers.contains(where: { $0.email.lowercased() == ferdinand.email.lowercased() }) {
+                warningMessage = "Ferdinand is already added to this trip."
+                showWarningAlert = true
+                return
+            }
             addTeamMember(ferdinand, isWaiting: isWaiting)
         }
     }

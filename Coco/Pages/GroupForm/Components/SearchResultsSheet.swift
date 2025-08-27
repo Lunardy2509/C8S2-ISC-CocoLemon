@@ -20,13 +20,14 @@ struct SearchResultsSheet: View {
                 HStack {
                     VStack(alignment: .leading, spacing: 8) {
                         Text("Search Results")
-                            .font(.title2)
+                            .font(.jakartaSans(forTextStyle: .title1, weight: .bold))
                             .fontWeight(.bold)
-                            .foregroundColor(.black)
+                            .foregroundColor(Token.additionalColorsBlack.toColor())
+                            .padding(.top, 10)
                         
                         Text("Found \(searchResults.count) results for '\(searchQuery)'")
-                            .font(.subheadline)
-                            .foregroundColor(.gray)
+                            .font(.jakartaSans(forTextStyle: .subheadline, weight: .regular))
+                            .foregroundColor(Token.grayscale60.toColor())
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
                     
@@ -100,50 +101,44 @@ struct SearchResultActivityCard: View {
             
             // Content
             VStack(alignment: .leading, spacing: 4) {
-                // Location
-                HStack(spacing: 4) {
-                    Image(systemName: "location")
-                        .resizable()
-                        .frame(width: 12, height: 12)
-                        .foregroundColor(.gray)
-                    
-                    Text(dataModel.location)
-                        .font(.footnote)
-                        .foregroundColor(.gray)
-                        .lineLimit(1)
-                    
-                    Spacer()
-                }
-                
                 // Title
                 Text(dataModel.title)
-                    .font(.headline)
+                    .font(.jakartaSans(forTextStyle: .headline, weight: .bold))
                     .fontWeight(.semibold)
                     .foregroundColor(.black)
                     .lineLimit(2)
                     .multilineTextAlignment(.leading)
+                    .padding(4)
                 
-                Spacer()
-                
-                // Price
-                HStack {
-                    Text(dataModel.priceText)
-                        .font(.callout)
-                        .fontWeight(.bold)
-                        .foregroundColor(.black)
+                // Location
+                HStack(spacing: 4) {
+                    Image(uiImage: CocoIcon.icPinPointBlack.image)
+                        .resizable()
+                        .frame(width: 12, height: 12)
+                        .foregroundColor(Token.additionalColorsBlack.toColor())
                     
-                    Text("/Person")
-                        .font(.callout)
-                        .fontWeight(.medium)
-                        .foregroundColor(.black)
+                    Text(dataModel.location)
+                        .font(.jakartaSans(forTextStyle: .footnote, weight: .regular))
+                        .foregroundColor(Token.grayscale90.toColor())
+                        .lineLimit(1)
                     
                     Spacer()
                 }
+                .padding(4)
+                
+                // Price
+                HStack {
+                    Text("\(dataModel.priceText)/Person")
+                        .font(.jakartaSans(forTextStyle: .caption2, weight: .bold))
+                        .foregroundColor(Token.additionalColorsBlack.toColor())
+                        .lineLimit(1)
+                }
+                .padding(4)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
         }
         .padding(12)
-        .background(Color.white)
+        .background(Token.additionalColorsWhite.toColor())
         .cornerRadius(16)
         .shadow(color: Color.black.opacity(0.1), radius: 4, x: 0, y: 2)
         .overlay(

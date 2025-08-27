@@ -9,20 +9,19 @@ import SwiftUI
 
 struct TopDestinationSection: View {
     @StateObject private var viewModel = TopDestinationViewModel()
-    let onDestinationTap: (TopDestinationCardDataModel) -> Void
+    let onDestinationTap: (TopDestinationCardDataModel, TopDestinationViewModel) -> Void
     let onAddDestinationTap: () -> Void
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 16) {
+        VStack(alignment: .leading, spacing: 12) {
             // Section Title
             HStack {
                 Text("Place Recommendation")
-                    .font(.jakartaSans(forTextStyle: .subheadline, weight: .medium))
+                    .font(.jakartaSans(forTextStyle: .headline, weight: .semibold))
                     .foregroundColor(Token.additionalColorsBlack.toColor())
                 
                 Spacer()
             }
-            .padding(.horizontal)
             
             if viewModel.topDestinations.isEmpty {
                 // Empty state
@@ -31,7 +30,7 @@ struct TopDestinationSection: View {
                         .font(.system(size: 32))
                         .foregroundColor(Token.grayscale50.toColor())
                     
-                    Text("No destinations available")
+                    Text("No Internet Connection")
                         .font(.jakartaSans(forTextStyle: .caption1, weight: .medium))
                         .foregroundColor(Token.grayscale70.toColor())
                         .padding(.top, 8)
@@ -47,15 +46,15 @@ struct TopDestinationSection: View {
                             TopDestinationCard(
                                 destination: destination,
                                 onTap: {
-                                    onDestinationTap(destination)
+                                    onDestinationTap(destination, viewModel)
                                 }
                             )
                             .frame(width: 280, height: 120)
                         }
                     }
-                    .padding(.horizontal, 24)
+                    .padding(.horizontal, 12)
                 }
-                .padding(.horizontal, -24)
+                .padding(.horizontal, -12)
             }
         }
         .onAppear {

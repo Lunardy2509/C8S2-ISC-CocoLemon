@@ -28,13 +28,10 @@ final class MyTripView: UIView {
     }
     
     func configureView(datas: [MyTripListCardDataModel]) {
-        print("📋 MyTripView: configureView called with \(datas.count) items")
         self.tripData = datas
         if datas.isEmpty {
-            print("📋 MyTripView: Showing empty state")
             showEmptyState()
         } else {
-            print("📋 MyTripView: Showing list with \(datas.count) items")
             showList()
         }
     }
@@ -94,14 +91,12 @@ private extension MyTripView {
     }
     
     func showList() {
-        print("📋 MyTripView: showList() - hiding empty state, showing collection view")
         emptyStateView.isHidden = true
         collectionView.isHidden = false
         collectionView.reloadData()
     }
     
     func showEmptyState() {
-        print("📋 MyTripView: showEmptyState() - hiding collection view, showing empty state")
         collectionView.isHidden = true
         emptyStateView.isHidden = false
     }
@@ -110,19 +105,15 @@ private extension MyTripView {
 // MARK: - UICollectionViewDataSource
 extension MyTripView: UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        print("📊 Collection view numberOfItems: \(tripData.count)")
         return tripData.count
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        print("🔧 Collection view creating cell for index: \(indexPath.item)")
         guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "MyTripCollectionViewCell", for: indexPath) as? MyTripCollectionViewCell else {
-            print("❌ Failed to dequeue MyTripCollectionViewCell")
             return UICollectionViewCell()
         }
         
         let data = tripData[indexPath.item]
-        print("📝 Configuring cell with trip: \(data.title)")
         cell.configure(with: data, index: indexPath.item)
         cell.delegate = self
         
@@ -150,7 +141,6 @@ extension MyTripView: UICollectionViewDelegateFlowLayout {
         // Calculate height based on your cell's content
         // This should match the height needed for your MyTripCollectionViewCell
         let height: CGFloat = 200 // Increased height to ensure visibility
-        print("📏 Collection view item size: \(width) x \(height)")
         return CGSize(width: width, height: height)
     }
 }

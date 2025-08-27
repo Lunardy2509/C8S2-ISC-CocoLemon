@@ -46,7 +46,6 @@ final class MyTripViewController: UIViewController {
 
 extension MyTripViewController: MyTripViewModelAction {
     func configureView(datas: [MyTripListCardDataModel]) {
-        print("🎨 MyTripViewController: Configuring view with \(datas.count) trip(s)")
         thisView.configureView(datas: datas)
     }
     

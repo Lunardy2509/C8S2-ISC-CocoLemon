@@ -81,7 +81,10 @@ final class EmptyStateView: UIView {
     
     private func setupTopDestinationSection(onDestinationSelected: @escaping (TopDestinationCardDataModel) -> Void) {
         let topDestinationSection = TopDestinationSection(
-            onDestinationTap: onDestinationSelected,
+            onDestinationTap: { destination, _ in
+                // Ignore the TopDestinationViewModel parameter and just pass the destination
+                onDestinationSelected(destination)
+            },
             onAddDestinationTap: { /* This won't be used in empty state */ }
         )
         
@@ -159,9 +162,6 @@ final class EmptyStateView: UIView {
         if let caption = caption {
             captionLabel.text = caption
         }
-        
-        // Note: ButtonTitle update would require recreating the hosting controller
-        // For simplicity, this is not implemented here but can be added if needed
     }
     
     func updateButtonStyle(
@@ -186,8 +186,6 @@ final class EmptyStateView: UIView {
     }
     
     private func getCurrentButtonTitle() -> String? {
-        // This would need to be tracked if dynamic updates are needed
-        // For now, return nil or implement a title tracking mechanism
         return nil
     }
 }
