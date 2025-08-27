@@ -143,7 +143,7 @@ private extension HomeCollectionViewController {
     
     typealias NoResultCellRegistration = UICollectionView.CellRegistration<NoResultCell, NoResultCellDataModel>
     func createNoResultCellRegistration() -> NoResultCellRegistration {
-        .init { cell, _, itemIdentifier in
+        .init { _, _, _ in
             // No configuration needed for the simple no result cell
         }
     }
@@ -157,7 +157,8 @@ private extension HomeCollectionViewController {
                 return
             }
             
-            let showClearAll = sectionTitle == "Your Result"
+            // Only show "Clear All" for "Your Result" sections that are NOT from search results
+            let showClearAll = sectionTitle == "Your Result" && !(self?.viewModel.isFromSearch ?? false)
             supplementaryView.configureView(title: sectionTitle, showClearAll: showClearAll)
             
             supplementaryView.onClearAllTap = { [weak self] in

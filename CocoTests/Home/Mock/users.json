@@ -1,0 +1,458 @@
+[
+  {
+    "id": "1575d5c7-3c0b-4e7d-b049-3ee3042948f3",
+    "group_id": 1,
+    "name": "User_1_morning",
+    "email": "user1_morning@demo.com",
+    "password_hash": "448c663947",
+    "created_at": "2025-06-05T04:14:04.325529"
+  },
+  {
+    "id": "ad8f44d2-8933-40a6-8dea-1d983cfff596",
+    "group_id": 2,
+    "name": "User_2_morning",
+    "email": "user2_morning@demo.com",
+    "password_hash": "5b36b85a05",
+    "created_at": "2025-06-05T04:14:04.325529"
+  },
+  {
+    "id": "6fbd607d-03e2-43e4-9a59-bb9dd5030263",
+    "group_id": 3,
+    "name": "User_3_morning",
+    "email": "user3_morning@demo.com",
+    "password_hash": "8e176b5e91",
+    "created_at": "2025-06-05T04:14:04.325529"
+  },
+  {
+    "id": "29b0341e-1e24-4161-98a9-d52533c729c5",
+    "group_id": 4,
+    "name": "User_4_morning",
+    "email": "user4_morning@demo.com",
+    "password_hash": "90066bfce4",
+    "created_at": "2025-06-05T04:14:04.325529"
+  },
+  {
+    "id": "b8af6723-1f2c-497c-9bf2-e475469e5e1f",
+    "group_id": 5,
+    "name": "User_5_morning",
+    "email": "user5_morning@demo.com",
+    "password_hash": "b2374c3351",
+    "created_at": "2025-06-05T04:14:04.325529"
+  },
+  {
+    "id": "ac0101e3-6045-49d2-880f-d4452b374ef3",
+    "group_id": 6,
+    "name": "User_6_morning",
+    "email": "user6_morning@demo.com",
+    "password_hash": "4efcb7e8fc",
+    "created_at": "2025-06-05T04:14:04.325529"
+  },
+  {
+    "id": "70a021c0-b943-4d1c-aa32-d308ab415a3c",
+    "group_id": 7,
+    "name": "User_7_morning",
+    "email": "user7_morning@demo.com",
+    "password_hash": "285d001b45",
+    "created_at": "2025-06-05T04:14:04.325529"
+  },
+  {
+    "id": "19d92fa2-1967-4018-a2b3-46a30067e70d",
+    "group_id": 8,
+    "name": "User_8_morning",
+    "email": "user8_morning@demo.com",
+    "password_hash": "f249f7088e",
+    "created_at": "2025-06-05T04:14:04.325529"
+  },
+  {
+    "id": "2b2200be-c4a9-4c4d-8c18-f901a8c4d191",
+    "group_id": 9,
+    "name": "User_9_morning",
+    "email": "user9_morning@demo.com",
+    "password_hash": "ae429341bc",
+    "created_at": "2025-06-05T04:14:04.325529"
+  },
+  {
+    "id": "da955387-91f3-4e88-96b8-f87d3a78e92f",
+    "group_id": 10,
+    "name": "User_10_morning",
+    "email": "user10_morning@demo.com",
+    "password_hash": "8907a530a4",
+    "created_at": "2025-06-05T04:14:04.325529"
+  },
+  {
+    "id": "8831db97-94c8-4824-9fbe-daec8624bdea",
+    "group_id": 11,
+    "name": "User_11_morning",
+    "email": "user11_morning@demo.com",
+    "password_hash": "dcd7e9ee17",
+    "created_at": "2025-06-05T04:14:04.325529"
+  },
+  {
+    "id": "b9345591-1c81-43b9-b46e-cf794394067c",
+    "group_id": 12,
+    "name": "User_12_morning",
+    "email": "user12_morning@demo.com",
+    "password_hash": "d4a1eb8669",
+    "created_at": "2025-06-05T04:14:04.325529"
+  },
+  {
+    "id": "e86281ba-d02f-42d6-a313-0bacf19ed815",
+    "group_id": 13,
+    "name": "User_13_morning",
+    "email": "user13_morning@demo.com",
+    "password_hash": "ee39b0f4e8",
+    "created_at": "2025-06-05T04:14:04.325529"
+  },
+  {
+    "id": "6b8847e5-0122-4388-9968-ff04e1d2e211",
+    "group_id": 14,
+    "name": "User_14_morning",
+    "email": "user14_morning@demo.com",
+    "password_hash": "3a8253d279",
+    "created_at": "2025-06-05T04:14:04.325529"
+  },
+  {
+    "id": "60c0a2c2-8b97-4080-9ce7-1f77f3c5abde",
+    "group_id": 15,
+    "name": "User_15_morning",
+    "email": "user15_morning@demo.com",
+    "password_hash": "b224b81fef",
+    "created_at": "2025-06-05T04:14:04.325529"
+  },
+  {
+    "id": "2e0eb22b-412c-4942-917e-da38c935eff3",
+    "group_id": 16,
+    "name": "User_16_morning",
+    "email": "user16_morning@demo.com",
+    "password_hash": "2de995d258",
+    "created_at": "2025-06-05T04:14:04.325529"
+  },
+  {
+    "id": "2c710840-f4e3-4569-9b73-52de83a6bd3d",
+    "group_id": 17,
+    "name": "User_17_morning",
+    "email": "user17_morning@demo.com",
+    "password_hash": "1af931debb",
+    "created_at": "2025-06-05T04:14:04.325529"
+  },
+  {
+    "id": "d3e43f2c-559c-4540-8039-a04963b06dfd",
+    "group_id": 18,
+    "name": "User_18_morning",
+    "email": "user18_morning@demo.com",
+    "password_hash": "6885144b2f",
+    "created_at": "2025-06-05T04:14:04.325529"
+  },
+  {
+    "id": "67eec5ce-7f06-4e90-8b69-7423440357b0",
+    "group_id": 19,
+    "name": "User_19_afternoon",
+    "email": "user19_afternoon@demo.com",
+    "password_hash": "fe3c3126e3",
+    "created_at": "2025-06-05T04:14:04.325529"
+  },
+  {
+    "id": "5e7585e7-3c76-4fb4-b54c-6013fb3119ab",
+    "group_id": 20,
+    "name": "User_20_afternoon",
+    "email": "user20_afternoon@demo.com",
+    "password_hash": "98adea90fd",
+    "created_at": "2025-06-05T04:14:04.325529"
+  },
+  {
+    "id": "879e4750-55a8-42b2-b259-1ba29b915b25",
+    "group_id": 21,
+    "name": "User_21_afternoon",
+    "email": "user21_afternoon@demo.com",
+    "password_hash": "8153a1e370",
+    "created_at": "2025-06-05T04:14:04.325529"
+  },
+  {
+    "id": "e24f8a41-60d4-4663-83c6-ee722f08132a",
+    "group_id": 22,
+    "name": "User_22_afternoon",
+    "email": "user22_afternoon@demo.com",
+    "password_hash": "afc138d563",
+    "created_at": "2025-06-05T04:14:04.325529"
+  },
+  {
+    "id": "d5fe004f-f44a-4425-a6a3-6253bd8100e5",
+    "group_id": 23,
+    "name": "User_23_afternoon",
+    "email": "user23_afternoon@demo.com",
+    "password_hash": "5eeb9ea0fe",
+    "created_at": "2025-06-05T04:14:04.325529"
+  },
+  {
+    "id": "342addd0-c09b-4cc7-8550-0e50fa9f9e64",
+    "group_id": 24,
+    "name": "User_24_afternoon",
+    "email": "user24_afternoon@demo.com",
+    "password_hash": "9fabbe0cd3",
+    "created_at": "2025-06-05T04:14:04.325529"
+  },
+  {
+    "id": "26c95804-0aac-4ecb-8f4b-bc82a4806175",
+    "group_id": 25,
+    "name": "User_25_afternoon",
+    "email": "user25_afternoon@demo.com",
+    "password_hash": "bf58dd9c9a",
+    "created_at": "2025-06-05T04:14:04.325529"
+  },
+  {
+    "id": "33e03bb8-7f51-491d-aa9b-2bdca4effd8b",
+    "group_id": 26,
+    "name": "User_26_afternoon",
+    "email": "user26_afternoon@demo.com",
+    "password_hash": "db10baba56",
+    "created_at": "2025-06-05T04:14:04.325529"
+  },
+  {
+    "id": "d40883ac-5847-4200-9999-449927e02bc5",
+    "group_id": 27,
+    "name": "User_27_afternoon",
+    "email": "user27_afternoon@demo.com",
+    "password_hash": "cc2d6fcc91",
+    "created_at": "2025-06-05T04:14:04.325529"
+  },
+  {
+    "id": "1aaf281c-a0f0-49bd-93ec-44d475016188",
+    "group_id": 28,
+    "name": "User_28_afternoon",
+    "email": "user28_afternoon@demo.com",
+    "password_hash": "30c2dc74a2",
+    "created_at": "2025-06-05T04:14:04.325529"
+  },
+  {
+    "id": "26cfcfb9-f132-4419-bd34-b848420d6d33",
+    "group_id": 29,
+    "name": "User_29_afternoon",
+    "email": "user29_afternoon@demo.com",
+    "password_hash": "a13a01d18a",
+    "created_at": "2025-06-05T04:14:04.325529"
+  },
+  {
+    "id": "338357f9-d676-4f2b-b7ad-07c047e05368",
+    "group_id": 30,
+    "name": "User_30_afternoon",
+    "email": "user30_afternoon@demo.com",
+    "password_hash": "ea64d3d260",
+    "created_at": "2025-06-05T04:14:04.325529"
+  },
+  {
+    "id": "7e951dbb-38b5-4fb2-911c-1f56a72dc7e3",
+    "group_id": 31,
+    "name": "User_31_afternoon",
+    "email": "user31_afternoon@demo.com",
+    "password_hash": "8693ba06c2",
+    "created_at": "2025-06-05T04:14:04.325529"
+  },
+  {
+    "id": "7f134c5e-9b51-42d2-b265-dbbe5a167353",
+    "group_id": 32,
+    "name": "User_32_afternoon",
+    "email": "user32_afternoon@demo.com",
+    "password_hash": "76cf2e8a74",
+    "created_at": "2025-06-05T04:14:04.325529"
+  },
+  {
+    "id": "75540fad-ce99-4cf2-a0db-965a6fbc1579",
+    "group_id": 33,
+    "name": "User_33_afternoon",
+    "email": "user33_afternoon@demo.com",
+    "password_hash": "24e2914714",
+    "created_at": "2025-06-05T04:14:04.325529"
+  },
+  {
+    "id": "0647bad5-0859-4e5d-8e0a-2366fb6ce082",
+    "group_id": 34,
+    "name": "User_34_afternoon",
+    "email": "user34_afternoon@demo.com",
+    "password_hash": "dd501ea3d5",
+    "created_at": "2025-06-05T04:14:04.325529"
+  },
+  {
+    "id": "49a61e93-955f-4254-93bd-363329f005ad",
+    "group_id": 35,
+    "name": "User_35_afternoon",
+    "email": "user35_afternoon@demo.com",
+    "password_hash": "4d8d09843e",
+    "created_at": "2025-06-05T04:14:04.325529"
+  },
+  {
+    "id": "419d1bd0-c180-4b0e-998c-761030a3bc79",
+    "group_id": 36,
+    "name": "User_36_afternoon",
+    "email": "user36_afternoon@demo.com",
+    "password_hash": "66c02a714a",
+    "created_at": "2025-06-05T04:14:04.325529"
+  },
+  {
+    "id": "7c90b00e-42e6-4014-9a10-2ead0ac0c278",
+    "group_id": null,
+    "name": "mentorspace",
+    "email": "tangerang@binus.edu",
+    "password_hash": "24k4m1sju11y",
+    "created_at": "2025-07-24T01:54:17.212743"
+  },
+  {
+    "id": "85f39fcd-d2e6-4af2-bc2e-81b320b54b1e",
+    "group_id": null,
+    "name": "user_31",
+    "email": "user_31@example.com",
+    "password_hash": "aB$5&zP!9qE*",
+    "created_at": "2025-08-13T03:22:17.095707"
+  },
+  {
+    "id": "b69e31e9-4a42-4227-b7a6-9eca91ff3404",
+    "group_id": null,
+    "name": "user_32",
+    "email": "user_32@example.com",
+    "password_hash": "kL@8#fG2$hV7",
+    "created_at": "2025-08-13T03:22:17.095707"
+  },
+  {
+    "id": "2d8e248c-69ac-4d7e-b538-cc2db80df25b",
+    "group_id": null,
+    "name": "user_33",
+    "email": "user_33@example.com",
+    "password_hash": "sW!6^jN4%mC1",
+    "created_at": "2025-08-13T03:22:17.095707"
+  },
+  {
+    "id": "74e4b171-16f1-4e3f-a976-a95c6e3d84c8",
+    "group_id": null,
+    "name": "user_34",
+    "email": "user_34@example.com",
+    "password_hash": "pX&9@zY3*rT5",
+    "created_at": "2025-08-13T03:22:17.095707"
+  },
+  {
+    "id": "663cc8bd-bee9-47ce-9772-bcab537c6bd4",
+    "group_id": null,
+    "name": "user_35",
+    "email": "user_35@example.com",
+    "password_hash": "gH#2!vB7$nK8",
+    "created_at": "2025-08-13T03:22:17.095707"
+  },
+  {
+    "id": "1077c786-393c-4a5a-90be-42cd48d220fa",
+    "group_id": null,
+    "name": "user_36",
+    "email": "user_36@example.com",
+    "password_hash": "uJ*5%dF1@eL9",
+    "created_at": "2025-08-13T03:22:17.095707"
+  },
+  {
+    "id": "eba34dc4-7e8e-4b8a-bda1-2a52cfc5bba3",
+    "group_id": null,
+    "name": "user_37",
+    "email": "user_37@example.com",
+    "password_hash": "cZ$3&wS6^pA4",
+    "created_at": "2025-08-13T03:22:17.095707"
+  },
+  {
+    "id": "f67562eb-6d2c-4583-8dc8-684e9445e50b",
+    "group_id": null,
+    "name": "user_38",
+    "email": "user_38@example.com",
+    "password_hash": "iO@7#mQ2!bN6",
+    "created_at": "2025-08-13T03:22:17.095707"
+  },
+  {
+    "id": "36be1955-4086-4905-8db6-774e57353e91",
+    "group_id": null,
+    "name": "user_39",
+    "email": "user_39@example.com",
+    "password_hash": "tY*1^hG8%vC3",
+    "created_at": "2025-08-13T03:22:17.095707"
+  },
+  {
+    "id": "1e1f31dc-43e0-48ba-a6e3-77e2b6db436f",
+    "group_id": null,
+    "name": "user_40",
+    "email": "user_40@example.com",
+    "password_hash": "rF&4@jK9$dM2",
+    "created_at": "2025-08-13T03:22:17.095707"
+  },
+  {
+    "id": "52979058-9c8f-475b-849c-59e7bddf2bef",
+    "group_id": null,
+    "name": "user_41",
+    "email": "user_41@example.com",
+    "password_hash": "mN#7!sD2^fG8",
+    "created_at": "2025-08-20T04:04:29.74046"
+  },
+  {
+    "id": "743089e0-b2c0-4369-bc5a-31883ff45b43",
+    "group_id": null,
+    "name": "user_42",
+    "email": "user_42@example.com",
+    "password_hash": "bV*9%hJ4@kL1",
+    "created_at": "2025-08-20T04:04:29.74046"
+  },
+  {
+    "id": "61698138-3974-43b9-bc54-9446b3845427",
+    "group_id": null,
+    "name": "user_43",
+    "email": "user_43@example.com",
+    "password_hash": "cX$1&zP6!qW5",
+    "created_at": "2025-08-20T04:04:29.74046"
+  },
+  {
+    "id": "1d6c4394-53bc-462f-bfe1-550c567ee97f",
+    "group_id": null,
+    "name": "user_44",
+    "email": "user_44@example.com",
+    "password_hash": "aZ@4#eR7^tY2",
+    "created_at": "2025-08-20T04:04:29.74046"
+  },
+  {
+    "id": "f98d7c37-5560-4efa-81e6-f6e4fd88f13b",
+    "group_id": null,
+    "name": "user_45",
+    "email": "user_45@example.com",
+    "password_hash": "wS!8*dF3%gH6",
+    "created_at": "2025-08-20T04:04:29.74046"
+  },
+  {
+    "id": "b56dd43c-e84a-416c-8d3d-63e34c2c6429",
+    "group_id": null,
+    "name": "user_46",
+    "email": "user_46@example.com",
+    "password_hash": "jK&2^lO9@pI7",
+    "created_at": "2025-08-20T04:04:29.74046"
+  },
+  {
+    "id": "b4f8f771-299b-45a6-a5ea-3e3a0e3a4d01",
+    "group_id": null,
+    "name": "user_47",
+    "email": "user_47@example.com",
+    "password_hash": "qA#5!zX1$eD4",
+    "created_at": "2025-08-20T04:04:29.74046"
+  },
+  {
+    "id": "6eb1e6bf-ae68-4be8-981f-298b25c59755",
+    "group_id": null,
+    "name": "user_48",
+    "email": "user_48@example.com",
+    "password_hash": "vB*7%n M3@jK9",
+    "created_at": "2025-08-20T04:04:29.74046"
+  },
+  {
+    "id": "21405ad4-4df3-422a-86df-cc196870cc62",
+    "group_id": null,
+    "name": "user_49",
+    "email": "user_49@example.com",
+    "password_hash": "uI$6&hG2^fT5",
+    "created_at": "2025-08-20T04:04:29.74046"
+  },
+  {
+    "id": "9656e608-4cb0-4545-8e8b-6a5145210eb6",
+    "group_id": null,
+    "name": "user_50",
+    "email": "user_50@example.com",
+    "password_hash": "yT!3@rE8*pW1",
+    "created_at": "2025-08-20T04:04:29.74046"
+  }
+]

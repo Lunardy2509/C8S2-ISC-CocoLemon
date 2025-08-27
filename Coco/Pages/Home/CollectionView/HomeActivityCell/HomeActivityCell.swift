@@ -20,8 +20,7 @@ final class HomeActivityCell: UICollectionViewCell {
     
     func configureCell(_ dataModel: HomeActivityCellDataModel) {
         imageView.loadImage(from: dataModel.imageUrl)
-        areaLabel.text = dataModel.area
-        nameLabel.text = dataModel.name
+        titleLabel.text = dataModel.title
         locationLabel.text = dataModel.location
         
         let attributedString = NSMutableAttributedString(
@@ -52,16 +51,11 @@ final class HomeActivityCell: UICollectionViewCell {
     
     private lazy var imageView: UIImageView = createImageView()
     private lazy var locationView: UIView = createLocationView()
-    private lazy var areaView: UIView = createAreaView()
+    private lazy var titleView: UIView = createTitleView()
     private lazy var priceView: UIView = createPriceView()
     
-    private lazy var areaLabel: UILabel = UILabel(
+    private lazy var titleLabel: UILabel = UILabel(
         font: .jakartaSans(forTextStyle: .title3, weight: .bold),
-        textColor: Token.additionalColorsBlack,
-        numberOfLines: 2
-    )
-    private lazy var nameLabel: UILabel = UILabel(
-        font: .jakartaSans(forTextStyle: .callout, weight: .medium),
         textColor: Token.additionalColorsBlack,
         numberOfLines: 2
     )
@@ -83,7 +77,7 @@ private extension HomeActivityCell {
             arrangedSubviews: [
                 imageView,
                 locationView,
-                areaView,
+                titleView,
                 priceView
             ]
         )
@@ -94,7 +88,7 @@ private extension HomeActivityCell {
         
         stackView.setCustomSpacing(12.0, after: imageView)
         stackView.setCustomSpacing(8.0, after: locationView)
-        stackView.setCustomSpacing(4.0, after: areaView)
+        stackView.setCustomSpacing(4.0, after: titleView)
         
         contentView.addSubviewAndLayout(stackView)
     }
@@ -112,7 +106,7 @@ private extension HomeActivityCell {
     
     func createLocationView() -> UIView {
         let containerView = UIView()
-        let pinIcon = UIImageView(image: CocoIcon.icPinPointBlue.image)
+        let pinIcon = UIImageView(image: CocoIcon.icPinPointBlack.image)
         pinIcon.contentMode = .scaleAspectFit
         
         containerView.addSubviews([pinIcon, locationLabel])
@@ -132,11 +126,11 @@ private extension HomeActivityCell {
         return containerView
     }
     
-    func createAreaView() -> UIView {
+    func createTitleView() -> UIView {
         let containerView = UIView()
-        containerView.addSubview(areaLabel)
+        containerView.addSubview(titleLabel)
         
-        areaLabel.layout {
+        titleLabel.layout {
             $0.leading(to: containerView.leadingAnchor)
                 .trailing(to: containerView.trailingAnchor)
                 .top(to: containerView.topAnchor)

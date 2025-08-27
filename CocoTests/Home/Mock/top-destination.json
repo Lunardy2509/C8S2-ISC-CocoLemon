@@ -1,0 +1,32 @@
+[
+  {
+    "id": 2,
+    "name": "Komodo National Park, NTT",
+    "description": "A UNESCO World Heritage site, home to the iconic Komodo dragon and offering dramatic landscapes and vibrant dive sites.",
+    "activity_count": 3
+  },
+  {
+    "id": 3,
+    "name": "Gili Trawangan, Bali",
+    "description": "The largest of the three Gili Islands, known for its vibrant nightlife, beautiful beaches, and excellent snorkeling with sea turtles.",
+    "activity_count": 2
+  },
+  {
+    "id": 1,
+    "name": "Raja Ampat, West Papua",
+    "description": "An archipelago of over 1,500 islands, famous for its world-class coral reef biodiversity and pristine marine life.",
+    "activity_count": 2
+  },
+  {
+    "id": 5,
+    "name": "Bunaken, North Sulawesi",
+    "description": "A marine park at the heart of the Coral Triangle, featuring spectacular, deep coral walls teeming with fish.",
+    "activity_count": 2
+  },
+  {
+    "id": 12,
+    "name": "Yogyakarta, DI Yogyakarta",
+    "description": "The cultural soul of Java, home to ancient temples like Borobudur and Prambanan, as well as rich Javanese arts.",
+    "activity_count": 2
+  }
+]

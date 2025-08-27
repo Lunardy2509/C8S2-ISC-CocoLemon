@@ -7,44 +7,60 @@
 
 import Foundation
 import UIKit
+import SwiftUI 
 
 struct BookingDetailDataModel {
     let imageString: String
     let activityName: String
     let packageName: String
     let location: String
-    
     let bookingDateText: String
+    let dueDateForm: String 
     let status: StatusLabel
     let paxNumber: Int
-    
     let price: Double
-    
     let address: String
+    let bookedPackages: [BookedPackageInfo]? 
     
     struct StatusLabel {
         let text: String
         let style: CocoStatusLabelStyle
     }
     
+    struct BookedPackageInfo {
+        let name: String
+        let price: String
+        let imageUrl: String
+        let minParticipants: String
+        let maxParticipants: String
+        let voters: [TripMember]
+        let totalVotes: Int
+    }
     
+    // Original initializer for API BookingDetails (without group trip features)
     init(bookingDetail: BookingDetails) {
         var bookingStatus: String = bookingDetail.status
         var statusStyle: CocoStatusLabelStyle = .pending
         
-        let formatter: DateFormatter = DateFormatter()
-        formatter.dateFormat = "YYYY-MM-dd"
-        
-        if let targetDate: Date = formatter.date(from: bookingDetail.activityDate) {
-            let today: Date = Date()
+        // If status is already "Pending", keep it as is (for newly created plans)
+        if bookingDetail.status.lowercased() == "pending" {
+            bookingStatus = "Pending"
+            statusStyle = .pending
+        } else {
+            // For other statuses, apply date-based logic
+            let formatter: DateFormatter = DateFormatter()
+            formatter.dateFormat = "YYYY-MM-dd"
             
-            if targetDate < today {
-                bookingStatus = "Completed"
-                statusStyle = .success
-            }
-            else if targetDate > today {
-                bookingStatus = "Upcoming"
-                statusStyle = .refund
+            if let targetDate: Date = formatter.date(from: bookingDetail.activityDate) {
+                let today: Date = Date()
+                
+                if targetDate < today {
+                    bookingStatus = "Completed"
+                    statusStyle = .success
+                } else if targetDate > today {
+                    bookingStatus = "Upcoming"
+                    statusStyle = .success // Fix: use .success instead of .refund for upcoming
+                }
             }
         }
         
@@ -56,7 +72,74 @@ struct BookingDetailDataModel {
         paxNumber = bookingDetail.participants
         price = bookingDetail.totalPrice
         address = bookingDetail.address
-        bookingDateText = bookingDetail.activityDate
+        
+        // For regular bookings, these fields don't exist
+        dueDateForm = "Not specified"
+        bookedPackages = nil
+        
+        // Format the date to display in a user-friendly format like "Tues, 15 March 2025"
+        let inputFormatter = DateFormatter()
+        inputFormatter.dateFormat = "yyyy-MM-dd"
+        
+        if let date = inputFormatter.date(from: bookingDetail.activityDate) {
+            let outputFormatter = DateFormatter()
+            outputFormatter.dateFormat = "E, d MMMM yyyy"
+            outputFormatter.locale = Locale(identifier: "en_US")
+            bookingDateText = outputFormatter.string(from: date)
+        } else {
+            bookingDateText = bookingDetail.activityDate
+        }
+    }
+    
+    // New initializer for LocalBookingDetails (group trips)
+    init(localBookingDetail: LocalBookingDetails) {
+        self.imageString = localBookingDetail.destination.imageUrl ?? ""
+        self.activityName = localBookingDetail.activityTitle
+        self.packageName = localBookingDetail.packageName
+        self.location = localBookingDetail.destination.name
+        self.paxNumber = localBookingDetail.participants
+        self.price = localBookingDetail.totalPrice
+        self.address = localBookingDetail.address
+        self.dueDateForm = localBookingDetail.dueDateForm ?? "Not specified"
+        
+        // Convert selected packages to BookedPackageInfo
+        if let selectedPackages = localBookingDetail.selectedPackages {
+            self.bookedPackages = selectedPackages.map { package in
+                BookedPackageInfo(
+                    name: package.name,
+                    price: package.price,
+                    imageUrl: package.imageUrlString,
+                    minParticipants: package.minParticipants,
+                    maxParticipants: package.maxParticipants,
+                    voters: package.voters,
+                    totalVotes: package.totalVotes
+                )
+            }
+        } else {
+            self.bookedPackages = nil
+        }
+        
+        // Status handling - use available CocoStatusLabelStyle values
+        switch localBookingDetail.status.lowercased() {
+        case "upcoming":
+            self.status = StatusLabel(text: "Upcoming", style: .success) // Fix: use .success
+        case "completed":
+            self.status = StatusLabel(text: "Completed", style: .success) // Fix: use .success
+        default:
+            self.status = StatusLabel(text: "Pending", style: .pending)
+        }
+        
+        // Date formatting
+        let inputFormatter = DateFormatter()
+        inputFormatter.dateFormat = "yyyy-MM-dd"
+        let outputFormatter = DateFormatter()
+        outputFormatter.dateFormat = "dd MMM yyyy"
+        
+        if let date = inputFormatter.date(from: localBookingDetail.activityDate) {
+            self.bookingDateText = outputFormatter.string(from: date)
+        } else {
+            self.bookingDateText = localBookingDetail.activityDate
+        }
     }
 }
 
@@ -77,10 +160,18 @@ final class TripDetailView: UIView {
         activityDescription.text = data.packageName
         
         bookingDateLabel.text = data.bookingDateText
+        dueDateFormLabel.text = data.dueDateForm 
         paxNumberLabel.text = "\(data.paxNumber)"
         
-        priceDetailTitle.text = "Pay During Trip"
-        priceDetailPrice.text = "Rp\(data.price)"
+        if let bookedPackages = data.bookedPackages, !bookedPackages.isEmpty {
+            setupBookedPackages(bookedPackages)
+            bookedPackagesSection.isHidden = false
+        } else {
+            bookedPackagesSection.isHidden = true
+        }
+        
+        priceDetailTitle.text = "Pay during trip"
+        priceDetailPrice.text = data.price.toRupiah()
         
         addressLabel.text = data.address
     }
@@ -93,6 +184,62 @@ final class TripDetailView: UIView {
                 .trailing(to: statusLabel.trailingAnchor, relation: .lessThanOrEqual)
                 .bottom(to: statusLabel.bottomAnchor)
         }
+    }
+    
+    private lazy var dueDateFormSection: UIView = createSectionTitle(title: "Due Date Form", view: dueDateFormLabel)
+    private lazy var dueDateFormLabel: UILabel = UILabel(
+        font: .jakartaSans(forTextStyle: .body, weight: .bold),
+        textColor: Token.additionalColorsBlack,
+        numberOfLines: 0
+    )
+    
+    private lazy var bookedPackagesSection: UIView = createBookedPackagesSection()
+    private lazy var bookedPackagesContainer: UIStackView = createStackView(spacing: 12.0) // Fix: add spacing parameter
+    
+    private func createBookedPackagesSection() -> UIView {
+        let containerView = UIView()
+        
+        let titleLabel = UILabel(
+            font: .jakartaSans(forTextStyle: .title3, weight: .bold),
+            textColor: Token.additionalColorsBlack,
+            numberOfLines: 1
+        )
+        titleLabel.text = "Booked Packages"
+        
+        containerView.addSubviews([titleLabel, bookedPackagesContainer])
+        
+        titleLabel.layout {
+            $0.top(to: containerView.topAnchor)
+                .leading(to: containerView.leadingAnchor)
+                .trailing(to: containerView.trailingAnchor)
+        }
+        
+        bookedPackagesContainer.layout {
+            $0.top(to: titleLabel.bottomAnchor, constant: 16.0)
+                .leading(to: containerView.leadingAnchor)
+                .trailing(to: containerView.trailingAnchor)
+                .bottom(to: containerView.bottomAnchor)
+        }
+        
+        return containerView
+    }
+    
+    private func setupBookedPackages(_ packages: [BookingDetailDataModel.BookedPackageInfo]) {
+        bookedPackagesContainer.arrangedSubviews.forEach { $0.removeFromSuperview() }
+        
+        for package in packages {
+            let packageView = createBookedPackageView(package: package)
+            bookedPackagesContainer.addArrangedSubview(packageView)
+        }
+    }
+    
+    private func createBookedPackageView(package: BookingDetailDataModel.BookedPackageInfo) -> UIView {
+        let hostingController = UIHostingController(
+            rootView: BookedPackageCardView(package: package)
+        )
+        
+        hostingController.view.backgroundColor = UIColor.clear // Fix: specify UIColor.clear
+        return hostingController.view
     }
     
     private lazy var activityDetailView: UIView = createActivityDetailView()
@@ -115,7 +262,7 @@ final class TripDetailView: UIView {
     
     private lazy var contentStackView: UIStackView = createStackView()
     
-    private lazy var bookingDateSection: UIView = createSectionTitle(title: "Date Booking", view: bookingDateLabel)
+    private lazy var bookingDateSection: UIView = createSectionTitle(title: "Date Visit", view: bookingDateLabel) 
     private lazy var bookingDateLabel: UILabel = UILabel(
         font: .jakartaSans(forTextStyle: .body, weight: .bold),
         textColor: Token.additionalColorsBlack,
@@ -183,10 +330,17 @@ private extension TripDetailView {
                 .bottom(to: dateStatusSection.bottomAnchor)
         }
         
-        
         contentStackView.addArrangedSubview(activityDetailView)
         contentStackView.addArrangedSubview(dateStatusSection)
+        
+        // Add Due Date Form section after dateStatusSection
+        contentStackView.addArrangedSubview(dueDateFormSection)
+        
         contentStackView.addArrangedSubview(paxNumberSection)
+        
+        // Add Booked Packages section before price details
+        contentStackView.addArrangedSubview(bookedPackagesSection)
+        
         contentStackView.addArrangedSubview(createLineDivider())
         contentStackView.addArrangedSubview(priceDetailSection)
         contentStackView.addArrangedSubview(createLineDivider())
@@ -195,8 +349,16 @@ private extension TripDetailView {
         backgroundColor = Token.additionalColorsWhite
     }
     
+    func createStackView(spacing: CGFloat = 24.0) -> UIStackView { // Fix: add default spacing parameter
+        let stackView: UIStackView = UIStackView()
+        stackView.axis = .vertical
+        stackView.spacing = spacing
+          
+        return stackView
+    }
+    
     func createActivityDetailView() -> UIView {
-        let imageView: UIImageView = UIImageView(image: CocoIcon.icPinPointBlue.image)
+        let imageView: UIImageView = UIImageView(image: CocoIcon.icPinPointBlack.image)
         imageView.layout {
             $0.size(20.0)
         }
@@ -267,14 +429,6 @@ private extension TripDetailView {
         return imageView
     }
     
-    func createStackView() -> UIStackView {
-        let stackView: UIStackView = UIStackView()
-        stackView.axis = .vertical
-        stackView.spacing = 24.0
-          
-        return stackView
-    }
-    
     func createSectionTitle(title: String, view: UIView) -> UIView {
         let titleView: UILabel = UILabel(
             font: .jakartaSans(forTextStyle: .callout, weight: .regular),
@@ -303,7 +457,6 @@ private extension TripDetailView {
                 .trailing(to: contentView.trailingAnchor)
                 .bottom(to: contentView.bottomAnchor)
         }
-        
         
         return contentView
     }
@@ -337,7 +490,7 @@ private extension TripDetailView {
         }
         
         rhs.layout {
-            $0.leading(to: lhs.trailingAnchor, relation: .greaterThanOrEqual,  constant: 4.0)
+            $0.leading(to: lhs.trailingAnchor, relation: .greaterThanOrEqual, constant: 4.0)
                 .trailing(to: containerView.trailingAnchor)
                 .centerY(to: containerView.centerYAnchor)
         }

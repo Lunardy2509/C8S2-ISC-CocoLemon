@@ -28,7 +28,7 @@ final class HomeViewModel {
     }()
     private(set) lazy var searchBarViewModel: HomeSearchBarViewModel = HomeSearchBarViewModel(
         leadingIcon: CocoIcon.icSearchLoop.image,
-        placeholderText: "Search...",
+        placeholderText: "I wanna go to...",
         currentTypedText: "",
         trailingIcon: (
             image: CocoIcon.icFilterIcon.image,
@@ -122,7 +122,6 @@ extension HomeViewModel: HomeViewModelProtocol {
                 self.filterDataModel = newFilterData
                 actionDelegate?.dismissTray()
                 
-                self.actionDelegate?.toggleLoadingView(isShown: false, after: 0.5)
                 self.filterDidApply()
                     
                 self.actionDelegate?.constructFilterCarousel(filterPillStates: newFilterData.filterPillDataState, filterDestinationPillStates: newFilterData.filterDestinationPillState)
@@ -233,7 +232,8 @@ extension HomeViewModel: HomeViewModelProtocol {
                 dataModel: tempResponseData.map {
                     HomeActivityCellDataModel(activity: $0)
                 }
-            )
+            ),
+            isFromSearch: !currentSearchQuery.isEmpty
         )
         
         // Update filter carousel with current filter states
@@ -272,7 +272,8 @@ extension HomeViewModel: HomeViewModelProtocol {
             activity: (
                 title: sectionTitle,
                 dataModel: filteredActivities.map { HomeActivityCellDataModel(activity: $0) }
-            )
+            ),
+            isFromSearch: hasActiveSearch
         )
         
         let selectedTitles = filterDataModel.filterPillDataState
@@ -281,7 +282,7 @@ extension HomeViewModel: HomeViewModelProtocol {
         
         var filterInfo = "Applied filters: \(selectedTitles.joined(separator: ", "))"
         if let priceRange = filterDataModel.priceRangeModel {
-            filterInfo += " | Price: Rp\(Int(priceRange.minPrice).formatted()) - Rp\(Int(priceRange.maxPrice).formatted())"
+            filterInfo += " | Price: \(priceRange.minPrice.toRupiah()) - \(priceRange.maxPrice.toRupiah())"
         }
     }
 }
@@ -323,7 +324,7 @@ private extension HomeViewModel {
             case .success(let response):
                 
                 // Store the full response data first
-                var allActivities = response.values
+                let allActivities = response.values
                 
                 // Get the current search text for local filtering
                 let searchText = currentSearchQuery.isEmpty ? searchBarViewModel.currentTypedText : currentSearchQuery
@@ -361,7 +362,10 @@ private extension HomeViewModel {
                 
                 // Set section title based on whether there's an active search
                 let sectionTitle = searchText.isEmpty ? "Most Popular" : "Your Result"
-                collectionViewModel.updateActivity(activity: (title: sectionTitle, dataModel: sectionData))
+                collectionViewModel.updateActivity(
+                    activity: (title: sectionTitle, dataModel: sectionData),
+                    isFromSearch: !searchText.isEmpty
+                )
                 
                 constructFilterData()
                 

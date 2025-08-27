@@ -9,7 +9,6 @@ import Foundation
 @testable import Coco
 
 final class MockActivityFetcher: ActivityFetcherProtocol {
-
     var invokedFetchActivity = false
     var invokedFetchActivityCount = 0
     var invokedFetchActivityParameters: (request: ActivitySearchRequest, Void)?

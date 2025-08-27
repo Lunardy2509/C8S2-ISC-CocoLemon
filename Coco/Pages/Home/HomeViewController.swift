@@ -115,25 +115,29 @@ extension HomeViewController: HomeViewModelAction {
         selectedQuery: String,
         latestSearches: [HomeSearchSearchLocationData]
     ) {
-        let searchPageVC = HomeSearchPageViewController(
+        let searchTrayView = HomeSearchSearchTray(
             selectedQuery: selectedQuery,
             latestSearches: latestSearches,
             searchDidApply: { [weak self] queryText in
-                self?.viewModel.onSearchDidApply(queryText)
+                self?.dismiss(animated: true) {
+                    self?.viewModel.onSearchDidApply(queryText)
+                }
             },
             onSearchHistoryRemove: { [weak self] searchData in
                 self?.viewModel.removeSearchFromHistory(searchData)
             },
             onSearchReset: { [weak self] in
-                self?.viewModel.onSearchReset()
+                self?.dismiss(animated: true) {
+                    self?.viewModel.onSearchReset()
+                }
             }
         )
         
-        navigationController?.pushViewController(searchPageVC, animated: true)
+        presentSearchTray(view: searchTrayView)
     }
     
     func openFilterTray(_ viewModel: HomeFilterTrayViewModel) {
-        presentTray(view: HomeFilterTray(viewModel: viewModel))
+        presentFilterTray(view: HomeFilterTray(viewModel: viewModel))
     }
     
     func dismissTray() {
@@ -142,13 +146,24 @@ extension HomeViewController: HomeViewModelAction {
 }
 
 private extension HomeViewController {
-    func presentTray(view: some View) {
+    func presentSearchTray(view: some View) {
         let trayVC: UIHostingController = UIHostingController(rootView: view)
         if let sheet: UISheetPresentationController = trayVC.sheetPresentationController {
-            let fractionalDetent = UISheetPresentationController.Detent.custom(identifier: .init("SixtyFivePercent")) { context in
-                return context.maximumDetentValue * 0.65
-            }
-            
+            sheet.detents = [.large()]
+            sheet.prefersGrabberVisible = true
+            sheet.prefersScrollingExpandsWhenScrolledToEdge = false
+            sheet.prefersEdgeAttachedInCompactHeight = true
+            sheet.preferredCornerRadius = 32.0
+        }
+        present(trayVC, animated: true)
+    }
+    
+    func presentFilterTray(view: some View) {
+        let trayVC: UIHostingController = UIHostingController(rootView: view)
+        let fractionalDetent = UISheetPresentationController.Detent.custom(identifier: .init("fractionalDetent")) { context in
+            return context.maximumDetentValue * 0.85
+        }
+        if let sheet: UISheetPresentationController = trayVC.sheetPresentationController {
             sheet.detents = [fractionalDetent, .large()]
             sheet.prefersGrabberVisible = true
             sheet.prefersScrollingExpandsWhenScrolledToEdge = false

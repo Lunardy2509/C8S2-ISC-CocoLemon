@@ -19,7 +19,7 @@ final class CheckoutView: UIView {
     }
     
     func configureView(_ data: BookingDetails) {
-        if let imageUrl: String = data.destination.imageUrl, imageUrl.count > 0{
+        if let imageUrl: String = data.destination.imageUrl, imageUrl.count > 0 {
             activityImage.loadImage(from: URL(string: imageUrl))
         }
         
@@ -82,6 +82,7 @@ final class CheckoutView: UIView {
             textColor: Token.additionalColorsBlack,
             numberOfLines: 2
         )
+
         priceDetailPrice.text = "\(data.totalPrice.toRupiah())"
         
         cardSectionStackView.addArrangedSubview(
@@ -122,8 +123,7 @@ final class CheckoutView: UIView {
 private extension CheckoutView {
     func crateCardSectionStackView() -> UIStackView {
         let sectionStackView: UIStackView = UIStackView(arrangedSubviews: [
-            activityDetailView,
-            
+            activityDetailView
         ])
         sectionStackView.axis = .vertical
         sectionStackView.spacing = 16.0
@@ -171,7 +171,7 @@ private extension CheckoutView {
     }
     
     func createActivityDetailView() -> UIView {
-        let imageView: UIImageView = UIImageView(image: CocoIcon.icPinPointBlue.image)
+        let imageView: UIImageView = UIImageView(image: CocoIcon.icPinPointBlack.image)
         imageView.layout {
             $0.size(20.0)
         }
@@ -311,7 +311,7 @@ private extension CheckoutView {
         }
         
         rhs.layout {
-            $0.leading(to: lhs.trailingAnchor, relation: .greaterThanOrEqual,  constant: 4.0)
+            $0.leading(to: lhs.trailingAnchor, relation: .greaterThanOrEqual, constant: 4.0)
                 .trailing(to: containerView.trailingAnchor)
                 .centerY(to: containerView.centerYAnchor)
         }

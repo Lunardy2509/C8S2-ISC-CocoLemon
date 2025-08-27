@@ -8,9 +8,20 @@
 import Foundation
 import UIKit
 
-struct CocoStatusLabelStyle {
+struct CocoStatusLabelStyle: Hashable {
     let textColor: UIColor
     let backgroundColor: UIColor
+    
+    // Hashable conformance
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(textColor.cgColor.components)
+        hasher.combine(backgroundColor.cgColor.components)
+    }
+    
+    static func == (lhs: CocoStatusLabelStyle, rhs: CocoStatusLabelStyle) -> Bool {
+        return lhs.textColor.cgColor == rhs.textColor.cgColor &&
+               lhs.backgroundColor.cgColor == rhs.backgroundColor.cgColor
+    }
 }
 
 extension CocoStatusLabelStyle {
@@ -25,8 +36,8 @@ extension CocoStatusLabelStyle {
     )
     
     static let pending: Self = Self(
-        textColor: Token.additionalColorsOrange,
-        backgroundColor: UIColor.from("#FFF2ED")
+        textColor: UIColor.from("#7B61FF"),
+        backgroundColor: UIColor.from("#F4F0FF")
     )
     
     static let refund: Self = Self(
@@ -37,5 +48,9 @@ extension CocoStatusLabelStyle {
     static let unpaid: Self = Self(
         textColor: Token.additionalColorsPurple,
         backgroundColor: UIColor.from("#F4F0FF")
+    )
+    static let plain: Self = Self(
+        textColor: Token.alertsError,
+        backgroundColor: UIColor.clear
     )
 }

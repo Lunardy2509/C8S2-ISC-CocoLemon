@@ -21,7 +21,7 @@ extension UIImageView {
             return
         }
         
-        URLSession.shared.dataTask(with: url) { data, response, error in
+        URLSession.shared.dataTask(with: url) { data, _, _ in
             guard
                 let data = data,
                 let image = UIImage(data: data)

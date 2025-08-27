@@ -93,7 +93,6 @@ private extension HomeFormScheduleView {
         }
     }
     
-    
     func createImageView() -> UIImageView {
         let imageView: UIImageView = UIImageView()
         imageView.contentMode = .scaleAspectFill
@@ -106,7 +105,7 @@ private extension HomeFormScheduleView {
     }
     
     func createActivityDetailView() -> UIView {
-        let imageView: UIImageView = UIImageView(image: CocoIcon.icPinPointBlue.image)
+        let imageView: UIImageView = UIImageView(image: CocoIcon.icPinPointBlack.image)
         imageView.layout {
             $0.size(20.0)
         }

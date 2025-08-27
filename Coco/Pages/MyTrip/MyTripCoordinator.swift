@@ -15,6 +15,7 @@ final class MyTripCoordinator: BaseCoordinator {
         
         enum Flow {
             case bookingDetail(data: BookingDetails)
+            case localBookingDetail(data: LocalBookingDetails) // Add this case
         }
     }
     
@@ -30,7 +31,11 @@ final class MyTripCoordinator: BaseCoordinator {
         case .bookingDetail(let data):
             let bookingDetailViewModel: TripDetailViewModel = TripDetailViewModel(data: data)
             let bookingDetailViewController: TripDetailViewController = TripDetailViewController(viewModel: bookingDetailViewModel)
+            start(viewController: bookingDetailViewController)
             
+        case .localBookingDetail(let data): // Handle local bookings
+            let bookingDetailViewModel: TripDetailViewModel = TripDetailViewModel(localData: data)
+            let bookingDetailViewController: TripDetailViewController = TripDetailViewController(viewModel: bookingDetailViewModel)
             start(viewController: bookingDetailViewController)
         }
     }

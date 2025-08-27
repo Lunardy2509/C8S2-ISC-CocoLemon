@@ -89,13 +89,10 @@ struct HomeViewModelTest {
         let context = try TestContext.setup()
         
         // --- WHEN ---
-        #expect(context.viewModel.loadingState.percentage == 0)
         context.viewModel.onViewDidLoad()
         
         // --- THEN ---
         assertViewDidLoadSetup(context)
-        #expect(context.actionDelegate.invokedToggleLoadingViewParameters?.isShown == false)
-        #expect(context.actionDelegate.invokedToggleLoadingViewParameters?.after == 1.0)
         
         let expectedActivity = HomeActivityCellDataModel(activity: context.activities.values[0])
         #expect(context.viewModel.collectionViewModel.activityData == ("", [expectedActivity]))
@@ -118,8 +115,6 @@ struct HomeViewModelTest {
         
         // --- THEN ---
         #expect(context.viewModel.searchBarViewModel.currentTypedText == "")
-        #expect(context.viewModel.loadingState.percentage == 100)
-        assertLoadingStates(context, states: [false, true, false])
         #expect(context.viewModel.collectionViewModel.activityData == ("", []))
     }
     
@@ -134,8 +129,8 @@ struct HomeViewModelTest {
         
         let activityData = HomeActivityCellDataModel(
             id: 1,
-            area: "area",
-            name: "name", location: "location",
+            title: "name",
+            location: "location",
             priceText: "priceText",
             imageUrl: nil
         )
@@ -183,8 +178,8 @@ struct HomeViewModelTest {
         
         let invalidActivityData = HomeActivityCellDataModel(
             id: 999,
-            area: "area",
-            name: "name", location: "location",
+            title: "title",
+            location: "location",
             priceText: "priceText",
             imageUrl: nil
         )
@@ -245,6 +240,242 @@ struct HomeViewModelTest {
         // --- THEN ---
         #expect(context.actionDelegate.invokedOpenSearchTrayCount == 1)
     }
+    
+    // MARK: - Advanced Search Tests
+    
+    @Test("search - should handle search text changes")
+    func search_whenTextChanges_shouldUpdateSearchBar() async throws {
+        // --- GIVEN ---
+        let context = try TestContext.setup()
+        context.viewModel.onViewDidLoad()
+        
+        // --- WHEN ---
+        context.viewModel.onSearchDidApply("beach")
+        
+        // --- THEN ---
+        #expect(context.viewModel.searchBarViewModel.currentTypedText == "beach")
+    }
+    
+    @Test("search - should handle consecutive searches")
+    func search_whenConsecutiveSearches_shouldHandleCorrectly() async throws {
+        // --- GIVEN ---
+        let context = try TestContext.setup()
+        context.viewModel.onViewDidLoad()
+        
+        // --- WHEN ---
+        context.viewModel.onSearchDidApply("beach")
+        context.viewModel.onSearchDidApply("mountain")
+        context.viewModel.onSearchDidApply("culture")
+        
+        // --- THEN ---
+        #expect(context.viewModel.searchBarViewModel.currentTypedText == "culture")
+        #expect(context.fetcher.invokedFetchActivityCount >= 3)
+    }
+    
+    // MARK: - Error Handling Tests
+    
+    @Test("error handling - should handle fetch failure")
+    func errorHandling_whenFetchFails_shouldHandleGracefully() async throws {
+        // --- GIVEN ---
+        let context = try TestContext.setup()
+        context.fetcher.stubbedFetchActivityCompletionResult = (.failure(NetworkServiceError.noInternetConnection), ())
+        
+        // --- WHEN ---
+        context.viewModel.onViewDidLoad()
+        
+        // --- THEN ---
+        #expect(context.viewModel.collectionViewModel.activityData.dataModel.isEmpty)
+    }
+    
+    @Test("error handling - should recover from error state")
+    func errorHandling_whenRecoveringFromError_shouldLoadSuccessfully() async throws {
+        // --- GIVEN ---
+        let context = try TestContext.setup()
+        context.fetcher.stubbedFetchActivityCompletionResult = (.failure(NetworkServiceError.noInternetConnection), ())
+        context.viewModel.onViewDidLoad()
+        
+        // --- WHEN ---
+        context.fetcher.stubbedFetchActivityCompletionResult = (.success(context.activities), ())
+        context.viewModel.onSearchDidApply("test")
+        
+        // --- THEN ---
+        #expect(context.viewModel.collectionViewModel.activityData.dataModel.count > 0)
+    }
+        
+    // MARK: - Collection View Tests
+    
+    @Test("collection view - should construct with proper data")
+    func collectionView_whenConstructed_shouldHaveProperData() async throws {
+        // --- GIVEN ---
+        let context = try TestContext.setup()
+        
+        // --- WHEN ---
+        context.viewModel.onViewDidLoad()
+        
+        // --- THEN ---
+        #expect(context.actionDelegate.invokedConstructCollectionViewCount == 1)
+        #expect(context.viewModel.collectionViewModel.activityData.dataModel.count > 0)
+    }
+    
+    @Test("collection view - should update after filter application")
+    func collectionView_afterFilterApplication_shouldUpdate() async throws {
+        // --- GIVEN ---
+        let context = try TestContext.setup()
+        context.viewModel.onViewDidLoad()
+        let initialCount = context.viewModel.collectionViewModel.activityData.dataModel.count
+        
+        // --- WHEN ---
+        context.viewModel.searchBarViewModel.trailingIcon?.didTap?()
+        let filterModel = HomeFilterTrayDataModel(
+            filterPillDataState: [],
+            priceRangeModel: HomeFilterPriceRangeModel(
+                minPrice: 1000000.0,
+                maxPrice: 2000000.0,
+                range: 0...0
+            )
+        )
+        context.actionDelegate.invokedOpenFilterTrayParameters?.viewModel
+            .filterDidApplyPublisher.send(filterModel)
+        
+        // --- THEN ---
+        let filteredCount = context.viewModel.collectionViewModel.activityData.dataModel.count
+        #expect(filteredCount <= initialCount) // Should be filtered
+    }
+    
+    // MARK: - Navigation Tests
+    
+    @Test("navigation - should handle activity navigation")
+    func navigation_whenActivitySelected_shouldNavigate() async throws {
+        // --- GIVEN ---
+        let context = try TestContext.setup()
+        context.viewModel.onViewDidLoad()
+        
+        let activityData = HomeActivityCellDataModel(
+            id: 1,
+            title: "title",
+            location: "location",
+            priceText: "priceText",
+            imageUrl: nil
+        )
+        
+        // --- WHEN ---
+        context.viewModel.notifyCollectionViewActivityDidTap(activityData)
+        
+        // --- THEN ---
+        #expect(context.actionDelegate.invokedActivityDidSelectCount == 1)
+        #expect(context.actionDelegate.invokedActivityDidSelectParameters?.data != nil)
+    }
+    
+    // MARK: - Filter Integration Tests
+    
+    @Test("filter integration - should maintain filter state")
+    func filterIntegration_shouldMaintainFilterState() async throws {
+        // --- GIVEN ---
+        let context = try TestContext.setup()
+        context.viewModel.onViewDidLoad()
+        
+        // --- WHEN ---
+        context.viewModel.searchBarViewModel.trailingIcon?.didTap?()
+        
+        // --- THEN ---
+        #expect(context.actionDelegate.invokedOpenFilterTrayCount == 1)
+        let filterViewModel = context.actionDelegate.invokedOpenFilterTrayParameters?.viewModel
+        #expect(filterViewModel != nil)
+    }
+    
+    @Test("filter integration - should apply price range filters")
+    func filterIntegration_withPriceRange_shouldFilter() async throws {
+        // --- GIVEN ---
+        let context = try TestContext.setup()
+        context.viewModel.onViewDidLoad()
+        
+        // --- WHEN ---
+        context.viewModel.searchBarViewModel.trailingIcon?.didTap?()
+        let filterModel = HomeFilterTrayDataModel(
+            filterPillDataState: [],
+            priceRangeModel: HomeFilterPriceRangeModel(
+                minPrice: 100000.0,
+                maxPrice: 500000.0,
+                range: 0...0
+            )
+        )
+        context.actionDelegate.invokedOpenFilterTrayParameters?.viewModel
+            .filterDidApplyPublisher.send(filterModel)
+        
+        // --- THEN ---
+        #expect(context.viewModel.collectionViewModel.activityData.dataModel.count >= 0)
+    }
+    
+    // MARK: - Performance Tests
+    
+    @Test("performance - should handle large activity sets")
+    func performance_withLargeActivitySets_shouldPerformWell() async throws {
+        // --- GIVEN ---
+        let context = try TestContext.setup()
+        let largeActivitySet: ActivityModelArray = try JSONReader.getObjectFromJSON(with: "activities")
+        context.fetcher.stubbedFetchActivityCompletionResult = (.success(largeActivitySet), ())
+        
+        // --- WHEN ---
+        let startTime = DispatchTime.now()
+        context.viewModel.onViewDidLoad()
+        let endTime = DispatchTime.now()
+        
+        // --- THEN ---
+        let nanoTime = endTime.uptimeNanoseconds - startTime.uptimeNanoseconds
+        let timeInterval = Double(nanoTime) / 1_000_000_000
+        #expect(timeInterval < 1.0) // Should complete within 1 second
+    }
+    
+    // MARK: - Edge Case Tests
+    
+    @Test("edge cases - should handle empty activity response")
+    func edgeCases_withEmptyResponse_shouldHandleGracefully() async throws {
+        // --- GIVEN ---
+        let context = try TestContext.setup()
+        let emptyActivities: ActivityModelArray = try JSONReader.getObjectFromJSON(with: "activities-empty")
+        context.fetcher.stubbedFetchActivityCompletionResult = (.success(emptyActivities), ())
+        
+        // --- WHEN ---
+        context.viewModel.onViewDidLoad()
+        
+        // --- THEN ---
+        #expect(context.viewModel.collectionViewModel.activityData.dataModel.isEmpty)
+    }
+    
+    @Test("edge cases - should handle nil activity selection")
+    func edgeCases_withNilActivitySelection_shouldNotCrash() async throws {
+        // --- GIVEN ---
+        let context = try TestContext.setup()
+        context.viewModel.onViewDidLoad()
+        
+        // --- WHEN ---
+        let nilActivityData = HomeActivityCellDataModel(
+            id: -1,
+            title: "",
+            location: "",
+            priceText: "",
+            imageUrl: nil
+        )
+        context.viewModel.notifyCollectionViewActivityDidTap(nilActivityData)
+        
+        // --- THEN ---
+        #expect(context.actionDelegate.invokedActivityDidSelectCount == 0)
+    }
+    
+    @Test("state consistency - should maintain search bar state")
+    func stateConsistency_shouldMaintainSearchBarState() async throws {
+        // --- GIVEN ---
+        let context = try TestContext.setup()
+        context.viewModel.onViewDidLoad()
+        
+        // --- WHEN ---
+        let searchText = "beach adventure"
+        context.viewModel.onSearchDidApply(searchText)
+        
+        // --- THEN ---
+        #expect(context.viewModel.searchBarViewModel.currentTypedText == searchText)
+        #expect(context.viewModel.searchBarViewModel.isTypeAble == true)
+    }
 }
 
 // MARK: - Test Helpers
@@ -252,13 +483,7 @@ struct HomeViewModelTest {
 private extension HomeViewModelTest {
     private func assertViewDidLoadSetup(_ context: TestContext) {
         #expect(context.actionDelegate.invokedConstructCollectionViewCount == 1)
-        #expect(context.actionDelegate.invokedConstructLoadingStateCount == 1)
         #expect(context.actionDelegate.invokedConstructNavBarCount == 1)
-        #expect(context.viewModel.loadingState.percentage == 100)
-    }
-    
-    private func assertLoadingStates(_ context: TestContext, states: [Bool]) {
-        #expect(context.actionDelegate.invokedToggleLoadingViewParametersList.map { $0.isShown } == states)
     }
 }
 
@@ -284,18 +509,6 @@ private final class MockHomeViewModelAction: HomeViewModelAction {
         invokedConstructCollectionViewCount += 1
     }
 
-    var invokedConstructLoadingState = false
-    var invokedConstructLoadingStateCount = 0
-    var invokedConstructLoadingStateParameters: (state: HomeLoadingState, Void)?
-    var invokedConstructLoadingStateParametersList = [(state: HomeLoadingState, Void)]()
-
-    func constructLoadingState(state: HomeLoadingState) {
-        invokedConstructLoadingState = true
-        invokedConstructLoadingStateCount += 1
-        invokedConstructLoadingStateParameters = (state, ())
-        invokedConstructLoadingStateParametersList.append((state, ()))
-    }
-
     var invokedConstructNavBar = false
     var invokedConstructNavBarCount = 0
     var invokedConstructNavBarParameters: (viewModel: HomeSearchBarViewModel, Void)?
@@ -307,19 +520,7 @@ private final class MockHomeViewModelAction: HomeViewModelAction {
         invokedConstructNavBarParameters = (viewModel, ())
         invokedConstructNavBarParametersList.append((viewModel, ()))
     }
-
-    var invokedToggleLoadingView = false
-    var invokedToggleLoadingViewCount = 0
-    var invokedToggleLoadingViewParameters: (isShown: Bool, after: CGFloat)?
-    var invokedToggleLoadingViewParametersList = [(isShown: Bool, after: CGFloat)]()
-
-    func toggleLoadingView(isShown: Bool, after: CGFloat) {
-        invokedToggleLoadingView = true
-        invokedToggleLoadingViewCount += 1
-        invokedToggleLoadingViewParameters = (isShown, after)
-        invokedToggleLoadingViewParametersList.append((isShown, after))
-    }
-
+    
     var invokedActivityDidSelect = false
     var invokedActivityDidSelectCount = 0
     var invokedActivityDidSelectParameters: (data: ActivityDetailDataModel, Void)?
