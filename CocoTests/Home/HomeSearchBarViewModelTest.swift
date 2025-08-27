@@ -27,7 +27,7 @@ struct HomeSearchBarViewModelTest {
             
             let viewModel = HomeSearchBarViewModel(
                 leadingIcon: leadingIcon,
-                placeholderText: "Search...",
+                placeholderText: "I wanna go to...",
                 currentTypedText: "",
                 trailingIcon: trailingIcon,
                 isTypeAble: false,
@@ -86,7 +86,7 @@ struct HomeSearchBarViewModelTest {
         let viewModel = context.viewModel
         
         // --- THEN ---
-        #expect(viewModel.placeholderText == "Search...")
+        #expect(viewModel.placeholderText == "I wanna go to...")
         #expect(viewModel.currentTypedText == "")
         #expect(viewModel.isTypeAble == false)
         #expect(viewModel.leadingIcon != nil)
@@ -230,7 +230,7 @@ struct HomeSearchBarViewModelTest {
         // --- THEN ---
         #expect(context.viewModel.placeholderText == originalPlaceholder)
         #expect(context.viewModel.isTypeAble == originalIsTypeAble)
-        #expect(context.viewModel.placeholderText == "Search...")
+        #expect(context.viewModel.placeholderText == "I wanna go to...")
         #expect(context.viewModel.isTypeAble == false)
     }
     

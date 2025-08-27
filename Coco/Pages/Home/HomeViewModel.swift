@@ -28,7 +28,7 @@ final class HomeViewModel {
     }()
     private(set) lazy var searchBarViewModel: HomeSearchBarViewModel = HomeSearchBarViewModel(
         leadingIcon: CocoIcon.icSearchLoop.image,
-        placeholderText: "Search...",
+        placeholderText: "I wanna go to...",
         currentTypedText: "",
         trailingIcon: (
             image: CocoIcon.icFilterIcon.image,

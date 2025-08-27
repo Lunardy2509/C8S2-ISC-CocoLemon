@@ -34,12 +34,14 @@ final class GroupFormViewModel: ObservableObject {
     @Published var showInviteFriendPopup: Bool = false
     @Published var showSearchResultsSheet: Bool = false
     @Published var showEmptyStatePopup: Bool = false
+    @Published var showFailedToAddContributorPopup: Bool = false
     @Published var searchResults: [HomeActivityCellDataModel] = []
     @Published var currentSearchQuery: String = ""
     
     // Warning/Alert Properties
     @Published var showWarningAlert: Bool = false
     @Published var warningMessage: String = ""
+    @Published var existingMember: String = ""
     
     // Available contributors for adding to team
     let availableContributors: [TripMemberData] = [
@@ -76,7 +78,7 @@ final class GroupFormViewModel: ObservableObject {
     lazy var searchBarViewModel: HomeSearchBarViewModel = {
         HomeSearchBarViewModel(
             leadingIcon: CocoIcon.icSearchLoop.image,
-            placeholderText: "Search destination...",
+            placeholderText: "I wanna go to...",
             currentTypedText: searchText,
             trailingIcon: ImageHandler(
                 image: CocoIcon.icFilterIcon.image,

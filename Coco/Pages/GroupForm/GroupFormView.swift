@@ -69,53 +69,72 @@ struct GroupFormView: View {
                 }
             )
         }
-        .overlay(
-            // Empty Search State Popup
-            Group {
-                if viewModel.showEmptyStatePopup {
-                    EmptySearchPopupView(
-                        searchQuery: viewModel.currentSearchQuery,
-                        onDismiss: {
-                            viewModel.showEmptyStatePopup = false
-                        }
-                    )
-                }
-            }
-        )
-        .overlay(
-            // Invite Friend Popup
-            Group {
-                if viewModel.showInviteFriendPopup {
-                    Color.black.opacity(0.4)
-                        .ignoresSafeArea()
-                        .onTapGesture {
-                            viewModel.dismissInviteFriendPopup()
-                        }
-                    
-                    InviteFriendPopUpView(
-                        onSendInvite: { email in
-                            viewModel.sendInvite(email: email)
-                        },
-                        onDismiss: {
-                            viewModel.dismissInviteFriendPopup()
-                        }
-                    )
-                    .cornerRadius(16)
-                    .padding(.horizontal, 32)
-                }
-            }
-        )
-        .alert("Warning", isPresented: $viewModel.showWarningAlert) {
-            Button("OK") {
-                viewModel.dismissWarningAlert()
-            }
-        } message: {
-            Text(viewModel.warningMessage)
-        }
+        .overlay(popupOverlays)
     }
 }
 
 private extension GroupFormView {
+    // MARK: - Popup Overlays
+    @ViewBuilder
+    var popupOverlays: some View {
+        // Empty Search State Popup
+        if viewModel.showEmptyStatePopup {
+            emptySearchPopupOverlay
+        }
+        
+        // Invite Friend Popup
+        if viewModel.showInviteFriendPopup {
+            inviteFriendPopupOverlay
+        }
+        
+        // Failed To Add Contributor Popup
+        if viewModel.showWarningAlert {
+            failedToAddContributorPopupOverlay
+        }
+    }
+    
+    var emptySearchPopupOverlay: some View {
+        EmptySearchPopupView(
+            searchQuery: viewModel.currentSearchQuery,
+            onDismiss: {
+                viewModel.showEmptyStatePopup = false
+                viewModel.showSearchSheet = true
+            }
+        )
+    }
+    
+    var inviteFriendPopupOverlay: some View {
+        ZStack {
+            Color.black.opacity(0.4)
+                .ignoresSafeArea()
+                .onTapGesture {
+                    viewModel.dismissInviteFriendPopup()
+                }
+            
+            InviteFriendPopUpView(
+                onSendInvite: { email in
+                    viewModel.sendInvite(email: email)
+                },
+                onDismiss: {
+                    viewModel.dismissInviteFriendPopup()
+                }
+            )
+            .cornerRadius(16)
+            .padding(.horizontal, 32)
+        }
+    }
+    
+    var failedToAddContributorPopupOverlay: some View {
+        FailedToAddContributor(
+            viewModel: viewModel,
+            onDismiss: {
+                viewModel.dismissWarningAlert()
+                // Optionally reopen the invite friend popup to let user try again
+                viewModel.showInviteFriendPopup = true
+            }
+        )
+    }
+    
     // MARK: - Trip Destination Section
     var tripDestinationSection: some View {
         VStack(alignment: .leading, spacing: 16) {
@@ -448,35 +467,35 @@ struct SelectablePackageCard: View {
                 .clipShape(RoundedRectangle(cornerRadius: 8))
                 
                 // Package Info
-                VStack(alignment: .leading, spacing: 8) {
+                VStack(alignment: .leading, spacing: 4) {
                     // Package Name
                     Text(package.name)
-                        .font(.system(size: 16, weight: .bold))
-                        .foregroundColor(.black)
+                        .font(.jakartaSans(forTextStyle: .headline, weight: .bold))
+                        .foregroundColor(Token.additionalColorsBlack.toColor())
                         .lineLimit(1)
                     
                     // Package Description & Participants
                     VStack(alignment: .leading, spacing: 4) {
                         Text(package.description)
-                            .font(.system(size: 12, weight: .regular))
-                            .foregroundColor(.gray)
+                            .font(.jakartaSans(forTextStyle: .caption1, weight: .medium))
+                            .foregroundColor(Token.grayscale70.toColor())
                             .lineLimit(2)
                         
                         HStack(spacing: 4) {
                             Image(systemName: "person.2")
                                 .font(.system(size: 10))
-                                .foregroundColor(.gray)
+                                .foregroundColor(Token.grayscale70.toColor())
                             
                             Text(package.participants)
-                                .font(.system(size: 10, weight: .regular))
-                                .foregroundColor(.gray)
+                                .font(.jakartaSans(forTextStyle: .caption1, weight: .medium))
+                                .foregroundColor(Token.grayscale70.toColor())
                         }
                     }
                     
                     // Price
-                    Text(package.price)
-                        .font(.system(size: 16, weight: .bold))
-                        .foregroundColor(.black)
+                    Text("\(package.price)/Person")
+                        .font(.jakartaSans(forTextStyle: .subheadline, weight: .bold))
+                        .foregroundColor(Token.additionalColorsBlack.toColor())
                 }
                 
                 Spacer()

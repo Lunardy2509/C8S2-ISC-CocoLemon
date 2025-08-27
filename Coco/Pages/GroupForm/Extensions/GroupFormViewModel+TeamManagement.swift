@@ -12,8 +12,9 @@ extension GroupFormViewModel {
     func addTeamMember(name: String, email: String, isWaiting: Bool = true) {
         let normalizedEmail = email.lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
         
-        // Check if trying to add Adhis (group planner)
+         // Check if trying to add Adhis (group planner)
         if normalizedEmail == "adhis@example.com" {
+            existingMember = "Adhis"
             warningMessage = "Adhis is already added as the group planner."
             showWarningAlert = true
             return
@@ -21,9 +22,11 @@ extension GroupFormViewModel {
         
         // Check if member is already in the team
         if teamMembers.contains(where: { $0.email.lowercased() == normalizedEmail }) {
-            if let existingMember = teamMembers.first(where: { $0.email.lowercased() == normalizedEmail }) {
-                warningMessage = "\(existingMember.name) is already added to this trip."
+            if let existingMemberData = teamMembers.first(where: { $0.email.lowercased() == normalizedEmail }) {
+                existingMember = existingMemberData.name
+                warningMessage = "\(existingMemberData.name) is already added to this trip."
             } else {
+                existingMember = "This member"
                 warningMessage = "This member is already added to this trip."
             }
             showWarningAlert = true
@@ -76,17 +79,20 @@ extension GroupFormViewModel {
         
         // Check if trying to add Adhis (group planner)
         if normalizedEmail == "adhis@example.com" || normalizedEmail == "adhis" {
+            existingMember = "Adhis"
             warningMessage = "Adhis is already added as the group planner."
             showWarningAlert = true
             return
         }
         
-        // Check if member is already in the team
-        if teamMembers.contains(where: { $0.email.lowercased() == normalizedEmail }) {
+        // Check if member is already in the team (check both email and name)
+        if teamMembers.contains(where: { $0.email.lowercased() == normalizedEmail || $0.name.lowercased() == normalizedEmail }) {
             // Find the member's name for better error message
-            if let existingMember = teamMembers.first(where: { $0.email.lowercased() == normalizedEmail || $0.name.lowercased() == normalizedEmail }) {
-                warningMessage = "\(existingMember.name) is already added to this trip."
+            if let existingMemberData = teamMembers.first(where: { $0.email.lowercased() == normalizedEmail || $0.name.lowercased() == normalizedEmail }) {
+                existingMember = existingMemberData.name
+                warningMessage = "\(existingMemberData.name) is already added to this trip."
             } else {
+                existingMember = "This member"
                 warningMessage = "This member is already added to this trip."
             }
             showWarningAlert = true
@@ -113,6 +119,7 @@ extension GroupFormViewModel {
     func dismissWarningAlert() {
         showWarningAlert = false
         warningMessage = ""
+        existingMember = ""
     }
     
     private func extractNameFromEmail(_ email: String) -> String {
@@ -130,6 +137,7 @@ extension GroupFormViewModel {
     // Convenience methods for adding specific contributors (all in waiting state except Adhis)
     func addAdhis(isWaiting: Bool = false) {
         // Adhis is already the group planner, show warning
+        existingMember = "Adhis"
         warningMessage = "Adhis is already added as the group planner."
         showWarningAlert = true
     }
@@ -138,6 +146,7 @@ extension GroupFormViewModel {
         if let cynthia = availableContributors.first(where: { $0.name == "Cynthia" }) {
             // Check if already added
             if teamMembers.contains(where: { $0.email.lowercased() == cynthia.email.lowercased() }) {
+                existingMember = "Cynthia"
                 warningMessage = "Cynthia is already added to this trip."
                 showWarningAlert = true
                 return
@@ -150,6 +159,7 @@ extension GroupFormViewModel {
         if let ahmad = availableContributors.first(where: { $0.name == "Ahmad" }) {
             // Check if already added
             if teamMembers.contains(where: { $0.email.lowercased() == ahmad.email.lowercased() }) {
+                existingMember = "Ahmad"
                 warningMessage = "Ahmad is already added to this trip."
                 showWarningAlert = true
                 return
@@ -162,6 +172,7 @@ extension GroupFormViewModel {
         if let teuku = availableContributors.first(where: { $0.name == "Teuku" }) {
             // Check if already added
             if teamMembers.contains(where: { $0.email.lowercased() == teuku.email.lowercased() }) {
+                existingMember = "Teuku"
                 warningMessage = "Teuku is already added to this trip."
                 showWarningAlert = true
                 return
@@ -174,6 +185,7 @@ extension GroupFormViewModel {
         if let griselda = availableContributors.first(where: { $0.name == "Griselda" }) {
             // Check if already added
             if teamMembers.contains(where: { $0.email.lowercased() == griselda.email.lowercased() }) {
+                existingMember = "Griselda"
                 warningMessage = "Griselda is already added to this trip."
                 showWarningAlert = true
                 return
@@ -186,6 +198,7 @@ extension GroupFormViewModel {
         if let ferdinand = availableContributors.first(where: { $0.name == "Ferdinand" }) {
             // Check if already added
             if teamMembers.contains(where: { $0.email.lowercased() == ferdinand.email.lowercased() }) {
+                existingMember = "Ferdinand"
                 warningMessage = "Ferdinand is already added to this trip."
                 showWarningAlert = true
                 return

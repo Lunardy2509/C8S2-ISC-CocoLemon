@@ -14,27 +14,8 @@ struct InviteFriendPopUpView: View {
     
     var body: some View {
         VStack(alignment: .center, spacing: 16.0) {
-            VStack(spacing: 8.0) {
-                HStack {
-                    Spacer()
-                    
-                    Button(action: {
-                        onDismiss()
-                    }, label: {
-                        ZStack {
-                            Image(systemName: "circle.fill")
-                                .resizable()
-                                .frame(width: 24.0, height: 24.0)
-                                .foregroundColor(Token.grayscale30.toColor())
-                            Image(systemName: "xmark")
-                                .resizable()
-                                .frame(width: 10.0, height: 10.0)
-                                .foregroundStyle(Token.additionalColorsBlack.toColor())
-                        }
-                    })
-                }
-                
-                Text("Invite a friend to join your trip using their email.")
+            VStack(spacing: 16.0) {
+                Text("Invite via email")
                     .font(.jakartaSans(forTextStyle: .body, weight: .regular))
                     .foregroundStyle(Token.grayscale70.toColor())
                     .multilineTextAlignment(.center)
@@ -45,7 +26,7 @@ struct InviteFriendPopUpView: View {
                 leadingIcon: nil,
                 currentTypedText: $friendEmail,
                 trailingIcon: nil,
-                placeholder: "Enter friend's email"
+                placeholder: "cocolemon@example.com"
             )
             .keyboardType(.emailAddress)
             .autocorrectionDisabled()
