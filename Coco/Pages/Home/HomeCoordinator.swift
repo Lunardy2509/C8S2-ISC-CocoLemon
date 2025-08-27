@@ -186,7 +186,6 @@ extension HomeCoordinator: GroupFormNavigationDelegate {
     }
     
     func notifyGroupFormCreatePlan() {
-        // Navigate to MyTrip tab after creating plan
         guard let tabBarController: BaseTabBarViewController = parentCoordinator?.navigationController?.tabBarController as? BaseTabBarViewController
         else {
             return

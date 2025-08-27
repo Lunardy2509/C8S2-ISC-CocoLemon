@@ -32,7 +32,6 @@ final class GroupTripPlanViewController: UIViewController {
         thisView.delegate = self
         viewModel.onViewDidLoad()
         
-        // Add Book Now button
         let bookNowButtonVC = CocoButtonHostingController(
             action: { [weak self] in
                 self?.viewModel.onBookNowTapped()
@@ -48,10 +47,8 @@ final class GroupTripPlanViewController: UIViewController {
     }
     
     private func setupNavigationBar() {
-        // Set the title from trip name
         title = viewModel.tripName
         
-        // Add Edit button
         navigationItem.rightBarButtonItem = UIBarButtonItem(
             title: "Edit",
             style: .plain,

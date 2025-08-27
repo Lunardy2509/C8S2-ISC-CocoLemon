@@ -377,29 +377,23 @@ private extension GroupTripPlanView {
     func setupTripMembers(_ members: [TripMember]) {
         tripMembersContainer.subviews.forEach { $0.removeFromSuperview() }
         
-        let flowLayout = UICollectionViewFlowLayout()
-        flowLayout.itemSize = CGSize(width: 70, height: 90)
-        flowLayout.minimumInteritemSpacing = 16
-        flowLayout.minimumLineSpacing = 16
-        flowLayout.scrollDirection = .horizontal
+        // Create SwiftUI FlowLayout with member cards
+        let flowLayoutView = UIHostingController(
+            rootView: FlowLayout(spacing: 12, alignment: .leading) {
+                ForEach(members, id: \.email) { member in
+                    TripMemberCardView(member: member)
+                }
+            }
+        )
         
-        let collectionView = UICollectionView(frame: .zero, collectionViewLayout: flowLayout)
-        collectionView.backgroundColor = .clear
-        collectionView.showsHorizontalScrollIndicator = false
-        collectionView.register(TripMemberCell.self, forCellWithReuseIdentifier: "TripMemberCell")
+        flowLayoutView.view.backgroundColor = .clear
+        tripMembersContainer.addSubview(flowLayoutView.view)
         
-        // Create a simple data source for the collection view
-        let dataSource = TripMembersDataSource(members: members)
-        collectionView.dataSource = dataSource
-        
-        tripMembersContainer.addSubview(collectionView)
-        collectionView.layout {
+        flowLayoutView.view.layout {
             $0.edges(to: tripMembersContainer)
-                .height(90)
         }
         
-        // Store the data source to prevent deallocation
-        objc_setAssociatedObject(collectionView, "dataSource", dataSource, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
+        objc_setAssociatedObject(tripMembersContainer, "flowLayoutHostingController", flowLayoutView, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
     }
     
     func setupVotablePackages(_ packages: [GroupTripPlanDataModel.VotablePackage]) {
@@ -421,27 +415,34 @@ private extension GroupTripPlanView {
     }
 }
 
-// MARK: - TripMembersDataSource
-private class TripMembersDataSource: NSObject, UICollectionViewDataSource {
-    private let members: [TripMember]
+struct TripMemberCardView: View {
+    let member: TripMember
     
-    init(members: [TripMember]) {
-        self.members = members
-        super.init()
-    }
-    
-    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return members.count
-    }
-    
-    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "TripMemberCell", for: indexPath) as? TripMemberCell else {
-            return UICollectionViewCell()
+    var body: some View {
+        VStack(spacing: 4) {
+            if let image = member.image {
+                Image(uiImage: image.image)
+                    .resizable()
+                    .aspectRatio(contentMode: .fill)
+                    .frame(width: 60, height: 60)
+                    .clipShape(Circle())
+            } else {
+                Circle()
+                    .fill(Token.grayscale20.toColor())
+                    .frame(width: 60, height: 60)
+                    .overlay(
+                        Text(String(member.name.prefix(1)).uppercased())
+                            .font(.jakartaSans(forTextStyle: .headline, weight: .medium))
+                            .foregroundColor(Token.additionalColorsBlack.toColor())
+                    )
+            }
+            
+            Text(member.name)
+                .font(.jakartaSans(forTextStyle: .caption2, weight: .medium))
+                .foregroundColor(Token.additionalColorsBlack.toColor())
+                .multilineTextAlignment(.center)
+                .lineLimit(1)
         }
-        
-        let member = members[indexPath.item]
-        cell.configure(with: member)
-        
-        return cell
+        .frame(width: 70)
     }
 }
