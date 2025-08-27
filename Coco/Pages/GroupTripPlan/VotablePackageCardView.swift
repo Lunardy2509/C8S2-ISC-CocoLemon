@@ -11,6 +11,7 @@ struct VotablePackageCardView: View {
     let package: GroupTripPlanDataModel.VotablePackage
     let totalMembers: Int
     let onVoteToggled: () -> Void
+    let onDetailTapped: () -> Void 
     
     var body: some View {
         HStack(spacing: 12) {
@@ -30,7 +31,7 @@ struct VotablePackageCardView: View {
                     .foregroundColor(Token.additionalColorsBlack.toColor())
                     .lineLimit(1)
                 
-                Text("Min. \(package.minParticipants) - Max. \(package.maxParticipants)")
+                Text("Min. \(package.minParticipants ?? "0") - Max. \(package.maxParticipants ?? "0")")
                     .font(.jakartaSans(forTextStyle: .caption2, weight: .medium))
                     .foregroundColor(Token.grayscale70.toColor())
                 
@@ -40,16 +41,22 @@ struct VotablePackageCardView: View {
                 
                 HStack(spacing: 8) {
                     if let firstVoter = package.voters.first {
-                        VoterAvatarView(voter: firstVoter)
+                        Button(action: onDetailTapped) { 
+                            VoterAvatarView(voter: firstVoter)
+                        }
+                        .buttonStyle(PlainButtonStyle())
                     }
                     
                     Text("\(package.totalVotes)/\(totalMembers)")
                         .font(.jakartaSans(forTextStyle: .caption2, weight: .medium))
                         .foregroundColor(Token.grayscale70.toColor())
                     
-                    Text(">")
-                        .font(.jakartaSans(forTextStyle: .caption2, weight: .medium))
-                        .foregroundColor(Token.grayscale70.toColor())
+                    Button(action: onDetailTapped) { 
+                        Text(">")
+                            .font(.jakartaSans(forTextStyle: .caption2, weight: .medium))
+                            .foregroundColor(Token.grayscale70.toColor())
+                    }
+                    .buttonStyle(PlainButtonStyle())
                     
                     Spacer()
                 }
@@ -62,20 +69,15 @@ struct VotablePackageCardView: View {
                     .foregroundColor(package.isSelected ? Token.mainColorPrimary.toColor() : Token.grayscale50.toColor())
                     .font(.system(size: 24))
             }
+            .buttonStyle(PlainButtonStyle())
         }
         .padding(12)
         .background(Token.additionalColorsWhite.toColor())
         .cornerRadius(16)
         .overlay(
             RoundedRectangle(cornerRadius: 16)
-                .stroke(
-                    package.isSelected ? Token.mainColorPrimary.toColor() : Color(red: 0.89, green: 0.91, blue: 0.93),
-                    lineWidth: package.isSelected ? 2 : 1
-                )
+                .stroke(Token.additionalColorsLine.toColor(), lineWidth: 1)
         )
-        .onTapGesture {
-            onVoteToggled()
-        }
     }
 }
 

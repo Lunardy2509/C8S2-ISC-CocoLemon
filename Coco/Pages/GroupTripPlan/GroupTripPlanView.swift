@@ -386,7 +386,7 @@ private extension GroupTripPlanView {
             }
         )
         
-        flowLayoutView.view.backgroundColor = .clear
+        flowLayoutView.view.backgroundColor = UIColor.clear
         tripMembersContainer.addSubview(flowLayoutView.view)
         
         flowLayoutView.view.layout {
@@ -403,14 +403,47 @@ private extension GroupTripPlanView {
             let hostingController = UIHostingController(
                 rootView: VotablePackageCardView(
                     package: package,
-                    totalMembers: currentData?.tripMembers.count ?? 0
-                ) { [weak self] in
-                    self?.delegate?.notifyPackageVoteToggled(packageId: package.id)
-                }
+                    totalMembers: currentData?.tripMembers.count ?? 0,
+                    onVoteToggled: { [weak self] in
+                        self?.delegate?.notifyPackageVoteToggled(packageId: package.id)
+                    },
+                    onDetailTapped: { [weak self] in
+                        self?.showPackageDetail(package: package)
+                    }
+                )
             )
             
             hostingController.view.backgroundColor = .clear
             packagesContainer.addArrangedSubview(hostingController.view)
+        }
+    }
+    
+    func showPackageDetail(package: GroupTripPlanDataModel.VotablePackage) {
+        guard let currentData = currentData else { return }
+        
+        let detailView = PackageDetailView(
+            package: package,
+            onDismiss: { [weak self] in
+                self?.dismissPackageDetail()
+            }
+        )
+        
+        let hostingController = UIHostingController(rootView: detailView)
+        let popupViewController = CocoPopupViewController(child: hostingController)
+        
+        // Find the view controller to present from
+        if let viewController = self.findViewController() {
+            viewController.present(popupViewController, animated: true)
+            
+            // Store reference to dismiss later
+            objc_setAssociatedObject(self, "packageDetailController", popupViewController, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
+        }
+    }
+    
+    func dismissPackageDetail() {
+        if let controller = objc_getAssociatedObject(self, "packageDetailController") as? CocoPopupViewController {
+            controller.dismiss(animated: true)
+            objc_setAssociatedObject(self, "packageDetailController", nil, .OBJC_ASSOCIATION_ASSIGN)
         }
     }
 }
@@ -436,7 +469,6 @@ struct TripMemberCardView: View {
                             .foregroundColor(Token.additionalColorsBlack.toColor())
                     )
             }
-            
             Text(member.name)
                 .font(.jakartaSans(forTextStyle: .caption2, weight: .medium))
                 .foregroundColor(Token.additionalColorsBlack.toColor())
@@ -446,3 +478,99 @@ struct TripMemberCardView: View {
         .frame(width: 70)
     }
 }
+
+// Extension to find the view controller
+extension UIView {
+    func findViewController() -> UIViewController? {
+        if let nextResponder = self.next as? UIViewController {
+            return nextResponder
+        } else if let nextResponder = self.next as? UIView {
+            return nextResponder.findViewController()
+        } else {
+            return nil
+        }
+    }
+}
+
+// MARK: - Package Detail View
+struct PackageDetailView: View {
+    let package: GroupTripPlanDataModel.VotablePackage
+    let onDismiss: () -> Void
+    
+    var body: some View {
+        VStack(spacing: 0) {
+            VStack(alignment: .leading, spacing: 16) {
+                HStack(spacing: 12) {
+                    AsyncImage(url: URL(string: package.imageUrlString)) { image in
+                        image
+                            .resizable()
+                            .aspectRatio(contentMode: .fill)
+                    } placeholder: {
+                        Color.gray.opacity(0.3)
+                    }
+                    .frame(width: 60, height: 60)
+                    .clipShape(RoundedRectangle(cornerRadius: 8))
+                    
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(package.name)
+                            .font(.jakartaSans(forTextStyle: .headline, weight: .bold))
+                            .foregroundColor(Token.additionalColorsBlack.toColor())
+                        
+                        Text("Min. \(package.minParticipants ?? "0") - Max. \(package.maxParticipants ?? "0")")
+                            .font(.jakartaSans(forTextStyle: .caption1, weight: .medium))
+                            .foregroundColor(Token.grayscale70.toColor())
+                        
+                        Text("\(package.price)/Person")
+                            .font(.jakartaSans(forTextStyle: .subheadline, weight: .bold))
+                            .foregroundColor(Token.additionalColorsBlack.toColor())
+                    }
+                    
+                    Spacer()
+                }
+            }
+            .padding(20)
+            .background(Token.additionalColorsWhite.toColor())
+            
+            if !package.voters.isEmpty {
+                VStack(alignment: .leading, spacing: 16) {
+                    Text("Member")
+                        .font(.jakartaSans(forTextStyle: .headline, weight: .bold))
+                        .foregroundColor(Token.additionalColorsBlack.toColor())
+                    
+                    VStack(spacing: 12) {
+                        ForEach(package.voters, id: \.email) { voter in
+                            HStack(spacing: 12) {
+                                if let image = voter.image {
+                                    Image(uiImage: image.image)
+                                        .resizable()
+                                        .aspectRatio(contentMode: .fill)
+                                        .frame(width: 40, height: 40)
+                                        .clipShape(Circle())
+                                } else {
+                                    Circle()
+                                        .fill(Token.grayscale20.toColor())
+                                        .frame(width: 40, height: 40)
+                                        .overlay(
+                                            Text(String(voter.name.prefix(1)).uppercased())
+                                                .font(.jakartaSans(forTextStyle: .body, weight: .medium))
+                                                .foregroundColor(Token.additionalColorsBlack.toColor())
+                                        )
+                                }
+                                
+                                Text(voter.name)
+                                    .font(.jakartaSans(forTextStyle: .body, weight: .medium))
+                                    .foregroundColor(Token.additionalColorsBlack.toColor())
+                                
+                                Spacer()
+                            }
+                        }
+                    }
+                }
+                .padding(20)
+                .background(Token.additionalColorsWhite.toColor())
+            }
+        }
+        .background(Token.additionalColorsWhite.toColor())
+    }
+}
+
