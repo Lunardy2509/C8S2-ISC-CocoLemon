@@ -165,7 +165,6 @@ extension HomeCoordinator: GroupFormNavigationDelegate {
     }
     
     func notifyGroupFormNavigateToTripDetail(_ bookingDetails: LocalBookingDetails) {
-        print("⚠️ WARNING: GroupForm is navigating directly to TripDetail - this should go through GroupTripPlan")
         guard let navigationController = self.navigationController else { return }
         let tripCoordinator = MyTripCoordinator(
             input: MyTripCoordinator.Input(
@@ -178,7 +177,6 @@ extension HomeCoordinator: GroupFormNavigationDelegate {
     }
     
     func notifyGroupTripPlanCreated(data: GroupTripPlanDataModel) {
-        print("🎯 HomeCoordinator: Creating GroupTripPlan with navigation delegate") 
         let viewModel = GroupTripPlanViewModel(data: data)
         viewModel.navigationDelegate = self  
         let viewController = GroupTripPlanViewController(viewModel: viewModel)
@@ -196,7 +194,6 @@ extension HomeCoordinator: GroupFormNavigationDelegate {
     }
     
     func notifyGroupTripCreateTripTapped(planData: GroupTripPlanDataModel) {
-        print("🎯 HomeCoordinator: Creating GroupTripPlan from create trip") 
         let viewModel = GroupTripPlanViewModel(data: planData)
         viewModel.navigationDelegate = self  
         let viewController = GroupTripPlanViewController(viewModel: viewModel)
@@ -206,21 +203,15 @@ extension HomeCoordinator: GroupFormNavigationDelegate {
 
 extension HomeCoordinator: GroupTripPlanNavigationDelegate {
     func notifyGroupTripPlanEditTapped() {
-        print("✏️ Edit tapped") 
     }
     
     func notifyGroupTripPlanBookNowTapped(localBookingDetails: LocalBookingDetails) {
-        print("🎯 HomeCoordinator: Book Now tapped received!") 
-        print("📋 LocalBookingDetails: \(localBookingDetails.activityTitle)") 
-        
         NotificationCenter.default.post(
             name: .newLocalTripCreated, 
             object: localBookingDetails
         )
-        print("📡 Notification posted: .newLocalTripCreated") 
         
         guard let navigationController = self.navigationController else { 
-            print("❌ Could not get navigationController")
             return 
         }
         
@@ -228,7 +219,5 @@ extension HomeCoordinator: GroupTripPlanNavigationDelegate {
         let bookingDetailViewController = TripDetailViewController(viewModel: bookingDetailViewModel)
         
         navigationController.pushViewController(bookingDetailViewController, animated: true)
-        
-        print("📱 Navigated to TripDetail page")
     }
 }

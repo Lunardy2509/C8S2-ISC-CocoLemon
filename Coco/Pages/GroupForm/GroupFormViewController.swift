@@ -164,26 +164,6 @@ extension GroupFormViewController: GroupFormNavigationDelegate {
     func notifyGroupFormCreatePlan() {
         navigationController?.popViewController(animated: true)
     }
-    
-//    func goToBookingDetail(with data: BookingDetails) {
-//        let coordinator = MyTripCoordinator(
-//            input: .init(
-//                navigationController: navigationController!,
-//                flow: .bookingDetail(data: data)
-//            )
-//        )
-//        coordinator.start()
-//    }
-//    
-//    func goToBookingDetail(with data: LocalBookingDetails) {
-//        let coordinator = MyTripCoordinator(
-//            input: .init(
-//                navigationController: navigationController!,
-//                flow: .localBookingDetail(data: data)
-//            )
-//        )
-//        coordinator.start()
-//    }
 }
 
 // MARK: - CocoCalendarViewControllerDelegate

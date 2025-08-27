@@ -124,16 +124,12 @@ final class GroupFormViewModel: ObservableObject {
               !tripName.isEmpty,
               !selectedPackageIds.isEmpty else { return }
         
-        print("🚀 GroupFormViewModel: Starting to create plan...")
         // Get selected package details
         guard let selectedPackage = availablePackages.first(where: { selectedPackageIds.contains($0.id) }) else { 
-            print("❌ No selected package found")
             return 
         }
         
         let userId = UserDefaults.standard.string(forKey: "user-id") ?? ""
-        print("👤 GroupFormViewModel: Using user ID: '\(userId)'")
-        print("📦 GroupFormViewModel: Selected package: \(selectedPackage.name)")
         
         Task { @MainActor in
             do {
@@ -148,7 +144,6 @@ final class GroupFormViewModel: ObservableObject {
                 // Call the API to create booking
                 let response = try await createBookingFetcher.createBooking(request: request)
                 
-                print("✅ GroupFormViewModel: Booking created successfully, posting notification")
                 // Post notification that a new trip was created
                 NotificationCenter.default.post(name: .newTripCreated, object: response.bookingDetails)
                 
@@ -173,9 +168,6 @@ final class GroupFormViewModel: ObservableObject {
                 navigationDelegate?.notifyGroupTripPlanCreated(data: planData)
                 
             } catch {
-                print("Failed to create booking: \(error)")
-                print("⚠️ GroupFormViewModel: API failed, creating local booking data and posting notification")
-                
                 let tripMembers = teamMembers.map { teamMember in
                     TripMember(
                         name: teamMember.name,

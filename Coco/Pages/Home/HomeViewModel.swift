@@ -122,7 +122,6 @@ extension HomeViewModel: HomeViewModelProtocol {
                 self.filterDataModel = newFilterData
                 actionDelegate?.dismissTray()
                 
-                self.actionDelegate?.toggleLoadingView(isShown: false, after: 0.5)
                 self.filterDidApply()
                     
                 self.actionDelegate?.constructFilterCarousel(filterPillStates: newFilterData.filterPillDataState, filterDestinationPillStates: newFilterData.filterDestinationPillState)
