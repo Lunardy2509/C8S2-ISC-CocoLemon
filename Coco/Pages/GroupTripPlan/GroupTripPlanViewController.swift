@@ -7,6 +7,7 @@
 
 import Foundation
 import UIKit
+import SwiftUI
 
 final class GroupTripPlanViewController: UIViewController {
     private let viewModel: GroupTripPlanViewModelProtocol
@@ -76,10 +77,28 @@ extension GroupTripPlanViewController: GroupTripPlanViewModelAction {
 
 extension GroupTripPlanViewController: GroupTripPlanViewDelegate {
     func notifyBookNowTapped() {
-        viewModel.onBookNowTapped()
+        showBookingConfirmationPopup()
     }
     
     func notifyPackageVoteToggled(packageId: Int) {
         viewModel.onPackageVoteToggled(packageId: packageId)
+    }
+    
+    private func showBookingConfirmationPopup() {
+        let confirmationView = BookingConfirmationPopupView(
+            onConfirm: { [weak self] in
+                self?.dismiss(animated: true) {
+                    self?.viewModel.onBookNowTapped()
+                }
+            },
+            onCancel: { [weak self] in
+                self?.dismiss(animated: true)
+            }
+        )
+        
+        let hostingController = UIHostingController(rootView: confirmationView)
+        let popupViewController = CocoPopupViewController(child: hostingController)
+        
+        present(popupViewController, animated: true)
     }
 }
