@@ -28,7 +28,7 @@ struct HomeSearchSearchTray: View {
             wrappedValue: HomeSearchSearchTrayViewModel(
                 searchBarViewModel: HomeSearchBarViewModel(
                     leadingIcon: CocoIcon.icSearchLoop.image,
-                    placeholderText: "Search...",
+                    placeholderText: "I wanna go to...",
                     currentTypedText: selectedQuery,
                     trailingIcon: nil,
                     isTypeAble: true,

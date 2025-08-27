@@ -13,11 +13,9 @@ protocol HomeViewModelNavigationDelegate: AnyObject {
 
 protocol HomeViewModelAction: AnyObject {
     func constructCollectionView(viewModel: some HomeCollectionViewModelProtocol)
-    func constructLoadingState(state: HomeLoadingState)
     func constructNavBar(viewModel: HomeSearchBarViewModel)
     func constructFilterCarousel(filterPillStates: [HomeFilterPillState], filterDestinationPillStates: [HomeFilterDestinationPillState])
     
-    func toggleLoadingView(isShown: Bool, after: CGFloat)
     func activityDidSelect(data: ActivityDetailDataModel)
     
     func openSearchTray(

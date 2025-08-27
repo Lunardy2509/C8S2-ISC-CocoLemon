@@ -1,14 +1,14 @@
 //
-//  EmptySearchPopupView.swift
+//  FailedToAddContributor.swift
 //  Coco
 //
-//  Created by Ferdinand Lunardy on 26/08/25.
+//  Created by Ferdinand Lunardy on 27/08/25.
 //
 
 import SwiftUI
 
-struct EmptySearchPopupView: View {
-    let searchQuery: String
+struct FailedToAddContributor: View {
+    @ObservedObject var viewModel: GroupFormViewModel
     let onDismiss: () -> Void
     
     var body: some View {
@@ -29,12 +29,12 @@ struct EmptySearchPopupView: View {
                         .foregroundColor(.red)
                     
                     VStack(spacing: 8) {
-                        Text("We couldn't find '\(searchQuery)'")
+                        Text(extractMemberNameFromWarning(viewModel.warningMessage))
                             .font(.jakartaSans(forTextStyle: .title3, weight: .semibold))
                             .foregroundColor(Token.additionalColorsBlack.toColor())
                             .multilineTextAlignment(.center)
                         
-                        Text("Explore other keywords to discover more destinations.")
+                        Text(viewModel.warningMessage)
                             .font(.jakartaSans(forTextStyle: .footnote, weight: .medium))
                             .foregroundColor(Token.grayscale70.toColor())
                             .multilineTextAlignment(.center)
@@ -43,7 +43,7 @@ struct EmptySearchPopupView: View {
                     // Try Again Button
                     CocoButton(
                         action: onDismiss,
-                        text: "Search Again",
+                        text: "Add Another",
                         style: .normal,
                         type: .primary
                     )
@@ -56,5 +56,20 @@ struct EmptySearchPopupView: View {
             }
             .padding(.horizontal, 40)
         }
+    }
+    
+    private func extractMemberNameFromWarning(_ warningMessage: String) -> String {
+        // Extract member name from warning messages like:
+        // "Adhis is already added as the group planner."
+        // "Cynthia is already added to this trip."
+        
+        if warningMessage.contains("is already added") {
+            if let memberName = warningMessage.components(separatedBy: " is already added").first {
+                return "We couldn't add '\(memberName)'"
+            }
+        }
+        
+        // Fallback for other warning message formats
+        return "We couldn't add this member"
     }
 }

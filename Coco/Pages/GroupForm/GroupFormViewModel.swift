@@ -34,6 +34,7 @@ final class GroupFormViewModel: ObservableObject {
     @Published var showInviteFriendPopup: Bool = false
     @Published var showSearchResultsSheet: Bool = false
     @Published var showEmptyStatePopup: Bool = false
+    @Published var showFailedToAddContributorPopup: Bool = false
     @Published var searchResults: [HomeActivityCellDataModel] = []
     @Published var currentSearchQuery: String = ""
     
@@ -45,6 +46,7 @@ final class GroupFormViewModel: ObservableObject {
     var createPlanButtonTitle: String { // New computed property
         isEditMode ? "Save Plan" : "Create Plan"
     }
+    @Published var existingMember: String = ""
     
     // Available contributors for adding to team
     let availableContributors: [TripMemberData] = [
@@ -81,7 +83,7 @@ final class GroupFormViewModel: ObservableObject {
     lazy var searchBarViewModel: HomeSearchBarViewModel = {
         HomeSearchBarViewModel(
             leadingIcon: CocoIcon.icSearchLoop.image,
-            placeholderText: "Search destination...",
+            placeholderText: "I wanna go to...",
             currentTypedText: searchText,
             trailingIcon: ImageHandler(
                 image: CocoIcon.icFilterIcon.image,
@@ -152,16 +154,12 @@ final class GroupFormViewModel: ObservableObject {
               !tripName.isEmpty,
               !selectedPackageIds.isEmpty else { return }
         
-        print("🚀 GroupFormViewModel: Starting to create plan...")
         // Get selected package details
         guard let selectedPackage = availablePackages.first(where: { selectedPackageIds.contains($0.id) }) else { 
-            print("❌ No selected package found")
             return 
         }
         
         let userId = UserDefaults.standard.string(forKey: "user-id") ?? ""
-        print("👤 GroupFormViewModel: Using user ID: '\(userId)'")
-        print("📦 GroupFormViewModel: Selected package: \(selectedPackage.name)")
         
         Task { @MainActor in
             do {
@@ -176,7 +174,6 @@ final class GroupFormViewModel: ObservableObject {
                 // Call the API to create booking
                 let response = try await createBookingFetcher.createBooking(request: request)
                 
-                print("✅ GroupFormViewModel: Booking created successfully, posting notification")
                 // Post notification that a new trip was created
                 NotificationCenter.default.post(name: .newTripCreated, object: response.bookingDetails)
                 
@@ -201,9 +198,6 @@ final class GroupFormViewModel: ObservableObject {
                 navigationDelegate?.notifyGroupTripPlanCreated(data: planData)
                 
             } catch {
-                print("Failed to create booking: \(error)")
-                print("⚠️ GroupFormViewModel: API failed, creating local booking data and posting notification")
-                
                 let tripMembers = teamMembers.map { teamMember in
                     TripMember(
                         name: teamMember.name,

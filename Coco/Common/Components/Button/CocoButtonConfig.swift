@@ -68,7 +68,7 @@ enum CocoButtonStyle {
         case .small:
             return 12.0
         case .normal:
-            return 20.0
+            return 32.0
         case .large:
             return 24.0
         }
