@@ -170,6 +170,7 @@ private extension MyTripViewController {
             target: self,
             action: #selector(plusButtonTapped)
         )
+        plusButton.tintColor = Token.additionalColorsBlack
         
         // Add notification button  
         let notificationButton = UIBarButtonItem(
@@ -178,6 +179,7 @@ private extension MyTripViewController {
             target: self,
             action: #selector(notificationButtonTapped),
         )
+        notificationButton.tintColor = Token.additionalColorsBlack
         
         navigationItem.rightBarButtonItems = [notificationButton, plusButton]
     }
@@ -198,25 +200,32 @@ private extension MyTripViewController {
             self,
             selector: #selector(handleNewTripCreated(_:)),
             name: .newTripCreated,
-            object: nil
+            object: nil,
         )
         NotificationCenter.default.addObserver(
             self,
             selector: #selector(handleNewLocalTripCreated(_:)),
             name: .newLocalTripCreated,
-            object: nil
+            object: nil,
         )
     }
     
+    func showBanner(color: UIColor) {
+        let banner = UIView()
+        banner.backgroundColor = color
+    }
+    
     @objc private func handleNewTripCreated(_ notification: Notification) {
+        showBanner(color: Token.additionalColorsBlack)
         if let bookingDetails = notification.object as? BookingDetails {
-            viewModel.addBooking(bookingDetails) 
+            viewModel.addBooking(bookingDetails)
         }
     }
     
     @objc private func handleNewLocalTripCreated(_ notification: Notification) {
+        showBanner(color: Token.additionalColorsBlack)
         if let localBookingDetails = notification.object as? LocalBookingDetails {
-            viewModel.addLocalBooking(localBookingDetails) 
+            viewModel.addLocalBooking(localBookingDetails)
         }
     }
 }

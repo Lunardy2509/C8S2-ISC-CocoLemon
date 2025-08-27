@@ -140,7 +140,7 @@ final class GroupFormViewModel: ObservableObject {
                     packageId: selectedPackage.id,
                     bookingDate: dateVisit,
                     participants: teamMembers.count + 1, // +1 for the user creating the plan
-                    userId: UserDefaults.standard.string(forKey: "user-id") ?? ""
+                    userId: userId
                 )
                 
                 // Call the API to create booking
