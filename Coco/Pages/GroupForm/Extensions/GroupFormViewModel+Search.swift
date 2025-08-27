@@ -171,8 +171,6 @@ extension GroupFormViewModel {
         }
     }
     
-
-    
     func loadRecommendations() {
         isLoading = true
         

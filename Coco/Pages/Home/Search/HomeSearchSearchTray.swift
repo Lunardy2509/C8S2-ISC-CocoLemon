@@ -165,7 +165,7 @@ private extension HomeSearchSearchTray {
     func lastSearchSectionView() -> some View {
         ScrollView(.horizontal) {
             HStack(alignment: .center, spacing: 16.0) {
-                ForEach(Array(latestSearches.enumerated()), id: \.0) { (index, location) in
+                ForEach(Array(latestSearches.enumerated()), id: \.0) { (_, location) in
                     createLastSearchView(name: location.name)
                 }
             }

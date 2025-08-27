@@ -9,13 +9,13 @@ import Foundation
 import UIKit
 
 // Base or Parent coordinator
-class BaseCoordinator {
+internal class BaseCoordinator {
     weak var parentCoordinator: Coordinator?
     weak var navigationController: UINavigationController?
     
     private let startingIndex: Int
     
-    init(navigationController : UINavigationController) {
+    init(navigationController: UINavigationController) {
         self.navigationController = navigationController
         startingIndex = max(0, navigationController.viewControllers.count - 1)
     }
@@ -34,7 +34,7 @@ extension BaseCoordinator: BaseCoordinatorProtocol {
     
     /// Removing a coordinator inside a children. This call is important to prevent memory leak.
     /// - Parameter coordinator: Coordinator that finished.
-    func childDidFinish(_ coordinator : BaseCoordinatorProtocol){
+    func childDidFinish(_ coordinator: BaseCoordinatorProtocol) {
         if let parentCoordinator {
             parentCoordinator.childDidFinish(self)
         }
@@ -46,4 +46,3 @@ extension BaseCoordinator: BaseCoordinatorProtocol {
         }
     }
 }
-

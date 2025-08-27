@@ -231,5 +231,3 @@ extension HomeCoordinator: GroupTripPlanNavigationDelegate {
         navigationController.pushViewController(bookingDetailViewController, animated: true)
     }
 }
-
-

@@ -143,7 +143,7 @@ private extension HomeCollectionViewController {
     
     typealias NoResultCellRegistration = UICollectionView.CellRegistration<NoResultCell, NoResultCellDataModel>
     func createNoResultCellRegistration() -> NoResultCellRegistration {
-        .init { cell, _, itemIdentifier in
+        .init { _, _, _ in
             // No configuration needed for the simple no result cell
         }
     }

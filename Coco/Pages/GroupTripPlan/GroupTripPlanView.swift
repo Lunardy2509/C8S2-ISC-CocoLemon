@@ -419,8 +419,6 @@ private extension GroupTripPlanView {
     }
     
     func showPackageDetail(package: GroupTripPlanDataModel.VotablePackage) {
-        guard let currentData = currentData else { return }
-        
         let detailView = PackageDetailView(
             package: package,
             onDismiss: { [weak self] in
@@ -516,7 +514,7 @@ struct PackageDetailView: View {
                             .font(.jakartaSans(forTextStyle: .headline, weight: .bold))
                             .foregroundColor(Token.additionalColorsBlack.toColor())
                         
-                        Text("Min. \(package.minParticipants ?? "0") - Max. \(package.maxParticipants ?? "0")")
+                        Text("Min. \(package.minParticipants) - Max. \(package.maxParticipants)")
                             .font(.jakartaSans(forTextStyle: .caption1, weight: .medium))
                             .foregroundColor(Token.grayscale70.toColor())
                         
@@ -573,4 +571,3 @@ struct PackageDetailView: View {
         .background(Token.additionalColorsWhite.toColor())
     }
 }
-

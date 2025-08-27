@@ -28,7 +28,7 @@ final class HomeFormScheduleViewModel {
         currentTypedText: "",
         trailingIcon: (
             image: CocoIcon.icFilterIcon.image,
-            didTap: openCalendar
+            didTap: showCalendarOption
         ),
         isTypeAble: false,
         delegate: self
@@ -85,9 +85,8 @@ extension HomeFormScheduleViewModel: HomeFormScheduleViewModelProtocol {
 
                 let response: CreateBookingResponse = try await fetcher.createBooking(request: request)
                 delegate?.notifyFormScheduleDidNavigateToCheckout(with: response)
-            }
-            catch {
-                
+            } catch {
+                // Do Nothing
             }
         }
     }
@@ -98,14 +97,11 @@ extension HomeFormScheduleViewModel: HomeSearchBarViewModelDelegate {
         if viewModel === calendarInputViewModel {
             actionDelegate?.showCalendarOption()
         }
-        else if viewModel === paxInputViewModel {
-            
-        }
     }
 }
 
 private extension HomeFormScheduleViewModel {
-    func openCalendar() {
-       
+    func showCalendarOption() {
+       // Implement the calendar option functionality here if needed
     }
 }

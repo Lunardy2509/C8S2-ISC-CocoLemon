@@ -13,10 +13,9 @@ final class ProfileViewModel: ProfileViewModelProtocol {
 
 extension ProfileViewModel {
     func onViewDidLoad() {
-        if let _: String = UserDefaults.standard.value(forKey: "user-id") as? String {
+        if UserDefaults.standard.value(forKey: "user-id") is String {
             showUserProfileView()
-        }
-        else {
+        } else {
             showSignInView()
         }
     }

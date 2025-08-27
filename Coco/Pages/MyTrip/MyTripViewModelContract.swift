@@ -17,7 +17,7 @@ protocol MyTripViewModelAction: AnyObject {
 
 protocol MyTripViewModelProtocol: AnyObject {
     var actionDelegate: MyTripViewModelAction? { get set }
-    
+
     func onViewWillAppear()
     func onTripListDidTap(at index: Int)
     func onTripDidDelete(at index: Int)

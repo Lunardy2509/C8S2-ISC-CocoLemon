@@ -31,7 +31,7 @@ struct VotablePackageCardView: View {
                     .foregroundColor(Token.additionalColorsBlack.toColor())
                     .lineLimit(1)
                 
-                Text("Min. \(package.minParticipants ?? "0") - Max. \(package.maxParticipants ?? "0")")
+                Text("Min. \(package.minParticipants) - Max. \(package.maxParticipants)")
                     .font(.jakartaSans(forTextStyle: .caption2, weight: .medium))
                     .foregroundColor(Token.grayscale70.toColor())
                 

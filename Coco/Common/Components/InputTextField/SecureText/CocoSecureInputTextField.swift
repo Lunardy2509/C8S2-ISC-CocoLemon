@@ -57,7 +57,7 @@ struct CocoSecureInputTextField: View {
     }
 }
 
-final class CocoSecureInputTextFieldHostingController: UIHostingController<CocoSecureInputTextField> {
+final class SecureInputTextFieldController: UIHostingController<CocoSecureInputTextField> {
     init(viewModel: CocoSecureInputTextFieldViewModel) {
         let view = CocoSecureInputTextField(viewModel: viewModel)
         super.init(rootView: view)

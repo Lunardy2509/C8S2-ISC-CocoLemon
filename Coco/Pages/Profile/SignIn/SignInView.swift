@@ -34,13 +34,12 @@ final class SignInView: UIView {
         actionHorizontalStackView.addArrangedSubview(view)
     }
 
-    
     func addActionButton(with view: UIView) {
         actionButtonContainerView.subviews.forEach { $0.removeFromSuperview() }
         actionButtonContainerView.addSubviewAndLayout(view)
     }
     
-    func addStatusLabel(with view: UIView){
+    func addStatusLabel(with view: UIView) {
         statusLabel.addArrangedSubview(view)
     }
      
@@ -48,8 +47,6 @@ final class SignInView: UIView {
     private lazy var actionHorizontalStackView: UIStackView = createStackHorizontalView()
     private lazy var actionButtonContainerView: UIView = UIView()
     private lazy var statusLabel: UIStackView = createContainerLabelView()
-
-    
 }
 
 private extension SignInView {
@@ -69,13 +66,12 @@ private extension SignInView {
                 .trailing(to: contentView.trailingAnchor)
         }
         
-        actionHorizontalStackView.layout{
+        actionHorizontalStackView.layout {
             $0.top(to: inputStackView.bottomAnchor, constant: 8.0)
                 .leading(to: contentView.leadingAnchor)
                 .trailing(to: contentView.trailingAnchor)
         }
     
-        
         actionButtonContainerView.layout {
             $0.top(to: actionHorizontalStackView.bottomAnchor, constant: 32.0)
                 .leading(to: contentView.leadingAnchor)
@@ -116,7 +112,7 @@ private extension SignInView {
         return stackView
     }
     
-    func createContainerLabelView() ->UIStackView{
+    func createContainerLabelView() -> UIStackView {
         let stackView = UIStackView()
         stackView.axis = .horizontal
         return stackView

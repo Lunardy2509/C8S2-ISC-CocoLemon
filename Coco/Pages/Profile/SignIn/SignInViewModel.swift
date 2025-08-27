@@ -14,7 +14,7 @@ final class SignInViewModel {
     init(fetcher: SignInFetcherProtocol = SignInFetcher()) {
         self.fetcher = fetcher
     }
-
+    
     private lazy var emailInputVM: HomeSearchBarViewModel = HomeSearchBarViewModel(
         leadingIcon: nil,
         placeholderText: "Enter your email address",
@@ -63,7 +63,6 @@ extension SignInViewModel: SignInViewModelProtocol {
             return
         }
         
-        
         fetcher.signIn(
             spec: SignInSpec(
                 email: emailInputVM.currentTypedText,
@@ -72,11 +71,10 @@ extension SignInViewModel: SignInViewModelProtocol {
         ) { [weak self] result in
             guard let self else { return }
             
-            
             switch result {
             case .success(let success):
                 
-//                delegate?.notifySignInDidSuccess()
+                //                delegate?.notifySignInDidSuccess()
                 
                 self.actionDelegate?.hideStatusMessage()
                 UserDefaults.standard.setValue(success.userId, forKey: "user-id")
@@ -93,10 +91,10 @@ extension SignInViewModel: SignInViewModelProtocol {
                 case .invalidURL, .bodyParsingFailed, .invalidResponse:
                     errorMessage = "Something went wrong. Please try again."
                     
-                case .requestFailed(_):
+                case .requestFailed:
                     errorMessage = "Network connection error. Please try again."
                     
-                case .decodingFailed(_):
+                case .decodingFailed:
                     errorMessage = "Something went wrong. Please try again."
                     
                 case .statusCode(let code):

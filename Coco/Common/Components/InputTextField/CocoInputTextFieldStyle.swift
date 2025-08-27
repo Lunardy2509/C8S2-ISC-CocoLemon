@@ -17,20 +17,6 @@ struct CocoInputTextFieldStyle: TextFieldStyle {
     let shouldInterceptFocus: Bool
     let onFocusedAction: ((Bool) -> Void)?
     
-    init(
-        leadingIcon: UIImage?,
-        placeHolder: String?,
-        trailingIcon: ImageHandler?,
-        shouldInterceptFocus: Bool,
-        onFocusedAction: ((Bool) -> Void)?
-    ) {
-        self.leadingIcon = leadingIcon
-        self.placeHolder = placeHolder
-        self.trailingIcon = trailingIcon
-        self.shouldInterceptFocus = shouldInterceptFocus
-        self.onFocusedAction = onFocusedAction
-    }
-    
     func _body(configuration: TextField<Self._Label>) -> some View {
         HStack(alignment: .center, spacing: 8.0) {
             if let leadingIcon: UIImage {
