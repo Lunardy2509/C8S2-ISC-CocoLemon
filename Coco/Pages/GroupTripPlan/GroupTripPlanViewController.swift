@@ -35,7 +35,7 @@ final class GroupTripPlanViewController: UIViewController {
         
         let bookNowButtonVC = CocoButtonHostingController(
             action: { [weak self] in
-                self?.viewModel.onBookNowTapped()
+                self?.notifyBookNowTapped()
             },
             text: "Book Now",
             style: .large,

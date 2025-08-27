@@ -13,7 +13,7 @@ struct BookingConfirmationPopupView: View {
                     .multilineTextAlignment(.center)
                 
                 Text("Once you confirm, we'll secure your spot instantly.")
-                    .font(.jakartaSans(forTextStyle: .body, weight: .regular))
+                    .font(.jakartaSans(forTextStyle: .subheadline, weight: .regular))
                     .foregroundColor(Token.grayscale70.toColor())
                     .multilineTextAlignment(.center)
             }
@@ -23,8 +23,9 @@ struct BookingConfirmationPopupView: View {
                     action: onConfirm,
                     text: "Confirm",
                     style: .normal,
-                    type: .primary
+                    type: .primary,
                 )
+                .stretch()
                 
                 CocoButton(
                     action: onCancel,
@@ -32,6 +33,7 @@ struct BookingConfirmationPopupView: View {
                     style: .normal,
                     type: .tertiary
                 )
+                .stretch()
             }
         }
         .padding(32.0)
