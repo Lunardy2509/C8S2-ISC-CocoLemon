@@ -474,22 +474,14 @@ struct SelectablePackageCard: View {
                         .foregroundColor(Token.additionalColorsBlack.toColor())
                         .lineLimit(1)
                     
-                    // Package Description & Participants
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text(package.description)
+                    HStack(spacing: 4) {
+                        Image(systemName: "person.2")
+                            .font(.system(size: 10))
+                            .foregroundColor(Token.grayscale70.toColor())
+                        
+                        Text(package.participants)
                             .font(.jakartaSans(forTextStyle: .caption1, weight: .medium))
                             .foregroundColor(Token.grayscale70.toColor())
-                            .lineLimit(2)
-                        
-                        HStack(spacing: 4) {
-                            Image(systemName: "person.2")
-                                .font(.system(size: 10))
-                                .foregroundColor(Token.grayscale70.toColor())
-                            
-                            Text(package.participants)
-                                .font(.jakartaSans(forTextStyle: .caption1, weight: .medium))
-                                .foregroundColor(Token.grayscale70.toColor())
-                        }
                     }
                     
                     // Price
