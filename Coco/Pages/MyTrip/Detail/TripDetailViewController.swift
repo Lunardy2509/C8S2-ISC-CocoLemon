@@ -38,7 +38,7 @@ final class TripDetailViewController: UIViewController {
             target: self,
             action: #selector(shareButtonTapped)
         )
-        shareButton.tintColor = Token.mainColorPrimary
+        shareButton.tintColor = Token.additionalColorsBlack
         
         navigationItem.rightBarButtonItem = shareButton
     }
