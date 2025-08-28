@@ -88,7 +88,7 @@ extension GroupTripPlanViewController: GroupTripPlanViewDelegate {
         let confirmationView = BookingConfirmationPopupView(
             onConfirm: { [weak self] in
                 self?.dismiss(animated: true) {
-                    self?.viewModel.onBookNowTapped()
+                    self?.showBookingSuccessPopup()
                 }
             },
             onCancel: { [weak self] in
@@ -97,6 +97,21 @@ extension GroupTripPlanViewController: GroupTripPlanViewDelegate {
         )
         
         let hostingController = UIHostingController(rootView: confirmationView)
+        let popupViewController = CocoPopupViewController(child: hostingController)
+        
+        present(popupViewController, animated: true)
+    }
+    
+    private func showBookingSuccessPopup() {
+        let successView = BookingSuccessPopupView(
+            onContinue: { [weak self] in
+                self?.dismiss(animated: true) {
+                    self?.viewModel.onBookNowTapped()
+                }
+            }
+        )
+        
+        let hostingController = UIHostingController(rootView: successView)
         let popupViewController = CocoPopupViewController(child: hostingController)
         
         present(popupViewController, animated: true)
