@@ -46,6 +46,8 @@ final class TripDetailViewController: UIViewController {
     @objc private func shareButtonTapped() {
         guard let tripData = getCurrentTripData() else { return }
         
+        let screenshot = captureScreenshot()
+        
         let shareText = """
         Check out my trip: \(tripData.activityName)
         
@@ -59,8 +61,8 @@ final class TripDetailViewController: UIViewController {
         
         var shareItems: [Any] = [shareText]
         
-        if let imageUrl = URL(string: tripData.imageString) {
-            shareItems.append(imageUrl)
+        if let screenshot = screenshot {
+            shareItems.append(screenshot)
         }
         
         let activityViewController = UIActivityViewController(
@@ -73,6 +75,20 @@ final class TripDetailViewController: UIViewController {
         }
         
         present(activityViewController, animated: true)
+    }
+    
+    private func captureScreenshot() -> UIImage? {
+        return captureView(view)
+    }
+    
+    private func captureView(_ targetView: UIView) -> UIImage? {
+        let renderer = UIGraphicsImageRenderer(bounds: targetView.bounds)
+        
+        let screenshot = renderer.image { context in
+            targetView.drawHierarchy(in: targetView.bounds, afterScreenUpdates: true)
+        }
+        
+        return screenshot
     }
     
     private func getCurrentTripData() -> BookingDetailDataModel? {
