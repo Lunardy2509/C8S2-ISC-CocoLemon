@@ -28,14 +28,65 @@ final class TripDetailViewController: UIViewController {
         super.viewDidLoad()
         viewModel.onViewDidLoad()
         title = "Detail My Trip"
+        setupNavigationBar() 
+    }
+    
+    private func setupNavigationBar() {
+        let shareButton = UIBarButtonItem(
+            image: UIImage(systemName: "square.and.arrow.up") ?? UIImage(),
+            style: .plain,
+            target: self,
+            action: #selector(shareButtonTapped)
+        )
+        shareButton.tintColor = Token.mainColorPrimary
+        
+        navigationItem.rightBarButtonItem = shareButton
+    }
+    
+    @objc private func shareButtonTapped() {
+        guard let tripData = getCurrentTripData() else { return }
+        
+        let shareText = """
+        Check out my trip: \(tripData.activityName)
+        
+        📍 Location: \(tripData.location)
+        📅 Date: \(tripData.bookingDateText)
+        👥 People: \(tripData.paxNumber)
+        💰 Price: \(tripData.price.toRupiah())
+        
+        Shared via CocoLemon
+        """
+        
+        var shareItems: [Any] = [shareText]
+        
+        if let imageUrl = URL(string: tripData.imageString) {
+            shareItems.append(imageUrl)
+        }
+        
+        let activityViewController = UIActivityViewController(
+            activityItems: shareItems,
+            applicationActivities: nil
+        )
+        
+        if let popover = activityViewController.popoverPresentationController {
+            popover.barButtonItem = navigationItem.rightBarButtonItem
+        }
+        
+        present(activityViewController, animated: true)
+    }
+    
+    private func getCurrentTripData() -> BookingDetailDataModel? {
+        return currentTripData
     }
     
     private let viewModel: TripDetailViewModelProtocol
     private let thisView: TripDetailView = TripDetailView()
+    private var currentTripData: BookingDetailDataModel?
 }
 
 extension TripDetailViewController: TripDetailViewModelAction {
     func configureView(dataModel: BookingDetailDataModel) {
+        currentTripData = dataModel 
         thisView.configureView(dataModel)
         
         let labelVC: CocoStatusLabelHostingController = CocoStatusLabelHostingController(
