@@ -1,0 +1,19 @@
+//
+//  Double+ext.swift
+//  Coco
+//
+//  Created by Teuku Fazariz Basya on 14/08/25
+//
+
+import Foundation
+
+extension Double {
+    func toRupiah() -> String {
+        let formatter = NumberFormatter()
+        formatter.numberStyle = .currency
+        formatter.locale = Locale(identifier: "id_ID")
+        formatter.currencySymbol = "Rp"
+        formatter.maximumFractionDigits = 0
+        return formatter.string(from: NSNumber(value: self)) ?? "Rp0"
+    }
+}

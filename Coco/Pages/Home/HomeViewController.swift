@@ -51,21 +51,56 @@ extension HomeViewController: HomeViewModelAction {
     }
     
     func constructNavBar(viewModel: HomeSearchBarViewModel) {
-        let viewController: HomeSearchBarHostingController = HomeSearchBarHostingController(viewModel: viewModel)
+        let viewController: HomeSearchBarHostingController = HomeSearchBarHostingController(
+            viewModel: viewModel,
+            onReturnKeyAction: { [weak self] in
+                // Handle return key press if needed - could trigger search or open search tray
+                if !viewModel.currentTypedText.isEmpty {
+                    self?.viewModel.onSearchDidApply(viewModel.currentTypedText)
+                }
+            },
+            onClearAction: { [weak self] in
+                self?.viewModel.onSearchReset()
+            }
+        )
         addChild(viewController)
         thisView.addSearchBarView(from: viewController.view)
         viewController.didMove(toParent: self)
     }
     
+    func constructFilterCarousel(filterPillStates: [HomeFilterPillState], filterDestinationPillStates: [HomeFilterDestinationPillState]) {
+        // Only show applied filters (isSelected = true) in the home view carousel
+        let appliedActivityFilters = filterPillStates.filter { $0.isSelected }
+        let appliedDestinationFilters = filterDestinationPillStates.filter { $0.isSelected }
+        let isPriceRangeApplied = viewModel.isPriceRangeFilterApplied()
+        let priceRangeText = viewModel.getPriceRangeText()
+        
+        let appliedFilterCarouselView = HomeAppliedFilterCarouselView(
+            appliedActivityFilters: appliedActivityFilters,
+            appliedDestinationFilters: appliedDestinationFilters,
+            isPriceRangeApplied: isPriceRangeApplied,
+            priceRangeText: priceRangeText,
+            onFilterDismiss: { [weak self] filterId in
+                self?.viewModel.onFilterDismiss(filterId)
+            }
+        )
+        let viewController: UIHostingController = UIHostingController(rootView: appliedFilterCarouselView)
+        addChild(viewController)
+        thisView.addFilterView(from: viewController.view)
+        viewController.didMove(toParent: self)
+        
+        thisView.toggleFilterView(isShown: !appliedActivityFilters.isEmpty || !appliedDestinationFilters.isEmpty || isPriceRangeApplied)
+    }
+    
     func toggleLoadingView(isShown: Bool, after: CGFloat) {
         DispatchQueue.main.asyncAfter(deadline: .now() + after, execute: { [weak self] in
-            guard let self else { return }
+            guard let self = self else { return }
             self.thisView.toggleLoadingView(isShown: isShown)
         })
     }
     
     func activityDidSelect(data: ActivityDetailDataModel) {
-        guard let navigationController else { return }
+        guard let navigationController = navigationController else { return }
         let coordinator: HomeCoordinator = HomeCoordinator(
             input: .init(
                 navigationController: navigationController,
@@ -80,17 +115,29 @@ extension HomeViewController: HomeViewModelAction {
         selectedQuery: String,
         latestSearches: [HomeSearchSearchLocationData]
     ) {
-        presentTray(view: HomeSearchSearchTray(
+        let searchTrayView = HomeSearchSearchTray(
             selectedQuery: selectedQuery,
-            latestSearches: latestSearches
-        ) { [weak self] queryText in
-            self?.dismiss(animated: true)
-            self?.viewModel.onSearchDidApply(queryText)
-        })
+            latestSearches: latestSearches,
+            searchDidApply: { [weak self] queryText in
+                self?.dismiss(animated: true) {
+                    self?.viewModel.onSearchDidApply(queryText)
+                }
+            },
+            onSearchHistoryRemove: { [weak self] searchData in
+                self?.viewModel.removeSearchFromHistory(searchData)
+            },
+            onSearchReset: { [weak self] in
+                self?.dismiss(animated: true) {
+                    self?.viewModel.onSearchReset()
+                }
+            }
+        )
+        
+        presentSearchTray(view: searchTrayView)
     }
     
-    func openFilterTray(_ viewModel: HomeSearchFilterTrayViewModel) {
-        presentTray(view: HomeSearchFilterTray(viewModel: viewModel))
+    func openFilterTray(_ viewModel: HomeFilterTrayViewModel) {
+        presentFilterTray(view: HomeFilterTray(viewModel: viewModel))
     }
     
     func dismissTray() {
@@ -99,10 +146,25 @@ extension HomeViewController: HomeViewModelAction {
 }
 
 private extension HomeViewController {
-    func presentTray(view: some View) {
+    func presentSearchTray(view: some View) {
         let trayVC: UIHostingController = UIHostingController(rootView: view)
         if let sheet: UISheetPresentationController = trayVC.sheetPresentationController {
-            sheet.detents = [.medium(), .large()]
+            sheet.detents = [.large()]
+            sheet.prefersGrabberVisible = true
+            sheet.prefersScrollingExpandsWhenScrolledToEdge = false
+            sheet.prefersEdgeAttachedInCompactHeight = true
+            sheet.preferredCornerRadius = 32.0
+        }
+        present(trayVC, animated: true)
+    }
+    
+    func presentFilterTray(view: some View) {
+        let trayVC: UIHostingController = UIHostingController(rootView: view)
+        let fractionalDetent = UISheetPresentationController.Detent.custom(identifier: .init("fractionalDetent")) { context in
+            return context.maximumDetentValue * 0.85
+        }
+        if let sheet: UISheetPresentationController = trayVC.sheetPresentationController {
+            sheet.detents = [fractionalDetent, .large()]
             sheet.prefersGrabberVisible = true
             sheet.prefersScrollingExpandsWhenScrolledToEdge = false
             sheet.prefersEdgeAttachedInCompactHeight = true

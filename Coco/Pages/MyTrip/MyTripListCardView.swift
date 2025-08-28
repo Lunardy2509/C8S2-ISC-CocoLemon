@@ -216,7 +216,6 @@ private extension MyTripListCardView {
                 .bottom(to: contentView.bottomAnchor)
         }
         
-        
         addSubviewAndLayout(contentView, insets: UIEdgeInsets(edges: 12.0))
         
         backgroundColor = Token.additionalColorsWhite

@@ -12,6 +12,9 @@ struct HomeFormScheduleInputView: View {
     @ObservedObject var paxInputViewModel: HomeSearchBarViewModel
     
     var actionButtonAction: () -> Void
+    var actionButtonText: String = "Checkout"
+    var showActionButton: Bool = true
+    var showPaxInput: Bool = true
     
     var body: some View {
         VStack(alignment: .leading, spacing: 16.0) {
@@ -23,22 +26,26 @@ struct HomeFormScheduleInputView: View {
                 HomeSearchBarView(viewModel: calendarViewModel)
             }
             
-            VStack(alignment: .leading, spacing: 8.0) {
-                Text("Number of People")
-                    .font(.jakartaSans(forTextStyle: .footnote, weight: .medium))
-                    .foregroundStyle(Token.grayscale70.toColor())
-                HomeSearchBarView(viewModel: paxInputViewModel)
+            if showPaxInput {
+                VStack(alignment: .leading, spacing: 8.0) {
+                    Text("Number of People")
+                        .font(.jakartaSans(forTextStyle: .footnote, weight: .medium))
+                        .foregroundStyle(Token.grayscale70.toColor())
+                    HomeSearchBarView(viewModel: paxInputViewModel)
+                }
             }
             
             Spacer()
             
-            CocoButton(
-                action: actionButtonAction,
-                text: "Checkout",
-                style: .large,
-                type: .primary
-            )
-            .stretch()
+            if showActionButton {
+                CocoButton(
+                    action: actionButtonAction,
+                    text: actionButtonText,
+                    style: .large,
+                    type: .primary
+                )
+                .stretch()
+            }
         }
     }
 }

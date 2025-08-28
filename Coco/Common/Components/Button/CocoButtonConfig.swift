@@ -9,12 +9,21 @@ import Foundation
 import SwiftUI
 
 enum CocoButtonStyle {
+    case thin
     case small
     case normal
     case large
     
     var padding: EdgeInsets {
         switch self {
+        case .thin:
+            return .init(
+                top: 0,
+                leading: 15.0,
+                bottom: 0,
+                trailing: 15.0
+                )
+            
         case .small:
             return .init(
                 top: 0,
@@ -41,6 +50,8 @@ enum CocoButtonStyle {
     
     var height: Double {
         switch self {
+        case .thin:
+            return 28.0
         case .small:
             return 28.0
         case .normal:
@@ -52,10 +63,12 @@ enum CocoButtonStyle {
     
     var cornerRadius: Double {
         switch self {
+        case .thin:
+            return 28.0
         case .small:
             return 12.0
         case .normal:
-            return 20.0
+            return 32.0
         case .large:
             return 24.0
         }
@@ -67,6 +80,7 @@ enum CocoButtonType {
     case secondary
     case tertiary
     case disabled
+    case forgot
     
     var textColor: Color {
         switch self {
@@ -78,6 +92,8 @@ enum CocoButtonType {
             return Token.mainColorPrimary.toColor()
         case .disabled:
             return Token.grayscale60.toColor()
+        case .forgot:
+            return .red
         }
     }
     
@@ -91,6 +107,9 @@ enum CocoButtonType {
             return Token.additionalColorsWhite.toColor()
         case .disabled:
             return Token.grayscale20.toColor()
+            
+        case .forgot:
+            return .clear
         }
     }
     
@@ -101,9 +120,21 @@ enum CocoButtonType {
         case .secondary:
             return Token.mainColorPrimary.toColor()
         case .tertiary:
-            return nil
+            return Token.mainColorPrimary.toColor()
         case .disabled:
             return nil
+        case .forgot:
+            return nil
+        }
+        
+    }
+    
+    var font: Font {
+        switch self {
+        case .forgot:
+            return .jakartaSans(forTextStyle: .footnote, weight: .semibold)
+        default:
+            return .jakartaSans(forTextStyle: .body, weight: .semibold)
         }
     }
 }

@@ -38,12 +38,15 @@ final class HomeCollectionViewController: UIViewController {
 extension HomeCollectionViewController: HomeCollectionViewModelAction {
     func configureDataSource() {
         let activityCellRegistration: ActivityCellRegistration = createActivityCellRegistration()
+        let noResultCellRegistration: NoResultCellRegistration = createNoResultCellRegistration()
         let headerRegistration: HeaderRegistration = createHeaderRegistration()
         
         dataSource = HomeCollectionViewDataSource(collectionView: collectionView, cellProvider: { (collectionView, indexPath, item: AnyHashable) -> UICollectionViewCell? in
             switch item {
             case let item as HomeActivityCellDataModel:
                 return collectionView.dequeueConfiguredReusableCell(using: activityCellRegistration, for: indexPath, item: item)
+            case let item as NoResultCellDataModel:
+                return collectionView.dequeueConfiguredReusableCell(using: noResultCellRegistration, for: indexPath, item: item)
             default:
                 return nil
             }
@@ -82,7 +85,7 @@ private extension HomeCollectionViewController {
     func createCollectionView() -> UICollectionView {
         let collectionView: UICollectionView = UICollectionView(frame: .zero, collectionViewLayout: createLayout())
         collectionView.showsHorizontalScrollIndicator = false
-        collectionView.contentInset = .init(top: 0, left: 0, bottom: 8.0, right: 0)
+        collectionView.contentInset = .init(top: 0, left: 0, bottom: 0, right: 0)
         
         return collectionView
     }
@@ -105,8 +108,23 @@ private extension HomeCollectionViewController {
                     alignment: .top
                 )
                 section.boundarySupplementaryItems = [sectionHeader]
-                section.interGroupSpacing = CGFloat(20)
-                section.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 24.0, bottom: 8.0, trailing: 24.0)
+                section.interGroupSpacing = CGFloat(12)
+                section.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 24, bottom: 0, trailing: 24)
+                return section
+                
+            case .noResult:
+                let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .fractionalHeight(1.0))
+                let item = NSCollectionLayoutItem(layoutSize: itemSize)
+                let groupSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .fractionalHeight(1.0))
+                let group = NSCollectionLayoutGroup.horizontal(layoutSize: groupSize, subitems: [item])
+                let section = NSCollectionLayoutSection(group: group)
+                
+                // Add section header for no result section as well
+                let sectionHeaderSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .estimated(70))
+                let sectionHeader = NSCollectionLayoutBoundarySupplementaryItem(layoutSize: sectionHeaderSize, elementKind: UICollectionView.elementKindSectionHeader, alignment: .top)
+                section.boundarySupplementaryItems = [sectionHeader]
+                
+                section.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 24, bottom: 0, trailing: 24)
                 return section
             }
         }
@@ -118,8 +136,15 @@ private extension HomeCollectionViewController {
     typealias ActivityCellRegistration = UICollectionView.CellRegistration<HomeActivityCell, HomeActivityCellDataModel>
     func createActivityCellRegistration() -> ActivityCellRegistration {
         .init { [weak self] cell, _, itemIdentifier in
-            guard let self else { return }
+            guard self != nil else { return }
             cell.configureCell(itemIdentifier)
+        }
+    }
+    
+    typealias NoResultCellRegistration = UICollectionView.CellRegistration<NoResultCell, NoResultCellDataModel>
+    func createNoResultCellRegistration() -> NoResultCellRegistration {
+        .init { _, _, _ in
+            // No configuration needed for the simple no result cell
         }
     }
     
@@ -131,7 +156,14 @@ private extension HomeCollectionViewController {
             else {
                 return
             }
-            supplementaryView.configureView(title: sectionTitle)
+            
+            // Only show "Clear All" for "Your Result" sections that are NOT from search results
+            let showClearAll = sectionTitle == "Your Result" && !(self?.viewModel.isFromSearch ?? false)
+            supplementaryView.configureView(title: sectionTitle, showClearAll: showClearAll)
+            
+            supplementaryView.onClearAllTap = { [weak self] in
+                self?.viewModel.onClearAllFilters()
+            }
         }
     }
 }

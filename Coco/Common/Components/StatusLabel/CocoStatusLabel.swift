@@ -15,7 +15,7 @@ struct CocoStatusLabel: View {
     var body: some View {
         Text(title)
             .lineLimit(1)
-            .font(.jakartaSans(forTextStyle: .footnote, weight: .light))
+            .font(.jakartaSans(forTextStyle: .footnote, weight: .medium))
             .foregroundStyle(style.textColor.toColor())
             .padding(.vertical, 4.0)
             .padding(.horizontal, 16.0)

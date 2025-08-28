@@ -13,7 +13,6 @@ private let kInputHeight: CGFloat = 52.0
 struct CocoSecureInputTextField: View {
     @ObservedObject var viewModel: CocoSecureInputTextFieldViewModel
     @State private var isSecure: Bool = true
-    
     @FocusState private var isFocused: Bool
     private let onFocusedAction: ((Bool) -> Void)?
     
@@ -32,8 +31,7 @@ struct CocoSecureInputTextField: View {
                     viewModel.placeholderText,
                     text: $viewModel.currentTypedText
                 )
-            }
-            else {
+            } else {
                 TextField(
                     viewModel.placeholderText,
                     text: $viewModel.currentTypedText
@@ -59,7 +57,7 @@ struct CocoSecureInputTextField: View {
     }
 }
 
-final class CocoSecureInputTextFieldHostingController: UIHostingController<CocoSecureInputTextField> {
+final class SecureInputTextFieldController: UIHostingController<CocoSecureInputTextField> {
     init(viewModel: CocoSecureInputTextFieldViewModel) {
         let view = CocoSecureInputTextField(viewModel: viewModel)
         super.init(rootView: view)

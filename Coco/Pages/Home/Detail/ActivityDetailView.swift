@@ -87,8 +87,7 @@ final class ActivityDetailView: UIView {
                 data.availablePackages.content.forEach { data in
                     packageContainer.addArrangedSubview(createPackageView(data: data))
                 }
-            }
-            else {
+            } else {
                 data.hiddenPackages.forEach { data in
                     packageContainer.addArrangedSubview(createPackageView(data: data))
                 }
@@ -132,6 +131,17 @@ final class ActivityDetailView: UIView {
         }
     }
     
+    func addCreateTripButton(button: UIView) {
+        createTripButtonContainer.addSubview(button)
+        button.translatesAutoresizingMaskIntoConstraints = false
+        button.layout {
+            $0.top(to: createTripButtonContainer.topAnchor, constant: 16)
+            .leading(to: createTripButtonContainer.leadingAnchor, constant: 24)
+            .trailing(to: createTripButtonContainer.trailingAnchor, constant: -24)
+            .bottom(to: createTripButtonContainer.safeAreaLayoutGuide.bottomAnchor, constant: -8)
+        }
+    }
+    
     private lazy var imageSliderView: UIView = UIView()
     private lazy var titleView: UIView = createTitleView()
     private lazy var titleLabel: UILabel = UILabel(
@@ -159,6 +169,16 @@ final class ActivityDetailView: UIView {
     private lazy var headerStackView: UIStackView = createStackView(spacing: 0)
     
     private lazy var isPackageButtonStateHidden: Bool = true
+    
+    private lazy var createTripButtonContainer: UIView = {
+        let view = UIView()
+        view.backgroundColor = .clear
+        view.layer.shadowColor = UIColor.black.cgColor
+        view.layer.shadowOpacity = 0
+        view.layer.shadowOffset = .init(width: 0, height: -2)
+        view.layer.shadowRadius = 4
+        return view
+    }()
 }
 
 extension ActivityDetailView {
@@ -166,12 +186,30 @@ extension ActivityDetailView {
         let scrollView: UIScrollView = UIScrollView()
         let contentView: UIView = UIView()
         
+        let buttonContainer = createTripButtonContainer
+
+        addSubview(scrollView)
+        addSubview(buttonContainer)
+        
+        scrollView.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            scrollView.topAnchor.constraint(equalTo: self.topAnchor),
+            scrollView.leadingAnchor.constraint(equalTo: self.leadingAnchor),
+            scrollView.trailingAnchor.constraint(equalTo: self.trailingAnchor),
+            scrollView.bottomAnchor.constraint(equalTo: self.bottomAnchor)
+        ])
+
+        buttonContainer.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            buttonContainer.leadingAnchor.constraint(equalTo: self.leadingAnchor),
+            buttonContainer.trailingAnchor.constraint(equalTo: self.trailingAnchor),
+            buttonContainer.bottomAnchor.constraint(equalTo: self.bottomAnchor)
+        ])
+        
         scrollView.addSubviewAndLayout(contentView)
         contentView.layout {
             $0.widthAnchor(to: scrollView.widthAnchor)
         }
-        
-        addSubviewAndLayout(scrollView)
         
         contentView.addSubviews([
             headerStackView,
@@ -201,6 +239,7 @@ extension ActivityDetailView {
         contentStackView.backgroundColor = Token.additionalColorsWhite
         
         scrollView.backgroundColor = UIColor.from("#F5F5F5")
+        backgroundColor = .white
         
         imageSliderView.isHidden = true
     }
@@ -282,7 +321,7 @@ private extension ActivityDetailView {
     }
     
     func createTitleView() -> UIView {
-        let pinPointImage: UIImageView = UIImageView(image: CocoIcon.icPinPointBlue.image)
+        let pinPointImage: UIImageView = UIImageView(image: CocoIcon.icPinPointBlack.image)
         pinPointImage.layout {
             $0.size(20.0)
         }
@@ -410,7 +449,7 @@ private extension ActivityDetailView {
         contentView.addSubviews([
             imageView,
             nameLabel,
-            descriptionLabel,
+            descriptionLabel
         ])
         
         imageView.layout {
@@ -479,8 +518,8 @@ private extension ActivityDetailView {
         let attributedString: NSMutableAttributedString = NSMutableAttributedString(
             string: data.price,
             attributes: [
-                .font : UIFont.jakartaSans(forTextStyle: .subheadline, weight: .bold),
-                .foregroundColor : Token.additionalColorsBlack
+                .font: UIFont.jakartaSans(forTextStyle: .subheadline, weight: .bold),
+                .foregroundColor: Token.additionalColorsBlack
             ]
         )
         
@@ -488,8 +527,8 @@ private extension ActivityDetailView {
             NSAttributedString(
                 string: "/Person",
                 attributes: [
-                    .font : UIFont.jakartaSans(forTextStyle: .subheadline, weight: .medium),
-                    .foregroundColor : Token.grayscale60
+                    .font: UIFont.jakartaSans(forTextStyle: .subheadline, weight: .medium),
+                    .foregroundColor: Token.grayscale60
                 ]
             )
         )
@@ -508,41 +547,14 @@ private extension ActivityDetailView {
         headerStackView.addArrangedSubview(nameLabel)
         headerStackView.addArrangedSubview(ratingAreaStackView)
         
-        let action: UIAction = UIAction { [weak self] _ in
-            self?.delegate?.notifyPackagesDetailDidTap(with: data.id)
-        }
-         
-        var config = UIButton.Configuration.filled()
-        config.image = CocoIcon.icArrowTopRight.image
-        config.baseBackgroundColor = Token.mainColorPrimary
-        config.baseForegroundColor = .white
-        config.cornerStyle = .capsule
-
-        let button: UIButton = UIButton(configuration: config, primaryAction: action)
-        button.layout {
-            $0.size(40.0)
-        }
-        
-        button.setContentHuggingPriority(.required + 1, for: .horizontal)
-        button.setContentHuggingPriority(.required + 1, for: .vertical)
-
-        button.setContentCompressionResistancePriority(.required, for: .horizontal)
-        button.setContentCompressionResistancePriority(.required, for: .vertical)
-        
         footerContentView.addSubviews([
-            priceLabel,
-            button
+            priceLabel
         ])
         
         priceLabel.layout {
             $0.leading(to: footerContentView.leadingAnchor)
                 .top(to: footerContentView.topAnchor)
                 .bottom(to: footerContentView.bottomAnchor)
-        }
-        
-        button.layout {
-            $0.leading(to: priceLabel.trailingAnchor, relation: .lessThanOrEqual)
-                .centerY(to: footerContentView.centerYAnchor)
                 .trailing(to: footerContentView.trailingAnchor)
         }
         

@@ -16,7 +16,14 @@ final class HomeCollectionViewModel {
         reloadCollection()
     }
     
+    func updateActivity(activity: HomeActivityCellSectionDataModel, isFromSearch: Bool) {
+        activityData = activity
+        self.isFromSearch = isFromSearch
+        reloadCollection()
+    }
+    
     private(set) var activityData: HomeActivityCellSectionDataModel = (nil, [])
+    private(set) var isFromSearch: Bool = false
 }
 
 extension HomeCollectionViewModel: HomeCollectionViewModelProtocol {
@@ -28,6 +35,10 @@ extension HomeCollectionViewModel: HomeCollectionViewModelProtocol {
     
     func onActivityDidTap(_ dataModel: HomeActivityCellDataModel) {
         delegate?.notifyCollectionViewActivityDidTap(dataModel)
+    }
+    
+    func onClearAllFilters() {
+        delegate?.notifyCollectionViewClearAllFilters()
     }
 }
 
@@ -57,6 +68,14 @@ private extension HomeCollectionViewModel {
         
         if let activitySectionDataModel: HomeCollectionContent {
             contents.append(activitySectionDataModel)
+        } else {
+            contents.append(.init(
+                section: .init(
+                    type: .noResult,
+                    title: "Your Result"
+                ),
+                items: [NoResultCellDataModel()]
+            ))
         }
         
         var snapshot: HomeCollectionViewSnapShot = HomeCollectionViewSnapShot()

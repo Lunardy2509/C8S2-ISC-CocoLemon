@@ -24,7 +24,7 @@ final class AppCoordinator {
 
 extension AppCoordinator: Coordinator {
     func start() {
-        guard let navigationController: UINavigationController else {
+        guard navigationController != nil else {
             assertionFailure("Navigation controller must be set before starting the coordinator.")
             return
         }
@@ -34,13 +34,10 @@ extension AppCoordinator: Coordinator {
         self.navigationController = navigationController
     }
     
-    func childDidFinish(_ coordinator : BaseCoordinatorProtocol){
+    func childDidFinish(_ coordinator: BaseCoordinatorProtocol) {
         // Call this if a coordinator is done.
-        for (index, child) in children.enumerated() {
-            if child === coordinator {
-                children.remove(at: index)
-                break
-            }
+        if let index = children.firstIndex(where: { $0 === coordinator }) {
+            children.remove(at: index)
         }
     }
 }

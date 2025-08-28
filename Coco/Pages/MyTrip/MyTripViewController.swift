@@ -8,9 +8,6 @@
 import Foundation
 import UIKit
 
-import Foundation
-import UIKit
-
 final class MyTripViewController: UIViewController {
     init(viewModel: MyTripViewModelProtocol) {
         self.viewModel = viewModel
@@ -25,12 +22,18 @@ final class MyTripViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         title = "My Trip"
+        setupNavigationBar()
         thisView.delegate = self
+        setupNotifications()
     }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         viewModel.onViewWillAppear()
+    }
+    
+    deinit {
+        NotificationCenter.default.removeObserver(self)
     }
     
     override func loadView() {
@@ -57,10 +60,172 @@ extension MyTripViewController: MyTripViewModelAction {
         coordinator.parentCoordinator = AppCoordinator.shared
         coordinator.start()
     }
+
+    func goToLocalBookingDetail(with data: LocalBookingDetails) {
+        guard let navigationController else { return }
+        let coordinator: MyTripCoordinator = MyTripCoordinator(
+            input: .init(
+                navigationController: navigationController,
+                flow: .localBookingDetail(data: data) 
+            )
+        )
+        coordinator.parentCoordinator = AppCoordinator.shared
+        coordinator.start()
+    }
+    
+    func goToNotificationPage() {
+        let notificationVC = NotificationViewController()
+        navigationController?.pushViewController(notificationVC, animated: true)
+    }
+    
+    func showDeleteConfirmation(for index: Int, completion: @escaping (Bool) -> Void) {
+        let alert = UIAlertController(
+            title: "Delete Trip",
+            message: "Are you sure you want to delete this trip? This action cannot be undone.",
+            preferredStyle: .alert
+        )
+        
+        let deleteAction = UIAlertAction(title: "Delete", style: .destructive) { _ in
+            completion(true)
+        }
+        
+        let cancelAction = UIAlertAction(title: "Cancel", style: .cancel) { _ in
+            completion(false)
+        }
+        
+        alert.addAction(deleteAction)
+        alert.addAction(cancelAction)
+        
+        present(alert, animated: true)
+    }
 }
 
 extension MyTripViewController: MyTripViewDelegate {
     func notifyTripListCardDidTap(at index: Int) {
         viewModel.onTripListDidTap(at: index)
+    }
+    
+    func notifyTripListCardDidDelete(at index: Int) {
+        showDeleteConfirmation(for: index) { [weak self] shouldDelete in
+            if shouldDelete {
+                self?.viewModel.onTripDidDelete(at: index)
+            }
+        }
+    }
+    
+    func notifyCreateTripDidTap() {
+        // Navigate to GroupForm using standard UIKit navigation
+        let groupFormVC = GroupFormViewController()
+        groupFormVC.hidesBottomBarWhenPushed = true
+        navigationController?.pushViewController(groupFormVC, animated: true)
+    }
+    
+    func notifyDestinationSelected(_ destination: TopDestinationCardDataModel) {
+        // Convert TopDestinationCardDataModel to ActivityDetailDataModel for GroupForm
+        // Since we don't have full activity details, we'll need to fetch them first
+        navigateToGroupFormWithDestination(destination)
+    }
+    
+    private func navigateToGroupFormWithDestination(_ destination: TopDestinationCardDataModel) {
+        // For now, navigate to GroupForm with a method to pre-select the destination
+        // We'll need to fetch the full activity details first
+        let activityFetcher = ActivityFetcher()
+        
+        // Search for activities in this destination
+        activityFetcher.fetchActivity(request: ActivitySearchRequest(pSearchText: destination.title)) { [weak self] result in
+            Task { @MainActor in
+                switch result {
+                case .success(let activityResponse):
+                    if let firstActivity = activityResponse.values.first {
+                        // Convert to ActivityDetailDataModel using the correct initializer
+                        let activityDetailData = ActivityDetailDataModel(firstActivity)
+                        
+                        // Create GroupFormViewController with pre-selected activity
+                        let groupFormVC = GroupFormViewController(preSelectedActivity: activityDetailData)
+                        groupFormVC.hidesBottomBarWhenPushed = true
+                        self?.navigationController?.pushViewController(groupFormVC, animated: true)
+                    } else {
+                        // Fallback: navigate to regular GroupForm
+                        let groupFormVC = GroupFormViewController()
+                        groupFormVC.hidesBottomBarWhenPushed = true
+                        self?.navigationController?.pushViewController(groupFormVC, animated: true)
+                    }
+                case .failure:
+                    // Fallback: navigate to regular GroupForm
+                    let groupFormVC = GroupFormViewController()
+                    groupFormVC.hidesBottomBarWhenPushed = true
+                    self?.navigationController?.pushViewController(groupFormVC, animated: true)
+                }
+            }
+        }
+    }
+}
+
+private extension MyTripViewController {
+    func setupNavigationBar() {
+        // Add plus button
+        let plusButton = UIBarButtonItem(
+            image: UIImage(systemName: "plus") ?? UIImage(),
+            style: .plain,
+            target: self,
+            action: #selector(plusButtonTapped)
+        )
+        plusButton.tintColor = Token.additionalColorsBlack
+        
+        // Add notification button  
+        let notificationButton = UIBarButtonItem(
+            image: UIImage(systemName: "bell") ?? UIImage(),
+            style: .plain,
+            target: self,
+            action: #selector(notificationButtonTapped),
+        )
+        notificationButton.tintColor = Token.additionalColorsBlack
+        
+        navigationItem.rightBarButtonItems = [notificationButton, plusButton]
+    }
+    
+    @objc private func plusButtonTapped() {
+        // Navigate to GroupForm using standard UIKit navigation
+        let groupFormVC = GroupFormViewController()
+        groupFormVC.hidesBottomBarWhenPushed = true
+        navigationController?.pushViewController(groupFormVC, animated: true)
+    }
+    
+    @objc private func notificationButtonTapped() {
+        viewModel.onNotificationButtonTapped()
+    }
+    
+    func setupNotifications() {
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(handleNewTripCreated(_:)),
+            name: .newTripCreated,
+            object: nil,
+        )
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(handleNewLocalTripCreated(_:)),
+            name: .newLocalTripCreated,
+            object: nil,
+        )
+    }
+    
+    func showBanner(color: UIColor) {
+        let banner = UIView()
+        banner.backgroundColor = color
+    }
+    
+    @objc private func handleNewTripCreated(_ notification: Notification) {
+        showBanner(color: Token.additionalColorsBlack)
+        if let bookingDetails = notification.object as? BookingDetails {
+            viewModel.addBooking(bookingDetails)
+        }
+    }
+    
+    @objc private func handleNewLocalTripCreated(_ notification: Notification) {
+        showBanner(color: Token.additionalColorsBlack)
+        if let localBookingDetails = notification.object as? LocalBookingDetails {
+            viewModel.addLocalBooking(localBookingDetails)
+        }
     }
 }

@@ -27,6 +27,19 @@ final class ActivityDetailViewController: UIViewController {
         super.viewDidLoad()
         thisView.delegate = self
         viewModel.onViewDidLoad()
+        let createTripButtonVC = CocoButtonHostingController(
+            action: { [weak self] in
+                self?.viewModel.onCreateTripTapped()
+            },
+            text: "Create Trip",
+            style: .large,
+            type: .primary,
+            isStretch: true
+        )
+        addChild(createTripButtonVC)
+        thisView.addCreateTripButton(button: createTripButtonVC.view)
+        createTripButtonVC.didMove(toParent: self)
+        setupNavigation()
     }
     
     private let viewModel: ActivityDetailViewModelProtocol
@@ -39,8 +52,7 @@ extension ActivityDetailViewController: ActivityDetailViewModelAction {
         
         if data.imageUrlsString.isEmpty {
             thisView.toggleImageSliderView(isShown: false)
-        }
-        else {
+        } else {
             thisView.toggleImageSliderView(isShown: true)
             let sliderVCs: ImageSliderHostingController = ImageSliderHostingController(images: data.imageUrlsString)
             addChild(sliderVCs)
@@ -51,6 +63,13 @@ extension ActivityDetailViewController: ActivityDetailViewModelAction {
     
     func updatePackageData(data: [ActivityDetailDataModel.Package]) {
         thisView.updatePackageData(data)
+    }
+    
+    func setupNavigation() {
+        // Use native back button with custom text
+        let backButton = UIBarButtonItem()
+        backButton.title = "Home"
+        navigationController?.navigationBar.topItem?.backBarButtonItem = backButton
     }
 }
 

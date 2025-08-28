@@ -7,7 +7,7 @@
 
 import UIKit
 
-class SceneDelegate: UIResponder, UIWindowSceneDelegate {
+internal class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     var window: UIWindow?
     var appCoordinator: AppCoordinator?
     var splashView: UIView?
@@ -87,9 +87,9 @@ private extension SceneDelegate {
     func dismissSplash() {
         UIView.animate(withDuration: 0.5, animations: {
             self.splashView?.alpha = 0
-        }) { _ in
+        }, completion: { _ in
             self.splashView?.removeFromSuperview()
             self.splashView = nil
-        }
+        })
     }
 }
