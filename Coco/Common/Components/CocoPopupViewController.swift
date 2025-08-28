@@ -37,9 +37,9 @@ final class CocoPopupViewController: UIViewController {
         view.addGestureRecognizer(tapGesture)
     }
     
-    @objc private func dismissViewController() {
-        dismiss(animated: true)
-    }
+//    @objc private func dismissViewController() {
+//        dismiss(animated: true)
+//    }
 
     private func setup() {
         view.backgroundColor = .clear

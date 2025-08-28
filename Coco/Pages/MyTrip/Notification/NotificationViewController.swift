@@ -31,44 +31,20 @@ final class NotificationViewController: UIViewController {
     private let notifications: [NotificationItem] = [
         NotificationItem(
             id: "1",
-            senderName: "Reminder",
+            senderName: "Adhis",
             message: "Invited You to join colaboration trip",
             tripName: "CoCoLemon goes to Bali",
             avatarIcon: Contributor.remindFriend,
-            isUnread: false
-        ),
-        NotificationItem(
-            id: "2",
-            senderName: "Ferdinand Lunardy",
-            message: "Invited You to join colaboration trip",
-            tripName: "CoCoLemon goes to Bali",
-            avatarIcon: Contributor.ferdinand,
             isUnread: true
         ),
-        NotificationItem(
-            id: "3",
-            senderName: "Griselda Shavilla",
-            message: "Griselda Shavilla has joined colaboration trip",
-            tripName: "CoCoLemon goes to Bali",
-            avatarIcon: Contributor.griselda,
-            isUnread: true
-        ),
-        NotificationItem(
-            id: "4",
-            senderName: "Ferdinand Lunardy",
-            message: "Ferdinand Lunardy has joined colaboration trip",
-            tripName: "CoCoLemon goes to Bali",
-            avatarIcon: Contributor.ferdinand,
-            isUnread: true
-        ),
-        NotificationItem(
-            id: "5",
-            senderName: "Cynthia Shabrina",
-            message: "Cynthia Shabrina  has joined colaboration trip",
-            tripName: "CoCoLemon goes to Bali",
-            avatarIcon: Contributor.cynthia,
-            isUnread: true
-        )
+//        NotificationItem(
+//            id: "2",
+//            senderName: "Ferdinand Lunardy",
+//            message: "Invited You to join colaboration trip",
+//            tripName: "CoCoLemon goes to Bali",
+//            avatarIcon: Contributor.ferdinand,
+//            isUnread: true
+//        )
 
     ]
 }

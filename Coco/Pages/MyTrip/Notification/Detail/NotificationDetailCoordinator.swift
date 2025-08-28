@@ -38,17 +38,3 @@ final class NotificationDetailCoordinator: BaseCoordinator {
     private let input: Input
 }
 
-//// MARK: - Alternative: NotificationViewController with Coordinator pattern
-//extension NotificationViewController {
-//    func navigateToNotificationDetailWithCoordinator(notification: NotificationItem) {
-//        guard let navigationController else { return }
-//        let coordinator = NotificationDetailCoordinator(
-//            input: .init(
-//                navigationController: navigationController,
-//                flow: .detail(notification: notification)
-//            )
-//        )
-//        coordinator.parentCoordinator = self.coordinator
-//        coordinator.start()
-//    }
-//}

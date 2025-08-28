@@ -15,7 +15,6 @@ protocol NotificationDetailViewDelegate: AnyObject {
 }
 
 final class NotificationDetailView: UIView {
-    
     // MARK: - Properties
     weak var delegate: NotificationDetailViewDelegate?
     
@@ -75,7 +74,7 @@ final class NotificationDetailView: UIView {
     
     private lazy var acceptButton: CocoButtonHostingController = {
         CocoButtonHostingController(
-            action: { [weak self] in
+            action: {[weak self] in
                 self?.acceptButtonTapped()
             },
             text: "Accept",

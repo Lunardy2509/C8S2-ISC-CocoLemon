@@ -116,46 +116,41 @@ extension MyTripViewController: MyTripViewDelegate {
         navigateToGroupFormWithDestination(destination)
     }
     
-    private func navigateToGroupFormWithDestination(_ destination: TopDestinationCardDataModel) {
-        // For now, navigate to GroupForm with a method to pre-select the destination
-        // We'll need to fetch the full activity details first
-        let activityFetcher = ActivityFetcher()
-        
-        // Search for activities in this destination
-        activityFetcher.fetchActivity(request: ActivitySearchRequest(pSearchText: destination.title)) { [weak self] result in
-            Task { @MainActor in
-                switch result {
-                case .success(let activityResponse):
-                    if let firstActivity = activityResponse.values.first {
-                        // Convert to ActivityDetailDataModel using the correct initializer
-                        let activityDetailData = ActivityDetailDataModel(firstActivity)
-                        
-                        // Create GroupFormViewController with pre-selected activity
-                        let groupFormVC = GroupFormViewController(preSelectedActivity: activityDetailData)
-                        groupFormVC.hidesBottomBarWhenPushed = true
-                        self?.navigationController?.pushViewController(groupFormVC, animated: true)
-                    } else {
-                        // Fallback: navigate to regular GroupForm
-                        let groupFormVC = GroupFormViewController()
-                        groupFormVC.hidesBottomBarWhenPushed = true
-                        self?.navigationController?.pushViewController(groupFormVC, animated: true)
-                    }
-                case .failure:
-                    // Fallback: navigate to regular GroupForm
-                    let groupFormVC = GroupFormViewController()
-                    groupFormVC.hidesBottomBarWhenPushed = true
-                    self?.navigationController?.pushViewController(groupFormVC, animated: true)
-                }
-            }
-        }
-    }
+//    private func navigateToGroupFormWithDestination(_ destination: TopDestinationCardDataModel) {
+//        // For now, navigate to GroupForm with a method to pre-select the destination
+//        // We'll need to fetch the full activity details first
+//        let activityFetcher = ActivityFetcher()
+//        
+//        // Search for activities in this destination
+//        activityFetcher.fetchActivity(request: ActivitySearchRequest(pSearchText: destination.title)) { [weak self] result in
+//            Task { @MainActor in
+//                switch result {
+//                case .success(let activityResponse):
+//                    if let firstActivity = activityResponse.values.first {
+//                        // Convert to ActivityDetailDataModel using the correct initializer
+//                        let activityDetailData = ActivityDetailDataModel(firstActivity)
+//                        
+//                        // Create GroupFormViewController with pre-selected activity
+//                        let groupFormVC = GroupFormViewController(preSelectedActivity: activityDetailData)
+//                        groupFormVC.hidesBottomBarWhenPushed = true
+//                        self?.navigationController?.pushViewController(groupFormVC, animated: true)
+//                    } else {
+//                        // Fallback: navigate to regular GroupForm
+//                        let groupFormVC = GroupFormViewController()
+//                        groupFormVC.hidesBottomBarWhenPushed = true
+//                        self?.navigationController?.pushViewController(groupFormVC, animated: true)
+//                    }
+//                case .failure:
+//                    // Fallback: navigate to regular GroupForm
+//                    let groupFormVC = GroupFormViewController()
+//                    groupFormVC.hidesBottomBarWhenPushed = true
+//                    self?.navigationController?.pushViewController(groupFormVC, animated: true)
+//                }
+//            }
+//        }
+//    }
     
-    func notifyDestinationSelected(_ destination: TopDestinationCardDataModel) {
-        // Convert TopDestinationCardDataModel to ActivityDetailDataModel for GroupForm
-        // Since we don't have full activity details, we'll need to fetch them first
-        navigateToGroupFormWithDestination(destination)
-    }
-    
+
     private func navigateToGroupFormWithDestination(_ destination: TopDestinationCardDataModel) {
         // For now, navigate to GroupForm with a method to pre-select the destination
         // We'll need to fetch the full activity details first
