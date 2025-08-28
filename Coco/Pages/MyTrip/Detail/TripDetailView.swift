@@ -31,8 +31,8 @@ struct BookingDetailDataModel {
         let name: String
         let price: String
         let imageUrl: String
-        let minParticipants: String
-        let maxParticipants: String
+        let minParticipants: Int  
+        let maxParticipants: Int  
         let voters: [TripMember]
         let totalVotes: Int
     }

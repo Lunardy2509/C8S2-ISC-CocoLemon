@@ -20,10 +20,15 @@ struct BookedPackageCardView: View {
                     .font(.jakartaSans(forTextStyle: .body, weight: .bold))
                     .foregroundColor(Token.additionalColorsBlack.toColor())
                     .lineLimit(2)
-                
-                Text("Min. \(package.minParticipants) - Max. \(package.maxParticipants)")
-                    .font(.jakartaSans(forTextStyle: .caption2, weight: .medium))
-                    .foregroundColor(Token.grayscale70.toColor())
+                HStack(spacing: 4) {
+                    Image(systemName: "person.2")
+                        .font(.system(size: 10))
+                        .foregroundColor(Token.grayscale70.toColor())
+                    
+                    Text("Min. \(package.minParticipants) - Max. \(package.maxParticipants)")
+                        .font(.jakartaSans(forTextStyle: .caption2, weight: .medium))
+                        .foregroundColor(Token.grayscale70.toColor())
+                }
                 
                 Text("\(package.price)/Person")
                     .font(.jakartaSans(forTextStyle: .subheadline, weight: .bold))
