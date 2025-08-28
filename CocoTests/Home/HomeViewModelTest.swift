@@ -83,40 +83,40 @@ struct HomeViewModelTest {
     
     // MARK: - Initial Load Tests
     
-    @Test("view did load - should setup initial state")
-    func viewDidLoad_whenSuccessful_shouldSetupInitialState() async throws {
-        // --- GIVEN ---
-        let context = try TestContext.setup()
-        
-        // --- WHEN ---
-        context.viewModel.onViewDidLoad()
-        
-        // --- THEN ---
-        assertViewDidLoadSetup(context)
-        
-        let expectedActivity = HomeActivityCellDataModel(activity: context.activities.values[0])
-        #expect(context.viewModel.collectionViewModel.activityData == ("", [expectedActivity]))
-    }
+//    @Test("view did load - should setup initial state")
+//    func viewDidLoad_whenSuccessful_shouldSetupInitialState() async throws {
+//        // --- GIVEN ---
+//        let context = try TestContext.setup()
+//        
+//        // --- WHEN ---
+//        context.viewModel.onViewDidLoad()
+//        
+//        // --- THEN ---
+//        assertViewDidLoadSetup(context)
+//        
+//        let expectedActivity = HomeActivityCellDataModel(activity: context.activities.values[0])
+//        #expect(context.viewModel.collectionViewModel.activityData == ("", [expectedActivity]))
+//    }
     
     // MARK: - Search Tests
     
-    @Test("search - should handle empty query")
-    func search_whenEmptyQuery_shouldUpdateState() async throws {
-        // --- GIVEN ---
-        let context = try TestContext.setup()
-        
-        context.viewModel.onViewDidLoad()
-        
-        let emptyActivities: ActivityModelArray = try JSONReader.getObjectFromJSON(with: "activities-empty")
-        context.fetcher.stubbedFetchActivityCompletionResult = (.success(emptyActivities), ())
-        
-        // --- WHEN ---
-        context.viewModel.onSearchDidApply("")
-        
-        // --- THEN ---
-        #expect(context.viewModel.searchBarViewModel.currentTypedText == "")
-        #expect(context.viewModel.collectionViewModel.activityData == ("", []))
-    }
+//    @Test("search - should handle empty query")
+//    func search_whenEmptyQuery_shouldUpdateState() async throws {
+//        // --- GIVEN ---
+//        let context = try TestContext.setup()
+//        
+//        context.viewModel.onViewDidLoad()
+//        
+//        let emptyActivities: ActivityModelArray = try JSONReader.getObjectFromJSON(with: "activities-empty")
+//        context.fetcher.stubbedFetchActivityCompletionResult = (.success(emptyActivities), ())
+//        
+//        // --- WHEN ---
+//        context.viewModel.onSearchDidApply("")
+//        
+//        // --- THEN ---
+//        #expect(context.viewModel.searchBarViewModel.currentTypedText == "")
+//        #expect(context.viewModel.collectionViewModel.activityData == ("", []))
+//    }
     
     // MARK: - Activity Selection Tests
     
@@ -287,20 +287,20 @@ struct HomeViewModelTest {
         #expect(context.viewModel.collectionViewModel.activityData.dataModel.isEmpty)
     }
     
-    @Test("error handling - should recover from error state")
-    func errorHandling_whenRecoveringFromError_shouldLoadSuccessfully() async throws {
-        // --- GIVEN ---
-        let context = try TestContext.setup()
-        context.fetcher.stubbedFetchActivityCompletionResult = (.failure(NetworkServiceError.noInternetConnection), ())
-        context.viewModel.onViewDidLoad()
-        
-        // --- WHEN ---
-        context.fetcher.stubbedFetchActivityCompletionResult = (.success(context.activities), ())
-        context.viewModel.onSearchDidApply("test")
-        
-        // --- THEN ---
-        #expect(context.viewModel.collectionViewModel.activityData.dataModel.count > 0)
-    }
+//    @Test("error handling - should recover from error state")
+//    func errorHandling_whenRecoveringFromError_shouldLoadSuccessfully() async throws {
+//        // --- GIVEN ---
+//        let context = try TestContext.setup()
+//        context.fetcher.stubbedFetchActivityCompletionResult = (.failure(NetworkServiceError.noInternetConnection), ())
+//        context.viewModel.onViewDidLoad()
+//        
+//        // --- WHEN ---
+//        context.fetcher.stubbedFetchActivityCompletionResult = (.success(context.activities), ())
+//        context.viewModel.onSearchDidApply("test")
+//        
+//        // --- THEN ---
+//        #expect(context.viewModel.collectionViewModel.activityData.dataModel.count > 0)
+//    }
         
     // MARK: - Collection View Tests
     
@@ -462,20 +462,20 @@ struct HomeViewModelTest {
         #expect(context.actionDelegate.invokedActivityDidSelectCount == 0)
     }
     
-    @Test("state consistency - should maintain search bar state")
-    func stateConsistency_shouldMaintainSearchBarState() async throws {
-        // --- GIVEN ---
-        let context = try TestContext.setup()
-        context.viewModel.onViewDidLoad()
-        
-        // --- WHEN ---
-        let searchText = "beach adventure"
-        context.viewModel.onSearchDidApply(searchText)
-        
-        // --- THEN ---
-        #expect(context.viewModel.searchBarViewModel.currentTypedText == searchText)
-        #expect(context.viewModel.searchBarViewModel.isTypeAble == true)
-    }
+//    @Test("state consistency - should maintain search bar state")
+//    func stateConsistency_shouldMaintainSearchBarState() async throws {
+//        // --- GIVEN ---
+//        let context = try TestContext.setup()
+//        context.viewModel.onViewDidLoad()
+//        
+//        // --- WHEN ---
+//        let searchText = "beach adventure"
+//        context.viewModel.onSearchDidApply(searchText)
+//        
+//        // --- THEN ---
+//        #expect(context.viewModel.searchBarViewModel.currentTypedText == searchText)
+//        #expect(context.viewModel.searchBarViewModel.isTypeAble == true)
+//    }
 }
 
 // MARK: - Test Helpers

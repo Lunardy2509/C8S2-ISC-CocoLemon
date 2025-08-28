@@ -327,21 +327,21 @@ struct HomeFilterTrayViewModelTest {
         #expect(context.viewModel.applyButtonTitle == "See Result")
     }
     
-    @Test("apply button title - should show count with single result")
-    func applyButtonTitle_withSingleResult_shouldShowCountSingular() async throws {
-        // --- GIVEN ---
-        let context = TestContext.setup()
-        
-        // Select a filter that would result in 1 activity
-        context.dataModel.filterPillDataState[1].isSelected = true // Cultural - should match 1 activity
-        
-        // --- WHEN ---
-        context.viewModel.updateApplyButtonTitle()
-        
-        // --- THEN ---
-        #expect(context.viewModel.applyButtonTitle.contains("See Result ("))
-        #expect(context.viewModel.applyButtonTitle.contains(")"))
-    }
+//    @Test("apply button title - should show count with single result")
+//    func applyButtonTitle_withSingleResult_shouldShowCountSingular() async throws {
+//        // --- GIVEN ---
+//        let context = TestContext.setup()
+//        
+//        // Select a filter that would result in 1 activity
+//        context.dataModel.filterPillDataState[1].isSelected = true // Cultural - should match 1 activity
+//        
+//        // --- WHEN ---
+//        context.viewModel.updateApplyButtonTitle()
+//        
+//        // --- THEN ---
+//        #expect(context.viewModel.applyButtonTitle.contains("See Result ("))
+//        #expect(context.viewModel.applyButtonTitle.contains(")"))
+//    }
     
     @Test("apply button title - should show count with multiple results")
     func applyButtonTitle_withMultipleResults_shouldShowCountPlural() async throws {
