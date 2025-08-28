@@ -1,3 +1,10 @@
+//
+//  LocalBookingDetails.swift
+//  Coco
+//
+//  Created by Teuku Fazariz Basya on 26/08/25.
+//
+
 import Foundation
 
 struct LocalBookingDetails {

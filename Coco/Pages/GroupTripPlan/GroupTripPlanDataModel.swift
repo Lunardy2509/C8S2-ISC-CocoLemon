@@ -34,14 +34,14 @@ struct GroupTripPlanDataModel {
         }
     }
     
-    struct VotablePackage {
+    struct VotablePackage: Identifiable {
         let id: Int
         let name: String
         let description: String
         let price: String
         let imageUrlString: String
-        let minParticipants: String
-        let maxParticipants: String
+        let minParticipants: Int  
+        let maxParticipants: Int  
         let voters: [TripMember]
         let totalVotes: Int
         let isSelected: Bool
@@ -52,8 +52,8 @@ struct GroupTripPlanDataModel {
             self.description = package.description
             self.price = package.price
             self.imageUrlString = package.imageUrlString
-            self.minParticipants = "\(package.minParticipants)"
-            self.maxParticipants = "\(package.maxParticipants)"
+            self.minParticipants = package.minParticipants ?? 0
+            self.maxParticipants = package.maxParticipants ?? 0
             self.voters = voters
             self.totalVotes = voters.count
             self.isSelected = isSelected

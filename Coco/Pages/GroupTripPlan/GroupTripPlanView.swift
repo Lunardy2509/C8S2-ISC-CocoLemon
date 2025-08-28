@@ -277,7 +277,7 @@ private extension GroupTripPlanView {
         
         // Status row
         let statusRow = createDetailRow(
-            icon: CocoIcon.icCheckMarkFill.image,
+            icon: CocoIcon.statusMark.image,
             label: "Status",
             valueView: statusLabel.view
         )

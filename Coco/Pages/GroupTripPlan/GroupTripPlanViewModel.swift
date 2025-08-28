@@ -129,14 +129,14 @@ final class GroupTripPlanViewModel: GroupTripPlanViewModelProtocol {
 }
 
 private extension GroupTripPlanDataModel.VotablePackage {
-    init(id: Int, name: String, description: String, price: String, imageUrlString: String, minParticipants: String, maxParticipants: String, voters: [TripMember], isSelected: Bool) {
+    init(id: Int, name: String, description: String, price: String, imageUrlString: String, minParticipants: Int, maxParticipants: Int, voters: [TripMember], isSelected: Bool) {
         self.id = id
         self.name = name
         self.description = description
         self.price = price
         self.imageUrlString = imageUrlString
-        self.minParticipants = minParticipants
-        self.maxParticipants = maxParticipants
+        self.minParticipants = minParticipants  
+        self.maxParticipants = maxParticipants  
         self.voters = voters
         self.totalVotes = voters.count
         self.isSelected = isSelected
