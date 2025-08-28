@@ -81,9 +81,8 @@ final class GroupInvitationTripViewController: UIViewController {
         viewModel.onMemberTap = { [weak self] member in
             self?.handleMemberTap(member)
         }
-        viewModel.onPackageSelect = { [weak self] package in
-            self?.handlePackageSelection(package)
-        }
+//        viewModel.onPackageSelect = {
+//        }
     }
 
     @objc private func backButtonTapped() {
@@ -117,15 +116,15 @@ final class GroupInvitationTripViewController: UIViewController {
         present(alert, animated: true)
     }
 
-    private func handlePackageSelection(_ package: TripPackage) {
-        let alert = UIAlertController(
-            title: "Package Selected",
-            message: "You selected \(package.name) - \(package.price)",
-            preferredStyle: .alert
-        )
-        alert.addAction(UIAlertAction(title: "OK", style: .default))
-        present(alert, animated: true)
-    }
+//    private func handlePackageSelection(_ package: TripPackage) {
+//        let alert = UIAlertController(
+//            title: "Package Selected",
+//            message: "You selected \(package.name) - \(package.price)",
+//            preferredStyle: .alert
+//        )
+//        alert.addAction(UIAlertAction(title: "OK", style: .default))
+//        present(alert, animated: true)
+//    }
 
     private func navigateToBooking() {
         print("Navigate to booking for trip: \(viewModel.tripData.title)")

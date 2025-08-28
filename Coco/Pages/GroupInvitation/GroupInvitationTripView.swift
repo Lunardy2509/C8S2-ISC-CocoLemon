@@ -14,7 +14,8 @@ struct GroupInvitationTripView: View {
     var onBookNow: (() -> Void)?
     var onMemberTap: ((TripsMember) -> Void)?
     var onPackageTap: ((TripPackage) -> Void)?
-    
+    @State private var selectedPackageId: Set <String> = []
+
     var body: some View {
         VStack(spacing: 0) {
             ScrollView {
@@ -47,7 +48,7 @@ struct GroupInvitationTripView: View {
                         .foregroundColor(.white)
                         .background(Color.blue)
                         .cornerRadius(25)
-                        .padding(.horizontal, 24)
+                        .padding(.horizontal, 25)
                 }
             }
             .background(Color(.systemBackground).shadow(color: .black.opacity(0.1), radius: 4, x: 0, y: -2))
@@ -73,7 +74,7 @@ private extension GroupInvitationTripView {
                     .lineLimit(2)
                 
                 HStack(spacing: 4) {
-                    Image(systemName: "location.fill")
+                    Image(systemName: "mappin.circle")
                         .foregroundColor(.blue)
                     Text(tripData.location)
                         .font(.system(size: 14, weight: .medium))
@@ -81,7 +82,7 @@ private extension GroupInvitationTripView {
                 }
                 
                 Text(tripData.priceRange)
-                    .font(.system(size: 14, weight: .semibold))
+                    .font(.system(size: 10, weight: .semibold))
                     .foregroundColor(.primary)
             }
         }
@@ -94,7 +95,7 @@ private extension GroupInvitationTripView {
     var tripDetailSection: some View {
         VStack(alignment: .leading, spacing: 16) {
             Text("Trip Detail")
-                .font(.system(size: 20, weight: .bold))
+                .font(.system(size: 16, weight: .bold))
             
             detailRow(icon: "checkmark.circle.fill", label: "Status", value: tripData.status.rawValue)
             detailRow(icon: "person.fill", label: "Person", value: "\(tripData.person)")
@@ -121,7 +122,7 @@ private extension GroupInvitationTripView {
     var tripMembersSection: some View {
         VStack(alignment: .leading, spacing: 16) {
             Text("Trip Members")
-                .font(.system(size: 20, weight: .bold))
+                .font(.system(size: 16, weight: .bold))
             
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 16) {
@@ -142,46 +143,118 @@ private extension GroupInvitationTripView {
             .frame(height: 90)
         }
     }
-    
+   
     var availablePackagesSection: some View {
         VStack(alignment: .leading, spacing: 16) {
-            Text("Available Packages")
-                .font(.system(size: 20, weight: .bold))
-            
-            VStack(spacing: 12) {
-                ForEach(tripData.availablePackages, id: \.id) { package in
-                    packageCard(package)
-                        .onTapGesture { onPackageTap?(package) }
-                }
-            }
-        }
+               Text("Available Packages")
+                   .font(.system(size: 16, weight: .bold))
+               
+               VStack(spacing: 12) {
+                   ForEach(tripData.availablePackages, id: \.id) { package in
+                       packageCard(package, isSelected: selectedPackageId.contains(package.id)) {
+                           if selectedPackageId.contains(package.id) {
+                               selectedPackageId.remove(package.id) // unselect
+                           } else {
+                               selectedPackageId.insert(package.id) // select
+                           }
+                           onPackageTap?(package)
+                       }
+                   }
+               }
+           }
     }
     
-    func packageCard(_ package: TripPackage) -> some View {
-        HStack(spacing: 12) {
-            Rectangle()
-                .fill(Color.gray.opacity(0.3))
-                .frame(width: 92, height: 92)
-                .cornerRadius(14)
-            
-            VStack(alignment: .leading, spacing: 8) {
-                Text(package.name)
-                    .font(.system(size: 16, weight: .bold))
-                    .foregroundColor(.primary)
-                Text(package.price)
-                    .font(.system(size: 14, weight: .semibold))
-                    .foregroundColor(.primary)
-                Text(package.description)
-                    .font(.system(size: 12, weight: .medium))
-                    .foregroundColor(.secondary)
+//    var availablePackagesSection: some View {
+//        VStack(alignment: .leading, spacing: 16) {
+//            Text("Available Packages")
+//                .font(.system(size: 16, weight: .bold))
+//            
+//            VStack(spacing: 12) {
+//                ForEach(tripData.availablePackages, id: \.id) { package in
+//                    packageCard(package)
+//                        .onTapGesture { onPackageTap?(package) }
+//                }
+//            }
+//        }
+//    }
+    func packageCard(_ package: TripPackage, isSelected: Bool, onTap: @escaping () -> Void) -> some View {
+        Button(action: onTap) {
+            HStack(spacing: 12) {
+                Rectangle()
+                    .fill(Color.gray.opacity(0.3))
+                    .frame(width: 92, height: 92)
+                    .cornerRadius(14)
+
+                VStack(alignment: .leading, spacing: 8) {
+                    Text(package.name)
+                        .font(.system(size: 16, weight: .bold))
+                        .foregroundColor(.primary)
+                    Text(package.price)
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundColor(.primary)
+                    Text(package.description)
+                        .font(.system(size: 12, weight: .medium))
+                        .foregroundColor(.secondary)
+                }
+                Spacer()
+
+                // ✅ Bulat checkbox
+                ZStack {
+                    Circle()
+                        .stroke(Color.gray, lineWidth: 2)
+                        .frame(width: 24, height: 24)
+
+                    if isSelected {
+                        Circle()
+                            .fill(Color.blue)
+                            .frame(width: 24, height: 24)
+                            .overlay(
+                                Image(systemName: "checkmark")
+                                    .font(.system(size: 12, weight: .bold))
+                                    .foregroundColor(.white)
+                            )
+                    }
+                }
             }
-            Spacer()
+            .padding(12)
+            .background(
+                RoundedRectangle(cornerRadius: 16)
+                    .fill(isSelected ? Color.blue.opacity(0.1) : Color(.systemBackground))
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 16)
+                    .stroke(isSelected ? Color.blue : Color(.systemGray5), lineWidth: 2)
+            )
+            .animation(.easeInOut, value: isSelected) // animasi smooth
         }
-        .padding(12)
-        .background(Color(.systemBackground))
-        .cornerRadius(16)
-        .overlay(RoundedRectangle(cornerRadius: 16).stroke(Color(.systemGray5)))
+        .buttonStyle(.plain) // supaya nggak ada efek default tombol
     }
+    
+//    func packageCard(_ package: TripPackage) -> some View {
+//        HStack(spacing: 12) {
+//            Rectangle()
+//                .fill(Color.gray.opacity(0.3))
+//                .frame(width: 92, height: 92)
+//                .cornerRadius(14)
+//            
+//            VStack(alignment: .leading, spacing: 8) {
+//                Text(package.name)
+//                    .font(.system(size: 16, weight: .bold))
+//                    .foregroundColor(.primary)
+//                Text(package.price)
+//                    .font(.system(size: 14, weight: .semibold))
+//                    .foregroundColor(.primary)
+//                Text(package.description)
+//                    .font(.system(size: 12, weight: .medium))
+//                    .foregroundColor(.secondary)
+//            }
+//            Spacer()
+//        }
+//        .padding(12)
+//        .background(Color(.systemBackground))
+//        .cornerRadius(16)
+//        .overlay(RoundedRectangle(cornerRadius: 16).stroke(Color(.systemGray5)))
+//    }
     
     func formattedDate(_ date: Date) -> String {
         let formatter = DateFormatter()
